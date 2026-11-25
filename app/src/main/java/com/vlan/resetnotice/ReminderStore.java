@@ -1,0 +1,214 @@
+package com.vlan.resetnotice;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import java.util.ArrayList;
+import java.util.List;
+
+/** One persistent profile per AI/account. Profile identifiers are never recycled. */
+final class ReminderStore {
+    static final int SHORT = 0;
+    static final int WEEK = 1;
+    static final int MAX_PROFILES = 100;
+    private static final String STORE = "reset_reminders_v1";
+    private static final String IDS = "profile_ids_v2";
+    private static final String NEXT = "next_profile_id_v2";
+    private static final String INITIALIZED = "profiles_initialized_v2";
+    private static final String CLOCK_ALIGNED = "clock_minute_alignment_v3";
+
+    static final class Profile {
+        final int id;
+        final String platform, account;
+        final boolean shortEnabled;
+        Profile(int id, String platform, String account, boolean shortEnabled) {
+            this.id = id; this.platform = platform; this.account = account; this.shortEnabled = shortEnabled;
+        }
+        String label() { return platform + " · " + account; }
+        boolean allows(int slot) { return slot == WEEK || (slot == SHORT && shortEnabled); }
+    }
+    static final class Slot {
+        final int profileId, id;
+        long target;
+        boolean early, at, earlyDelivered, atDelivered;
+        int earlyMinutes, periodMinutes;
+        Slot(int profileId, int id) { this.profileId = profileId; this.id = id; }
+        String title() { return id == WEEK ? "周限额" : "短时限额"; }
+    }
+    static SharedPreferences prefs(Context context) {
+        return context.getSharedPreferences(STORE, Context.MODE_PRIVATE);
+    }
+    private static String profileKey(int id, String field) { return "profile_" + id + "_" + field; }
+    private static String slotKey(int profileId, int slot, String field) {
+        return "profile_" + profileId + "_slot_" + slot + "_" + field;
+    }
+    private static String legacyKey(int slot, String field) { return "slot_" + slot + "_" + field; }
+
+    private static void writeProfile(SharedPreferences.Editor editor, Profile profile) {
+        editor.putString(profileKey(profile.id, "platform"), profile.platform)
+                .putString(profileKey(profile.id, "account"), profile.account)
+                .putBoolean(profileKey(profile.id, "short_enabled"), profile.shortEnabled);
+    }
+    private static Slot readSlot(SharedPreferences p, int profileId, int slot, boolean legacy) {
+        String prefix = legacy ? "slot_" + slot + "_" : "profile_" + profileId + "_slot_" + slot + "_";
+        Slot s = new Slot(profileId, slot);
+        s.target = p.getLong(prefix + "target", 0L);
+        s.early = p.getBoolean(prefix + "early", false);
+        s.at = p.getBoolean(prefix + "at", true);
+        s.earlyMinutes = p.getInt(prefix + "early_minutes", slot == WEEK ? 60 : 15);
+        s.periodMinutes = slot == WEEK ? ResetMath.WEEK_MINUTES : ResetMath.validPeriod(
+                p.getInt(prefix + "period_minutes", ResetMath.DEFAULT_SHORT_MINUTES));
+        s.earlyDelivered = p.getBoolean(prefix + "early_delivered", false);
+        s.atDelivered = p.getBoolean(prefix + "at_delivered", false);
+        return s;
+    }
+    private static void writeSlot(SharedPreferences.Editor editor, Slot s) {
+        editor.putLong(slotKey(s.profileId, s.id, "target"), s.target)
+                .putBoolean(slotKey(s.profileId, s.id, "early"), s.early)
+                .putBoolean(slotKey(s.profileId, s.id, "at"), s.at)
+                .putInt(slotKey(s.profileId, s.id, "early_minutes"), s.earlyMinutes)
+                .putInt(slotKey(s.profileId, s.id, "period_minutes"), s.periodMinutes)
+                .putBoolean(slotKey(s.profileId, s.id, "early_delivered"), s.earlyDelivered)
+                .putBoolean(slotKey(s.profileId, s.id, "at_delivered"), s.atDelivered);
+    }
+
+    // Upgrade atomically, retaining both independent v1 timers and delivery flags.
+    private static synchronized void initialize(Context context) {
+        SharedPreferences p = prefs(context);
+        if (!p.getBoolean(INITIALIZED, false)) {
+            boolean legacy = p.contains(legacyKey(SHORT, "target")) || p.contains(legacyKey(WEEK, "target"));
+            SharedPreferences.Editor e = p.edit();
+            if (legacy) {
+                Profile profile = new Profile(1, "ChatGPT", "默认账户", true);
+                writeProfile(e, profile);
+                writeSlot(e, readSlot(p, 1, SHORT, true));
+                writeSlot(e, readSlot(p, 1, WEEK, true));
+            }
+            e.putString(IDS, legacy ? "1" : "").putInt(NEXT, legacy ? 2 : 1)
+                    .putBoolean(INITIALIZED, true).commit();
+        }
+        // v1/v2 duration entries could carry the seconds of the Save tap. Align
+        // all stored targets once; leave account IDs, switches and delivery flags intact.
+        if (!p.getBoolean(CLOCK_ALIGNED, false)) {
+            SharedPreferences.Editor e = p.edit();
+            for (int profileId : ids(p)) {
+                for (int slot : new int[]{SHORT, WEEK}) {
+                    String key = slotKey(profileId, slot, "target");
+                    long prior = p.getLong(key, 0L);
+                    if (prior > 0 && prior % ResetMath.MINUTE != 0)
+                        e.putLong(key, ResetMath.minuteBoundary(prior));
+                }
+            }
+            e.putBoolean(CLOCK_ALIGNED, true).commit();
+        }
+    }
+    private static List<Integer> ids(SharedPreferences p) {
+        List<Integer> result = new ArrayList<>();
+        for (String v : p.getString(IDS, "").split(",")) {
+            if (v.isEmpty()) continue;
+            try {
+                int id = Integer.parseInt(v);
+                if (id > 0 && !result.contains(id)) result.add(id);
+            } catch (NumberFormatException ignored) {}
+        }
+        return result;
+    }
+    private static String encodeIds(List<Integer> ids) {
+        StringBuilder result = new StringBuilder();
+        for (int id : ids) { if (result.length() > 0) result.append(','); result.append(id); }
+        return result.toString();
+    }
+    private static Profile readProfile(SharedPreferences p, int id) {
+        String platform = p.getString(profileKey(id, "platform"), null);
+        if (platform == null) return null;
+        return new Profile(id, platform, p.getString(profileKey(id, "account"), "默认账户"),
+                p.getBoolean(profileKey(id, "short_enabled"), true));
+    }
+    static List<Profile> profiles(Context context) {
+        initialize(context);
+        SharedPreferences p = prefs(context);
+        List<Profile> result = new ArrayList<>();
+        for (int id : ids(p)) {
+            Profile profile = readProfile(p, id);
+            if (profile != null) result.add(profile);
+        }
+        return result;
+    }
+    static Profile profile(Context context, int id) {
+        initialize(context);
+        return id > 0 ? readProfile(prefs(context), id) : null;
+    }
+    static boolean duplicate(Context context, int exceptId, String platform, String account) {
+        for (Profile p : profiles(context)) {
+            if (p.id != exceptId && p.platform.equalsIgnoreCase(platform) && p.account.equalsIgnoreCase(account)) return true;
+        }
+        return false;
+    }
+    static synchronized Profile add(Context context, String platform, String account, boolean shortEnabled) {
+        initialize(context);
+        SharedPreferences p = prefs(context);
+        List<Integer> ids = ids(p);
+        if (ids.size() >= MAX_PROFILES) throw new IllegalStateException("Profile limit reached");
+        if (duplicate(context, -1, platform, account)) throw new IllegalArgumentException("Duplicate profile");
+        int id = p.getInt(NEXT, 1);
+        if (id <= 0 || id >= 500_000_000) throw new IllegalStateException("Profile ID space exhausted");
+        Profile profile = new Profile(id, platform, account, shortEnabled);
+        ids.add(id);
+        SharedPreferences.Editor e = p.edit();
+        writeProfile(e, profile);
+        e.putString(IDS, encodeIds(ids)).putInt(NEXT, id + 1).commit();
+        return profile;
+    }
+    static synchronized Profile edit(Context context, int id, String platform, String account, boolean shortEnabled) {
+        Profile previous = profile(context, id);
+        if (previous == null) return null;
+        if (duplicate(context, id, platform, account)) throw new IllegalArgumentException("Duplicate profile");
+        Profile result = new Profile(id, platform, account, shortEnabled);
+        SharedPreferences p = prefs(context);
+        SharedPreferences.Editor editor = p.edit();
+        writeProfile(editor, result);
+        if (previous.shortEnabled && !shortEnabled) {
+            Slot shortSlot = readSlot(p, id, SHORT, false);
+            shortSlot.target = 0;
+            shortSlot.earlyDelivered = shortSlot.atDelivered = false;
+            writeSlot(editor, shortSlot);
+        }
+        editor.commit();
+        return result;
+    }
+    static synchronized void delete(Context context, int id) {
+        initialize(context);
+        SharedPreferences p = prefs(context);
+        List<Integer> ids = ids(p);
+        ids.remove(Integer.valueOf(id));
+        SharedPreferences.Editor e = p.edit().putString(IDS, encodeIds(ids));
+        String prefix = "profile_" + id + "_";
+        for (String key : p.getAll().keySet()) if (key.startsWith(prefix)) e.remove(key);
+        e.commit();
+    }
+    static Slot load(Context context, int profileId, int slot) {
+        initialize(context);
+        return readSlot(prefs(context), profileId, slot, false);
+    }
+    static void save(Context context, Slot s) {
+        Profile p = profile(context, s.profileId);
+        if (p == null || !p.allows(s.id)) return;
+        s.target = ResetMath.minuteBoundary(s.target);
+        s.periodMinutes = s.id == WEEK ? ResetMath.WEEK_MINUTES : ResetMath.validPeriod(s.periodMinutes);
+        SharedPreferences.Editor e = prefs(context).edit();
+        writeSlot(e, s);
+        e.commit();
+    }
+    static boolean rollForward(Context context, Slot s, long now) {
+        long next = ResetMath.nextTarget(s.target, s.periodMinutes, now);
+        if (next == s.target) return false;
+        s.target = next;
+        s.earlyDelivered = s.atDelivered = false;
+        save(context, s);
+        return true;
+    }
+    static void markDelivered(Context context, int profileId, int slot, boolean early) {
+        Profile p = profile(context, profileId);
+        if (p != null && p.allows(slot)) prefs(context).edit()
+                .putBoolean(slotKey(profileId, slot, early ? "early_delivered" : "at_delivered"), true).commit();
+    }
+}

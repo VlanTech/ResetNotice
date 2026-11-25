@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="page">#16141D</color>
+    <color name="card">#211F2B</color>
+    <color name="text_main">#F2EEFC</color>
+    <color name="text_sub">#B0A9C2</color>
+    <color name="accent">#C7B4FF</color>
+    <color name="on_accent">#2B2046</color>
+    <color name="accent_soft">#352B4E</color>
+    <color name="line">#393443</color>
+    <color name="positive">#9EE1C9</color>
+    <color name="positive_soft">#1D382F</color>
+    <color name="warning">#FFD59A</color>
+    <color name="warning_soft">#443117</color>
+    <color name="portrait_background">#FFFFFF</color>
+</resources>
