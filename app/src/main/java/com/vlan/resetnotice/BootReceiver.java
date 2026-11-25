@@ -77,7 +77,7 @@ public final class BootReceiver extends BroadcastReceiver {
     private static void notifyLocked(Context context, long deadline) {
         long now = System.currentTimeMillis();
         if (deadline <= 0 || deadline != BootState.nextAlert(context) || deadline < now - ResetMath.DAY ||
-                !AlarmEngine.notificationsAllowed(context)) return;
+                !AlarmEngine.notificationsAllowed(context) || BootState.quietSuppresses(context, deadline, now)) return;
         if (now < deadline) { armLocked(context); return; }
         NotificationManager manager = context.getSystemService(NotificationManager.class);
         if (Build.VERSION.SDK_INT >= 26 && manager.getNotificationChannel(AlarmEngine.CHANNEL) == null)

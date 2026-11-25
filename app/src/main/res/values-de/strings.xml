@@ -173,4 +173,16 @@
     <string name="last_alarm_title">Letzte Kontingent-Alarmantwort</string>
     <string name="last_alarm_none">Keine gültige Alarmantwort erfasst.</string>
     <string name="last_alarm_result">%1$s · Verzögerung %2$d s</string>
+    <string name="quiet_global">Globale Ruhezeiten</string>
+    <string name="quiet_global_hint">Unterdrückt Kontingent-Erinnerungen aller Konten in diesem täglichen Zeitraum. Individuelle Ruhezeiten gelten zusätzlich.</string>
+    <string name="quiet_account">Ruhezeit des Kontos</string>
+    <string name="quiet_account_hint">Unterdrückt Erinnerungen dieses Kontos in diesem Zeitraum. Die Timer laufen weiter.</string>
+    <string name="quiet_from">Von %1$s</string>
+    <string name="quiet_until">Bis %1$s</string>
+    <string name="quiet_start_title">Beginn der Ruhezeit</string>
+    <string name="quiet_end_title">Ende der Ruhezeit</string>
+    <string name="quiet_invalid">Beginn und Ende müssen sich unterscheiden.</string>
+    <string name="quiet_active">Ruhezeit aktiv · Timer läuft weiter.</string>
+    <string name="quiet_early_skipped">Vorab-Erinnerung während der Ruhezeit übersprungen.</string>
+    <string name="keep_background_hint">Für zuverlässige Erinnerungen Hintergrundaktivität und Autostart erlauben und die App in der Übersicht belassen.</string>
 </resources>

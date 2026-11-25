@@ -173,4 +173,16 @@
     <string name="last_alarm_title">前回の利用枠アラーム</string>
     <string name="last_alarm_none">有効なコールバックの記録がありません。</string>
     <string name="last_alarm_result">%1$s · 遅延 %2$d 秒</string>
+    <string name="quiet_global">全アカウントの通知休止</string>
+    <string name="quiet_global_hint">毎日この時間帯は全アカウントの通知を停止します。個別の休止時間も有効です。</string>
+    <string name="quiet_account">アカウントの通知休止</string>
+    <string name="quiet_account_hint">この時間帯は当該アカウントの通知を省略します。タイマーは継続します。</string>
+    <string name="quiet_from">開始 %1$s</string>
+    <string name="quiet_until">終了 %1$s</string>
+    <string name="quiet_start_title">通知休止の開始</string>
+    <string name="quiet_end_title">通知休止の終了</string>
+    <string name="quiet_invalid">開始時刻と終了時刻を変えてください。</string>
+    <string name="quiet_active">通知休止中 · タイマーは継続します。</string>
+    <string name="quiet_early_skipped">今回の事前通知は休止設定により省略されました。</string>
+    <string name="keep_background_hint">通知を確実に受け取るには、バックグラウンド動作と自動起動を許可し、履歴からアプリを消さないでください。</string>
 </resources>

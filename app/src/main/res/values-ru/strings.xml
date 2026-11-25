@@ -173,4 +173,16 @@
     <string name="last_alarm_title">Последний ответ будильника квоты</string>
     <string name="last_alarm_none">Нет записи о действительном ответе.</string>
     <string name="last_alarm_result">%1$s · Задержка %2$d с</string>
+    <string name="quiet_global">Общие тихие часы</string>
+    <string name="quiet_global_hint">Отключает уведомления всех аккаунтов в этот ежедневный период. Индивидуальные интервалы тоже действуют.</string>
+    <string name="quiet_account">Тихие часы аккаунта</string>
+    <string name="quiet_account_hint">Пропускает напоминания этого аккаунта в этот период. Таймеры продолжают работать.</string>
+    <string name="quiet_from">С %1$s</string>
+    <string name="quiet_until">До %1$s</string>
+    <string name="quiet_start_title">Начало тихих часов</string>
+    <string name="quiet_end_title">Конец тихих часов</string>
+    <string name="quiet_invalid">Время начала и окончания должно различаться.</string>
+    <string name="quiet_active">Тихие часы активны · Таймер работает.</string>
+    <string name="quiet_early_skipped">Раннее напоминание пропущено в тихие часы.</string>
+    <string name="keep_background_hint">Для надёжных напоминаний разрешите фоновую работу и автозапуск и оставляйте приложение в списке недавних.</string>
 </resources>

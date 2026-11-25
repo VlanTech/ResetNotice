@@ -173,4 +173,16 @@
     <string name="last_alarm_title">Último retorno de alarme de cota</string>
     <string name="last_alarm_none">Nenhum retorno de alarme válido.</string>
     <string name="last_alarm_result">%1$s · Atraso %2$d s</string>
+    <string name="quiet_global">Horário de silêncio global</string>
+    <string name="quiet_global_hint">Silencia os avisos de todas as contas durante este período diário. Os horários individuais também se aplicam.</string>
+    <string name="quiet_account">Horário de silêncio da conta</string>
+    <string name="quiet_account_hint">Ignora os avisos desta conta nesse horário. Os ciclos continuam.</string>
+    <string name="quiet_from">De %1$s</string>
+    <string name="quiet_until">Até %1$s</string>
+    <string name="quiet_start_title">Início do horário de silêncio</string>
+    <string name="quiet_end_title">Fim do horário de silêncio</string>
+    <string name="quiet_invalid">Os horários de início e fim devem ser diferentes.</string>
+    <string name="quiet_active">Horário de silêncio ativo · O temporizador continua.</string>
+    <string name="quiet_early_skipped">Aviso antecipado ignorado durante o horário de silêncio.</string>
+    <string name="keep_background_hint">Para receber avisos com confiabilidade, permita atividade em segundo plano e início automático e mantenha o app nos Recentes.</string>
 </resources>

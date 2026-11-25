@@ -210,6 +210,61 @@ public final class ProfileStoreTest {
             require(PushVendor.detect(manufacturer[0], manufacturer[1]).name().equals(manufacturer[2]),
                     "preferred OEM channel: " + manufacturer[0] + "/" + manufacturer[1]);
         require(PushVendor.detect(null, null) == PushVendor.NONE, "unknown OEM falls back to local alarms");
+        // Daily windows, including midnight, use local clock minutes and are
+        // independent across accounts. Global quiet is an additional window.
+        QuietHours overnight = new QuietHours(true, 23 * 60, 8 * 60);
+        QuietHours lunch = new QuietHours(true, 12 * 60, 14 * 60);
+        require(overnight.containsMinute(23 * 60) && overnight.containsMinute(0) && overnight.containsMinute(479),
+                "overnight starts inclusively and crosses midnight");
+        require(!overnight.containsMinute(8 * 60) && !overnight.containsMinute(22 * 60 + 59), "overnight end exclusive");
+        require(lunch.containsMinute(720) && lunch.containsMinute(839) && !lunch.containsMinute(840), "same-day boundaries");
+        require(!QuietHours.OFF.containsMinute(0), "disabled quiet window never suppresses");
+        require(!new QuietHours(true, 600, 600).enabled, "invalid equal start/end cannot mute forever");
+        require(QuietHours.time(0).equals("00:00") && QuietHours.time(1439).equals("23:59"), "quiet labels");
+
+        java.util.Calendar local = java.util.Calendar.getInstance();
+        local.clear(); local.set(2026, 5, 10, 22, 0, 0);
+        long evening = local.getTimeInMillis();
+        long beforeQuiet = evening + 30 * ResetMath.MINUTE, duringQuiet = evening + 2 * ResetMath.HOUR;
+        long afterQuiet = evening + 11 * ResetMath.HOUR;
+        require(QuietHours.suppressed(overnight, QuietHours.OFF, duringQuiet, afterQuiet), "no delayed replay of quiet event");
+        require(QuietHours.suppressed(overnight, QuietHours.OFF, beforeQuiet, duringQuiet), "do not ring during quiet time");
+        require(!QuietHours.suppressed(overnight, QuietHours.OFF, afterQuiet, afterQuiet), "normal notification after quiet");
+        require(QuietHours.suppressed(QuietHours.OFF, overnight, duringQuiet, duringQuiet), "account-specific window independent");
+        FakeContext quietContext = new FakeContext();
+        ReminderStore.Profile qa = ReminderStore.add(quietContext, "GPT", "A", true, overnight);
+        ReminderStore.Profile qb = ReminderStore.add(quietContext, "Claude", "B", true);
+        require(ReminderStore.profile(quietContext, qa.id).quiet.same(overnight), "account quiet persists");
+        require(!ReminderStore.profile(quietContext, qb.id).quiet.enabled, "account quiet isolation");
+        require(!ReminderStore.globalQuiet(quietContext).enabled, "global defaults off");
+        ReminderStore.edit(quietContext, qa.id, "GPT", "Renamed", true);
+        require(ReminderStore.profile(quietContext, qa.id).quiet.same(overnight), "renaming preserves existing quiet setting");
+        ReminderStore.Slot qaSlot = ReminderStore.load(quietContext, qa.id, ReminderStore.SHORT);
+        qaSlot.target = duringQuiet; qaSlot.at = true; ReminderStore.save(quietContext, qaSlot);
+        ReminderStore.Slot qbSlot = ReminderStore.load(quietContext, qb.id, ReminderStore.SHORT);
+        qbSlot.target = duringQuiet; qbSlot.at = true; ReminderStore.save(quietContext, qbSlot);
+        TimerSnapshot quietSnap = TimerSnapshot.read(quietContext, evening);
+        require(quietSnap.count == 2 && quietSnap.nextVisibleAlert == duringQuiet && !quietSnap.nextAlertAccountQuiet.enabled,
+                "quiet account skipped in Direct Boot visible selection, other account still works");
+        ReminderStore.setGlobalQuiet(quietContext, overnight);
+        require(ReminderStore.globalQuiet(quietContext).same(overnight), "global quiet persisted");
+        require(TimerSnapshot.read(quietContext, evening).nextVisibleAlert == Long.MAX_VALUE, "global quiet filters all visible events");
+        require(TimerSnapshot.read(quietContext, evening).count == 2, "global quiet never stops timers");
+        ReminderStore.setGlobalQuiet(quietContext, QuietHours.OFF);
+        require(ReminderStore.profile(quietContext, qa.id).quiet.same(overnight), "disabling global preserves account-specific settings");
+        ReminderStore.markEarlySuppressed(quietContext, qa.id, ReminderStore.SHORT);
+        qaSlot = ReminderStore.load(quietContext, qa.id, ReminderStore.SHORT);
+        require(qaSlot.earlyDelivered && qaSlot.earlySuppressed, "quiet early event consumed and distinguished from sent");
+        require(ReminderStore.rollForward(quietContext, qaSlot, duringQuiet + 1), "quiet event still rolls forward");
+        require(!qaSlot.earlyDelivered && !qaSlot.earlySuppressed, "new cycle clears quiet delivery flags");
+        ReminderStore.delete(quietContext, qa.id);
+        require(ReminderStore.profile(quietContext, qa.id) == null, "deleting profile removes quiet preferences");
+        require(ResetMath.countdownLevel(now + 5 * ResetMath.HOUR, 300, now) == 10000, "full cycle starts full");
+        require(ResetMath.countdownLevel(now + 150 * ResetMath.MINUTE, 300, now) == 5000, "half cycle has half fill");
+        require(ResetMath.countdownLevel(now, 300, now) == 0, "due cycle empty");
+        require(ResetMath.countdownLevel(0, 300, now) == 0, "unset cycle empty");
+        require(ResetMath.countdownLevel(now + 10 * ResetMath.HOUR, 300, now) == 10000, "duration beyond one cycle clamps full");
+        require(ResetMath.countdownLevel(now + 7 * ResetMath.DAY, ResetMath.WEEK_MINUTES, now) == 10000, "weekly progress independent");
         String[][] brands = {{"ChatGPT Plus","openai"},{"GPT-6.2 Sol","openai"},{"OpenAI","openai"},{"Codex","openai"},{"Claude Pro","claude"},
                 {"Anthropic","claude"},{"Google Gemini","gemini"},{"Grok 4","grok"},{"xAI","grok"},{"DeepSeek V4","deepseek"},
                 {"通义千问","qwen"},{"Qwen","qwen"},{"Perplexity Pro","perplexity"},{"Microsoft Copilot","copilot"},{"Kimi","kimi"},

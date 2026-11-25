@@ -173,4 +173,16 @@
     <string name="last_alarm_title">Última respuesta de alarma de cuota</string>
     <string name="last_alarm_none">No hay respuestas de alarma válidas.</string>
     <string name="last_alarm_result">%1$s · Retraso %2$d s</string>
+    <string name="quiet_global">Horario de silencio global</string>
+    <string name="quiet_global_hint">Silencia los avisos de todas las cuentas durante este intervalo diario. Los horarios individuales también se aplican.</string>
+    <string name="quiet_account">Horario de silencio de la cuenta</string>
+    <string name="quiet_account_hint">Omite los avisos de esta cuenta durante este horario. Los ciclos continúan.</string>
+    <string name="quiet_from">Desde %1$s</string>
+    <string name="quiet_until">Hasta %1$s</string>
+    <string name="quiet_start_title">Inicio del horario de silencio</string>
+    <string name="quiet_end_title">Fin del horario de silencio</string>
+    <string name="quiet_invalid">La hora inicial y final deben ser distintas.</string>
+    <string name="quiet_active">Horario de silencio activo · El temporizador continúa.</string>
+    <string name="quiet_early_skipped">Aviso previo omitido durante el horario de silencio.</string>
+    <string name="keep_background_hint">Para recibir avisos de forma fiable, permite la actividad en segundo plano y el inicio automático, y conserva la app en Recientes.</string>
 </resources>

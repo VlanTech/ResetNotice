@@ -84,7 +84,8 @@ public final class MainActivity extends Activity {
 
     static final class GroupViews {
         ReminderStore.Profile profile;
-        LinearLayout root, body, summary, shortBlock, header;
+        LinearLayout root, body, summary, shortBlock, header, progressRail;
+        View shortRail, weekRail;
         FrameLayout bodyClip;
         TextView platform, account, shortSummary, shortDate, weekSummary, weekDate;
         ImageView logo;
@@ -277,7 +278,7 @@ public final class MainActivity extends Activity {
 
         getWindow().setStatusBarColor(page);
         getWindow().setNavigationBarColor(page);
-        scroll = new ScrollView(this);
+        scroll = new ElasticScrollView(this);
         scroll.setFillViewport(true);
         scroll.setClipToPadding(false);
         scroll.setVerticalScrollBarEnabled(false);
@@ -364,6 +365,8 @@ public final class MainActivity extends Activity {
         }
         backgroundStatus = label("", 13, sub, false);
         add(readiness, backgroundStatus, 12);
+        TextView keep = label(tr(R.string.keep_background_hint), 12, sub, false);
+        add(readiness, keep, 7);
         updateBackgroundStatus();
     }
 
@@ -571,6 +574,20 @@ public final class MainActivity extends Activity {
         g.body = column();
         g.bodyClip.addView(g.body, new FrameLayout.LayoutParams(-1, -2));
         add(g.root, g.bodyClip, 12);
+        // Compact cards get a thin rail beneath the weekly date instead of a
+        // colored text background. Two independent rails follow quota order.
+        g.progressRail = column();
+        g.progressRail.setClipChildren(true);
+        g.progressRail.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+        g.shortRail = new View(this);
+        g.weekRail = new View(this);
+        g.shortRail.setBackground(new CountdownProgress(card, accent, dp(2), 0.72f));
+        g.weekRail.setBackground(new CountdownProgress(card, accent, dp(2), 0.72f));
+        g.progressRail.addView(g.shortRail, new LinearLayout.LayoutParams(-1, dp(3)));
+        LinearLayout.LayoutParams weekRailParams = new LinearLayout.LayoutParams(-1, dp(3));
+        weekRailParams.topMargin = dp(4);
+        g.progressRail.addView(g.weekRail, weekRailParams);
+        add(g.root, g.progressRail, 10);
         groups.put(profile.id, g);
         add(groupList, g.root, 12);
         rebuildGroupBody(g);
@@ -588,6 +605,10 @@ public final class MainActivity extends Activity {
         g.weekView = buildSlot(g.profile.id, ReminderStore.WEEK);
         add(g.body, g.weekView.root, g.profile.shortEnabled ? 12 : 0);
         g.shortBlock.setVisibility(g.profile.shortEnabled ? View.VISIBLE : View.GONE);
+        g.shortRail.setVisibility(g.profile.shortEnabled ? View.VISIBLE : View.GONE);
+        LinearLayout.LayoutParams railParams = (LinearLayout.LayoutParams)g.weekRail.getLayoutParams();
+        railParams.topMargin = g.profile.shortEnabled ? dp(4) : 0;
+        g.weekRail.setLayoutParams(railParams);
         LinearLayout.LayoutParams weekParams = (LinearLayout.LayoutParams) g.weekSummary.getLayoutParams();
         weekParams.topMargin = g.profile.shortEnabled ? dp(11) : 0;
         g.weekSummary.setLayoutParams(weekParams);
@@ -611,6 +632,10 @@ public final class MainActivity extends Activity {
         g.body.setLayoutParams(bodyParams);
         g.body.setAlpha(1f);
         g.bodyClip.setVisibility(g.expanded ? View.VISIBLE : View.GONE);
+        LinearLayout.LayoutParams rail = (LinearLayout.LayoutParams) g.progressRail.getLayoutParams();
+        rail.height = -2; rail.topMargin = dp(10); g.progressRail.setLayoutParams(rail);
+        g.progressRail.setAlpha(1f);
+        g.progressRail.setVisibility(g.expanded ? View.GONE : View.VISIBLE);
     }
 
     private void setExpanded(GroupViews g, boolean expanded, boolean animate) {
@@ -619,6 +644,11 @@ public final class MainActivity extends Activity {
         int startHeight = visible ? (clipParams.height >= 0 ? clipParams.height : g.bodyClip.getHeight()) : 0;
         int startMargin = visible ? clipParams.topMargin : 0;
         float startAlpha = visible ? g.body.getAlpha() : 0f;
+        boolean railVisible = g.progressRail.getVisibility() == View.VISIBLE;
+        LinearLayout.LayoutParams railParams = (LinearLayout.LayoutParams)g.progressRail.getLayoutParams();
+        int startRailHeight = railVisible ? (railParams.height >= 0 ? railParams.height : g.progressRail.getHeight()) : 0;
+        int startRailMargin = railVisible ? railParams.topMargin : 0;
+        float startRailAlpha = railVisible ? g.progressRail.getAlpha() : 0f;
         cancelExpansion(g); // Keep the current geometry if the user reverses mid-animation.
         g.expanded = expanded;
         g.expandButton.setContentDescription(tr(expanded ? R.string.collapse_account : R.string.expand_account, g.profile.label()));
@@ -638,6 +668,15 @@ public final class MainActivity extends Activity {
         int endHeight = expanded ? naturalHeight : 0;
         int endMargin = expanded ? dp(12) : 0;
         float endAlpha = expanded ? 1f : 0f;
+        g.progressRail.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        int endRailHeight = expanded ? 0 : g.progressRail.getMeasuredHeight();
+        int endRailMargin = expanded ? 0 : dp(10);
+        float endRailAlpha = expanded ? 0f : 1f;
+        railParams.height = startRailHeight; railParams.topMargin = startRailMargin;
+        g.progressRail.setLayoutParams(railParams);
+        g.progressRail.setVisibility(View.VISIBLE);
+        g.progressRail.setAlpha(startRailAlpha);
         FrameLayout.LayoutParams bodyParams = (FrameLayout.LayoutParams) g.body.getLayoutParams();
         bodyParams.height = naturalHeight;
         g.body.setLayoutParams(bodyParams);
@@ -662,6 +701,13 @@ public final class MainActivity extends Activity {
                 g.bodyClip.setLayoutParams(p);
             }
             g.body.setAlpha(startAlpha + (endAlpha - startAlpha) * f);
+            LinearLayout.LayoutParams rail = (LinearLayout.LayoutParams)g.progressRail.getLayoutParams();
+            int rh = Math.round(startRailHeight + (endRailHeight - startRailHeight) * f);
+            int rm = Math.round(startRailMargin + (endRailMargin - startRailMargin) * f);
+            if (rail.height != rh || rail.topMargin != rm) {
+                rail.height = rh; rail.topMargin = rm; g.progressRail.setLayoutParams(rail);
+            }
+            g.progressRail.setAlpha(startRailAlpha + (endRailAlpha - startRailAlpha) * f);
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override public void onAnimationEnd(Animator animation) {
@@ -715,9 +761,13 @@ public final class MainActivity extends Activity {
         add(fields, shortRow, 19);
         if (!creating) add(fields, label(tr(R.string.disable_short_hint), 12, sub, false), 10);
         else add(fields, label(tr(R.string.account_alias_hint), 12, sub, false), 10);
+        QuietHoursEditor quiet = new QuietHoursEditor(this, creating ? QuietHours.OFF : previous.quiet, false, null);
+        add(fields, quiet, 20);
+        ElasticScrollView dialogScroll = new ElasticScrollView(this);
+        dialogScroll.addView(fields, new ScrollView.LayoutParams(-1, -2));
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle(creating ? tr(R.string.new_profile) : tr(R.string.edit_profile))
-                .setView(fields).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.save), null);
+                .setView(dialogScroll).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.save), null);
         if (!creating) builder.setNeutralButton(tr(R.string.delete_profile), (d, w) -> confirmDelete(previous));
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -730,9 +780,10 @@ public final class MainActivity extends Activity {
                 account.setError(tr(R.string.duplicate_account)); return;
             }
             if (creating && groups.size() >= ReminderStore.MAX_PROFILES) { toast(tr(R.string.account_limit)); return; }
+            if (!creating) AlarmEngine.reconcileDue(this, System.currentTimeMillis());
             ReminderStore.Profile profile = creating
-                    ? ReminderStore.add(this, ai, name, shortSwitch.isChecked())
-                    : ReminderStore.edit(this, previous.id, ai, name, shortSwitch.isChecked());
+                    ? ReminderStore.add(this, ai, name, shortSwitch.isChecked(), quiet.value())
+                    : ReminderStore.edit(this, previous.id, ai, name, shortSwitch.isChecked(), quiet.value());
             if (profile == null) { dialog.dismiss(); return; }
             if (creating) {
                 addGroup(profile, true);
@@ -754,6 +805,7 @@ public final class MainActivity extends Activity {
                 // Renaming keeps the existing scheduled times; delivery uses current labels.
                 if (!profile.shortEnabled) AlarmEngine.cancelSlot(this, profile.id, ReminderStore.SHORT, true);
             }
+            AlarmEngine.rescheduleAll(this);
             TimerService.refresh(this);
             dialog.dismiss();
             if (creating) focusProfile(profile.id);
@@ -799,6 +851,7 @@ public final class MainActivity extends Activity {
         add(p, header, 0);
         sv.countdown = label("--:--:--", 31, accent, true);
         sv.countdown.setFontFeatureSettings("tnum");
+        progressBackground(sv.countdown, page, 12, 10);
         add(p, sv.countdown, 14);
         sv.target = label(tr(R.string.unset_time), 12, sub, false);
         add(p, sv.target, 8);
@@ -856,7 +909,7 @@ public final class MainActivity extends Activity {
                 .setNegativeButton(tr(R.string.keep), null).setPositiveButton(tr(R.string.clear), (d, w) -> {
                     ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
                     current.target = 0;
-                    current.earlyDelivered = current.atDelivered = false;
+                    current.earlyDelivered = current.atDelivered = current.earlySuppressed = false;
                     save(current);
                     AlarmEngine.cancelSlot(this, profileId, id, true);
                 }).show(); });
@@ -887,6 +940,16 @@ public final class MainActivity extends Activity {
         return I18n.countdown(this, s.target - now);
     }
 
+    private void progressBackground(TextView view, int base, int radius, int verticalPadding) {
+        view.setBackground(new CountdownProgress(base, accent, dp(radius)));
+        view.setPadding(dp(9), dp(verticalPadding), dp(9), dp(verticalPadding));
+    }
+    private void updateProgress(View view, ReminderStore.Slot s, long now) {
+        android.graphics.drawable.Drawable background = view.getBackground();
+        if (background instanceof CountdownProgress)
+            background.setLevel(ResetMath.countdownLevel(s.target, s.periodMinutes, now));
+    }
+
     private void updateCountdowns() {
         long now = System.currentTimeMillis();
         // Foreground fallback: even if Android delays an alarm while idle, the
@@ -902,19 +965,22 @@ public final class MainActivity extends Activity {
     }
 
     private void updateGroup(GroupViews g, long now) {
+        boolean quietNow = ReminderStore.globalQuiet(this).contains(now) || g.profile.quiet.contains(now);
         if (g.profile.shortEnabled) {
             ReminderStore.Slot s = ReminderStore.load(this, g.profile.id, ReminderStore.SHORT);
             setText(g.shortSummary, I18n.slot(this, s) + " · " + compactTime(s, now));
+            updateProgress(g.shortRail, s, now);
             setText(g.shortDate, s.target > 0 ? ResetMath.displayDateTime(s.target, now) : tr(R.string.unset_time));
-            if (g.shortView != null) updateSlot(g.shortView, s, now);
+            if (g.shortView != null) updateSlot(g.shortView, s, now, quietNow);
         }
         ReminderStore.Slot week = ReminderStore.load(this, g.profile.id, ReminderStore.WEEK);
         setText(g.weekSummary, tr(R.string.week_quota) + " · " + compactTime(week, now));
+        updateProgress(g.weekRail, week, now);
         setText(g.weekDate, week.target > 0 ? ResetMath.displayDateTime(week.target, now) : tr(R.string.unset_time));
-        if (g.weekView != null) updateSlot(g.weekView, week, now);
+        if (g.weekView != null) updateSlot(g.weekView, week, now, quietNow);
     }
 
-    private void updateSlot(SlotViews v, ReminderStore.Slot s, long now) {
+    private void updateSlot(SlotViews v, ReminderStore.Slot s, long now, boolean quietNow) {
         String status, note, countdown, target;
         int fg, bg;
         boolean hasTarget = s.target > 0;
@@ -933,7 +999,9 @@ public final class MainActivity extends Activity {
             target = tr(R.string.planned, ResetMath.displayDateTime(s.target, now));
             status = tr(R.string.timer_running); fg = accent; bg = accentSoft;
             if (!s.early && !s.at) note = tr(R.string.reminders_off);
+            else if (quietNow) note = tr(R.string.quiet_active);
             else if (!notifyReady) note = tr(R.string.permission_missing);
+            else if (s.early && s.earlySuppressed) note = tr(R.string.quiet_early_skipped);
             else if (s.early && s.earlyDelivered) note = s.at ? tr(R.string.early_sent_wait) : tr(R.string.early_sent);
             else if (s.early && s.target - s.earlyMinutes * ResetMath.MINUTE <= now) note = tr(R.string.early_window);
             else note = tr(R.string.enabled);
@@ -946,6 +1014,7 @@ public final class MainActivity extends Activity {
             v.atSwitch.setContentDescription(quotaTitle + " · " + tr(R.string.at_alert));
         }
         setText(v.countdown, countdown); setText(v.target, target); setText(v.note, note);
+        updateProgress(v.countdown, s, now);
         if (!status.equals(v.statusKey)) {
             v.statusKey = status;
             setText(v.status, status);
@@ -978,7 +1047,7 @@ public final class MainActivity extends Activity {
         if (profile == null || !profile.allows(id)) return;
         ReminderStore.Slot s = ReminderStore.load(this, profileId, id);
         s.target = target;
-        s.earlyDelivered = s.atDelivered = false;
+        s.earlyDelivered = s.atDelivered = s.earlySuppressed = false;
         // Clear any delivered notification from the previous quota cycle.
         AlarmEngine.cancelSlot(this, profileId, id, true);
         save(s);

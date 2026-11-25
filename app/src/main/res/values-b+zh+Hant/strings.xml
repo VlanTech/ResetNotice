@@ -173,4 +173,16 @@
     <string name="last_alarm_title">最近額度鬧鐘回呼</string>
     <string name="last_alarm_none">尚無有效的額度鬧鐘回呼記錄。</string>
     <string name="last_alarm_result">%1$s · 延遲 %2$d 秒</string>
+    <string name="quiet_global">全域勿擾</string>
+    <string name="quiet_global_hint">每日於此時段暫停所有帳戶的額度提醒；各帳戶個別設定的時段仍有效。</string>
+    <string name="quiet_account">帳戶勿擾</string>
+    <string name="quiet_account_hint">每日於此時段不傳送本帳戶的額度提醒，計時正常續排。</string>
+    <string name="quiet_from">開始 %1$s</string>
+    <string name="quiet_until">結束 %1$s</string>
+    <string name="quiet_start_title">勿擾開始時間</string>
+    <string name="quiet_end_title">勿擾結束時間</string>
+    <string name="quiet_invalid">開始與結束時間不能相同。</string>
+    <string name="quiet_active">勿擾時段內 · 計時正常繼續。</string>
+    <string name="quiet_early_skipped">本輪提前提醒已依勿擾設定略過。</string>
+    <string name="keep_background_hint">為確保提醒及時送達，請允許背景活動和自動啟動，建議在最近任務中保留應用程式。</string>
 </resources>

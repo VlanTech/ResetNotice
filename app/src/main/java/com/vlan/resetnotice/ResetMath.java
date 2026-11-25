@@ -7,6 +7,12 @@ import java.util.Locale;
 
 /** Pure time calculations shared by the UI and alarm engine. */
 final class ResetMath {
+    /** Remaining fraction of this quota cycle, in Drawable level units. */
+    static int countdownLevel(long target, int periodMinutes, long now) {
+        if (target <= now || target <= 0) return 0;
+        double period = validPeriod(periodMinutes) * (double)MINUTE;
+        return (int)Math.max(0, Math.min(10000, Math.round((target - (double)now) * 10000 / period)));
+    }
     static final long MINUTE = 60_000L;
     static final long HOUR = 60 * MINUTE;
     static final long DAY = 24 * HOUR;

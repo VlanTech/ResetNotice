@@ -21,8 +21,13 @@ final class ReminderStore {
         final int id;
         final String platform, account;
         final boolean shortEnabled;
+        final QuietHours quiet;
         Profile(int id, String platform, String account, boolean shortEnabled) {
+            this(id, platform, account, shortEnabled, QuietHours.OFF);
+        }
+        Profile(int id, String platform, String account, boolean shortEnabled, QuietHours quiet) {
             this.id = id; this.platform = platform; this.account = account; this.shortEnabled = shortEnabled;
+            this.quiet = quiet;
         }
         String label() { return platform + " · " + account; }
         boolean allows(int slot) { return slot == WEEK || (slot == SHORT && shortEnabled); }
@@ -30,7 +35,7 @@ final class ReminderStore {
     static final class Slot {
         final int profileId, id;
         long target;
-        boolean early, at, earlyDelivered, atDelivered;
+        boolean early, at, earlyDelivered, atDelivered, earlySuppressed;
         int earlyMinutes, periodMinutes;
         Slot(int profileId, int id) { this.profileId = profileId; this.id = id; }
         String title() { return id == WEEK ? "周限额" : "短时限额"; }
@@ -44,10 +49,25 @@ final class ReminderStore {
     }
     private static String legacyKey(int slot, String field) { return "slot_" + slot + "_" + field; }
 
+    private static QuietHours readQuiet(SharedPreferences p, String prefix) {
+        return new QuietHours(p.getBoolean(prefix + "enabled", false),
+                p.getInt(prefix + "start", QuietHours.DEFAULT_START), p.getInt(prefix + "end", QuietHours.DEFAULT_END));
+    }
+    private static void writeQuiet(SharedPreferences.Editor e, String prefix, QuietHours quiet) {
+        e.putBoolean(prefix + "enabled", quiet.enabled).putInt(prefix + "start", quiet.start).putInt(prefix + "end", quiet.end);
+    }
+    static QuietHours globalQuiet(Context context) { return readQuiet(prefs(context), "global_quiet_"); }
+    static void setGlobalQuiet(Context context, QuietHours quiet) {
+        SharedPreferences.Editor e = prefs(context).edit();
+        writeQuiet(e, "global_quiet_", quiet);
+        e.commit();
+    }
+
     private static void writeProfile(SharedPreferences.Editor editor, Profile profile) {
         editor.putString(profileKey(profile.id, "platform"), profile.platform)
                 .putString(profileKey(profile.id, "account"), profile.account)
                 .putBoolean(profileKey(profile.id, "short_enabled"), profile.shortEnabled);
+        writeQuiet(editor, profileKey(profile.id, "quiet_"), profile.quiet);
     }
     private static Slot readSlot(SharedPreferences p, int profileId, int slot, boolean legacy) {
         String prefix = legacy ? "slot_" + slot + "_" : "profile_" + profileId + "_slot_" + slot + "_";
@@ -59,6 +79,7 @@ final class ReminderStore {
         s.periodMinutes = slot == WEEK ? ResetMath.WEEK_MINUTES : ResetMath.validPeriod(
                 p.getInt(prefix + "period_minutes", ResetMath.DEFAULT_SHORT_MINUTES));
         s.earlyDelivered = p.getBoolean(prefix + "early_delivered", false);
+        s.earlySuppressed = p.getBoolean(prefix + "early_suppressed", false);
         s.atDelivered = p.getBoolean(prefix + "at_delivered", false);
         return s;
     }
@@ -69,6 +90,7 @@ final class ReminderStore {
                 .putInt(slotKey(s.profileId, s.id, "early_minutes"), s.earlyMinutes)
                 .putInt(slotKey(s.profileId, s.id, "period_minutes"), s.periodMinutes)
                 .putBoolean(slotKey(s.profileId, s.id, "early_delivered"), s.earlyDelivered)
+                .putBoolean(slotKey(s.profileId, s.id, "early_suppressed"), s.earlySuppressed)
                 .putBoolean(slotKey(s.profileId, s.id, "at_delivered"), s.atDelivered);
     }
 
@@ -122,7 +144,7 @@ final class ReminderStore {
         String platform = p.getString(profileKey(id, "platform"), null);
         if (platform == null) return null;
         return new Profile(id, platform, p.getString(profileKey(id, "account"), "默认账户"),
-                p.getBoolean(profileKey(id, "short_enabled"), true));
+                p.getBoolean(profileKey(id, "short_enabled"), true), readQuiet(p, profileKey(id, "quiet_")));
     }
     static List<Profile> profiles(Context context) {
         initialize(context);
@@ -153,6 +175,9 @@ final class ReminderStore {
         return false;
     }
     static synchronized Profile add(Context context, String platform, String account, boolean shortEnabled) {
+        return add(context, platform, account, shortEnabled, QuietHours.OFF);
+    }
+    static synchronized Profile add(Context context, String platform, String account, boolean shortEnabled, QuietHours quiet) {
         initialize(context);
         SharedPreferences p = prefs(context);
         List<Integer> ids = ids(p);
@@ -160,7 +185,7 @@ final class ReminderStore {
         if (duplicate(context, -1, platform, account)) throw new IllegalArgumentException("Duplicate profile");
         int id = p.getInt(NEXT, 1);
         if (id <= 0 || id >= 500_000_000) throw new IllegalStateException("Profile ID space exhausted");
-        Profile profile = new Profile(id, platform, account, shortEnabled);
+        Profile profile = new Profile(id, platform, account, shortEnabled, quiet);
         ids.add(id);
         SharedPreferences.Editor e = p.edit();
         writeProfile(e, profile);
@@ -170,15 +195,20 @@ final class ReminderStore {
     static synchronized Profile edit(Context context, int id, String platform, String account, boolean shortEnabled) {
         Profile previous = profile(context, id);
         if (previous == null) return null;
+        return edit(context, id, platform, account, shortEnabled, previous.quiet);
+    }
+    static synchronized Profile edit(Context context, int id, String platform, String account, boolean shortEnabled, QuietHours quiet) {
+        Profile previous = profile(context, id);
+        if (previous == null) return null;
         if (duplicate(context, id, platform, account)) throw new IllegalArgumentException("Duplicate profile");
-        Profile result = new Profile(id, platform, account, shortEnabled);
+        Profile result = new Profile(id, platform, account, shortEnabled, quiet);
         SharedPreferences p = prefs(context);
         SharedPreferences.Editor editor = p.edit();
         writeProfile(editor, result);
         if (previous.shortEnabled && !shortEnabled) {
             Slot shortSlot = readSlot(p, id, SHORT, false);
             shortSlot.target = 0;
-            shortSlot.earlyDelivered = shortSlot.atDelivered = false;
+            shortSlot.earlyDelivered = shortSlot.atDelivered = shortSlot.earlySuppressed = false;
             writeSlot(editor, shortSlot);
         }
         editor.commit();
@@ -211,7 +241,7 @@ final class ReminderStore {
         long next = ResetMath.nextTarget(s.target, s.periodMinutes, now);
         if (next == s.target) return false;
         s.target = next;
-        s.earlyDelivered = s.atDelivered = false;
+        s.earlyDelivered = s.atDelivered = s.earlySuppressed = false;
         save(context, s);
         return true;
     }
@@ -219,5 +249,11 @@ final class ReminderStore {
         Profile p = profile(context, profileId);
         if (p != null && p.allows(slot)) prefs(context).edit()
                 .putBoolean(slotKey(profileId, slot, early ? "early_delivered" : "at_delivered"), true).commit();
+    }
+    static void markEarlySuppressed(Context context, int profileId, int slot) {
+        Profile p = profile(context, profileId);
+        if (p != null && p.allows(slot)) prefs(context).edit()
+                .putBoolean(slotKey(profileId, slot, "early_delivered"), true)
+                .putBoolean(slotKey(profileId, slot, "early_suppressed"), true).commit();
     }
 }

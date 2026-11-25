@@ -173,4 +173,16 @@
     <string name="last_alarm_title">最近额度闹钟回调</string>
     <string name="last_alarm_none">尚无有效的额度闹钟回调记录。</string>
     <string name="last_alarm_result">%1$s · 延迟 %2$d 秒</string>
+    <string name="quiet_global">全局免打扰</string>
+    <string name="quiet_global_hint">每日在此时段暂停所有账户的额度提醒；各账户单独设置的时段仍有效。</string>
+    <string name="quiet_account">账户免打扰</string>
+    <string name="quiet_account_hint">每日在此时段不发送本账户的额度提醒，计时正常续排。</string>
+    <string name="quiet_from">开始 %1$s</string>
+    <string name="quiet_until">结束 %1$s</string>
+    <string name="quiet_start_title">免打扰开始时间</string>
+    <string name="quiet_end_title">免打扰结束时间</string>
+    <string name="quiet_invalid">开始和结束时间不能相同。</string>
+    <string name="quiet_active">免打扰时段内 · 计时正常继续。</string>
+    <string name="quiet_early_skipped">本轮提前提醒已按免打扰设置跳过。</string>
+    <string name="keep_background_hint">为保证提醒及时送达，请允许后台活动和自启动，建议保留应用于最近任务中。</string>
 </resources>

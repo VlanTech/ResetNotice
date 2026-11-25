@@ -173,4 +173,16 @@
     <string name="last_alarm_title">최근 한도 알람 콜백</string>
     <string name="last_alarm_none">유효한 콜백 기록이 없습니다.</string>
     <string name="last_alarm_result">%1$s · %2$d초 지연</string>
+    <string name="quiet_global">전체 방해 금지 시간</string>
+    <string name="quiet_global_hint">매일 이 시간 동안 모든 계정의 한도 알림을 끕니다. 계정별 설정도 적용됩니다.</string>
+    <string name="quiet_account">계정 방해 금지 시간</string>
+    <string name="quiet_account_hint">이 시간 동안 이 계정의 알림을 건너뜁니다. 타이머는 계속됩니다.</string>
+    <string name="quiet_from">시작 %1$s</string>
+    <string name="quiet_until">종료 %1$s</string>
+    <string name="quiet_start_title">방해 금지 시작</string>
+    <string name="quiet_end_title">방해 금지 종료</string>
+    <string name="quiet_invalid">시작과 종료 시간은 달라야 합니다.</string>
+    <string name="quiet_active">방해 금지 중 · 타이머 계속 진행.</string>
+    <string name="quiet_early_skipped">이번 사전 알림은 방해 금지 설정에 따라 생략됐습니다.</string>
+    <string name="keep_background_hint">안정적인 알림을 위해 백그라운드 활동과 자동 시작을 허용하고 최근 앱에 남겨 두세요.</string>
 </resources>

@@ -173,4 +173,16 @@
     <string name="last_alarm_title">Ultima risposta allarme quota</string>
     <string name="last_alarm_none">Nessuna risposta valida registrata.</string>
     <string name="last_alarm_result">%1$s · Ritardo %2$d s</string>
+    <string name="quiet_global">Orario silenzioso globale</string>
+    <string name="quiet_global_hint">Sospende gli avvisi di tutti gli account in questa fascia giornaliera. Si applicano anche gli orari individuali.</string>
+    <string name="quiet_account">Orario silenzioso dell’account</string>
+    <string name="quiet_account_hint">Salta gli avvisi di questo account in questa fascia. I timer continuano.</string>
+    <string name="quiet_from">Dalle %1$s</string>
+    <string name="quiet_until">Alle %1$s</string>
+    <string name="quiet_start_title">Inizio orario silenzioso</string>
+    <string name="quiet_end_title">Fine orario silenzioso</string>
+    <string name="quiet_invalid">Gli orari di inizio e fine devono essere diversi.</string>
+    <string name="quiet_active">Orario silenzioso attivo · Il timer continua.</string>
+    <string name="quiet_early_skipped">Avviso anticipato saltato durante l’orario silenzioso.</string>
+    <string name="keep_background_hint">Per avvisi affidabili, consenti attività in background e avvio automatico e mantieni l’app tra le recenti.</string>
 </resources>

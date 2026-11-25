@@ -173,4 +173,16 @@
     <string name="last_alarm_title">Dernier retour d’alarme de quota</string>
     <string name="last_alarm_none">Aucun retour d’alarme valide.</string>
     <string name="last_alarm_result">%1$s · Retard %2$d s</string>
+    <string name="quiet_global">Heures silencieuses globales</string>
+    <string name="quiet_global_hint">Suspend les rappels de tous les comptes durant cette plage quotidienne. Les plages individuelles s’appliquent aussi.</string>
+    <string name="quiet_account">Heures silencieuses du compte</string>
+    <string name="quiet_account_hint">Ignore les rappels de ce compte durant cette plage. Les minuteurs continuent.</string>
+    <string name="quiet_from">De %1$s</string>
+    <string name="quiet_until">À %1$s</string>
+    <string name="quiet_start_title">Début des heures silencieuses</string>
+    <string name="quiet_end_title">Fin des heures silencieuses</string>
+    <string name="quiet_invalid">Les heures de début et de fin doivent être différentes.</string>
+    <string name="quiet_active">Heures silencieuses actives · Le minuteur continue.</string>
+    <string name="quiet_early_skipped">Rappel anticipé ignoré pendant les heures silencieuses.</string>
+    <string name="keep_background_hint">Pour des rappels fiables, autorisez les activités en arrière-plan et le démarrage automatique, et gardez l’appli dans les récents.</string>
 </resources>

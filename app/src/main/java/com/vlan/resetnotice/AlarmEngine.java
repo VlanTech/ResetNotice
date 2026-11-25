@@ -110,7 +110,11 @@ final class AlarmEngine {
                 .putExtra("minutes", s.earlyMinutes);
         PendingIntent pi = PendingIntent.getBroadcast(context, request, delivery,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        scheduleSystemAlarm(context, when, pi, AlarmPolicy.visible(s, early, now), request, s.profileId);
+        ReminderStore.Profile profile = ReminderStore.profile(context, s.profileId);
+        long intended = early ? s.target - s.earlyMinutes * ResetMath.MINUTE : s.target;
+        boolean visible = AlarmPolicy.visible(s, early, now) && profile != null &&
+                !QuietHours.suppressed(ReminderStore.globalQuiet(context), profile.quiet, intended, when);
+        scheduleSystemAlarm(context, when, pi, visible, request, s.profileId);
     }
 
     /** Every user-visible alarm can opt into Android's actual alarm-clock API;
@@ -148,6 +152,11 @@ final class AlarmEngine {
         long expected = System.currentTimeMillis() + AlarmDiagnostics.PROBE_DELAY;
         AlarmDiagnostics.startProbe(context, expected);
         armProbe(context, expected);
+    }
+
+    static void cancelLegacyProbe(Context context) {
+        cancel(context, PROBE_ID, new Intent(context, ProbeReceiver.class).setAction(PROBE_ACTION));
+        context.getSystemService(NotificationManager.class).cancel(PROBE_ID);
     }
 
     static void armProbe(Context context, long expected) {
@@ -200,6 +209,7 @@ final class AlarmEngine {
      * boot/time-change recovery and the foreground system-clock ticker. */
     static void reconcileDue(Context context, long now) {
         boolean changed = false;
+        QuietHours global = ReminderStore.globalQuiet(context);
         for (ReminderStore.Profile p : ReminderStore.profiles(context)) {
             for (int quota : new int[]{ReminderStore.SHORT, ReminderStore.WEEK}) {
                 if (!p.allows(quota)) continue;
@@ -212,7 +222,8 @@ final class AlarmEngine {
                     // On long offline gaps only the most recent reset is relevant.
                     // Never emit many old notifications or repeat the same delivered cycle.
                     if (current.at && !(due == current.target && current.atDelivered)
-                            && due >= now - ResetMath.DAY && notificationsAllowed(context)) {
+                            && due >= now - ResetMath.DAY && !QuietHours.suppressed(global, p.quiet, due, now)
+                            && notificationsAllowed(context)) {
                         Context localized = AppPreferences.localized(context);
                         String label = p.account + " · " + I18n.slot(localized, current);
                         notify(context, AlarmIdentity.id(p.id, current.id, false), p.id,
@@ -221,7 +232,7 @@ final class AlarmEngine {
                     }
                     rolled = ReminderStore.rollForward(context, current, now);
                 }
-                boolean earlySent = deliverEarly(context, p, current, now);
+                boolean earlySent = deliverEarly(context, p, current, now, global);
                 changed |= rolled || earlySent;
                 if (rolled) schedule(context, current, false);
                 if (rolled || earlySent) schedule(context, current, true);
@@ -230,9 +241,19 @@ final class AlarmEngine {
         if (changed) BootState.sync(context, TimerSnapshot.read(context, now));
     }
 
-    private static boolean deliverEarly(Context context, ReminderStore.Profile profile, ReminderStore.Slot s, long now) {
+    private static boolean deliverEarly(Context context, ReminderStore.Profile profile, ReminderStore.Slot s, long now, QuietHours global) {
         if (s.target <= 0 || !s.early || s.earlyDelivered || now >= s.target
-                || now < s.target - s.earlyMinutes * ResetMath.MINUTE || !notificationsAllowed(context)) return false;
+                || now < s.target - s.earlyMinutes * ResetMath.MINUTE) return false;
+        long intended = s.target - s.earlyMinutes * ResetMath.MINUTE;
+        if (QuietHours.suppressed(global, profile.quiet, intended, now)) {
+            // Consume this cycle's early event even when no notification was sent;
+            // neither a later ticker nor an unlock should replay it.
+            s.earlyDelivered = true;
+            s.earlySuppressed = true;
+            ReminderStore.markEarlySuppressed(context, profile.id, s.id);
+            return true;
+        }
+        if (!notificationsAllowed(context)) return false;
         Context localized = AppPreferences.localized(context);
         String slotName = I18n.slot(localized, s);
         String label = profile.label() + " · " + slotName;

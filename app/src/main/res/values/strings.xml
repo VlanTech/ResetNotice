@@ -173,4 +173,16 @@
     <string name="last_alarm_title">Last quota alarm callback</string>
     <string name="last_alarm_none">No valid quota alarm callback recorded.</string>
     <string name="last_alarm_result">%1$s · Delay %2$d s</string>
+    <string name="quiet_global">Global quiet hours</string>
+    <string name="quiet_global_hint">Mute quota alerts for all accounts during this daily window. Individual account windows also apply.</string>
+    <string name="quiet_account">Account quiet hours</string>
+    <string name="quiet_account_hint">Skip this account’s reminders during these hours. Countdown cycles continue.</string>
+    <string name="quiet_from">From %1$s</string>
+    <string name="quiet_until">Until %1$s</string>
+    <string name="quiet_start_title">Quiet hours start</string>
+    <string name="quiet_end_title">Quiet hours end</string>
+    <string name="quiet_invalid">Start and end times must differ.</string>
+    <string name="quiet_active">Quiet hours active · Countdown continues.</string>
+    <string name="quiet_early_skipped">Early reminder skipped during quiet hours.</string>
+    <string name="keep_background_hint">For reliable reminders, allow background activity and auto-start, and keep the app in Recents.</string>
 </resources>
