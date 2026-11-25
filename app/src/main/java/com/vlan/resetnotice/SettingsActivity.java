@@ -10,6 +10,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
@@ -18,12 +19,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 /** Separate, localized settings and about page. */
 public final class SettingsActivity extends Activity {
     private int page, card, text, sub, line, accent;
+    private TextView batteryValue;
     @Override protected void attachBaseContext(Context base) { super.attachBaseContext(AppPreferences.wrap(base)); }
 
     @Override public void onCreate(Bundle state) {
@@ -44,7 +47,8 @@ public final class SettingsActivity extends Activity {
         ImageButton back = new ImageButton(this);
         back.setImageResource(R.drawable.ic_back); back.setColorFilter(text);
         back.setBackground(pressable(0x00000000, 24)); back.setPadding(dp(10), dp(10), dp(10), dp(10));
-        back.setContentDescription(getString(R.string.back)); back.setOnClickListener(v -> finish());
+        back.setContentDescription(getString(R.string.back)); Haptics.configure(back);
+        back.setOnClickListener(v -> { Haptics.tap(v); finish(); });
         header.addView(back, new LinearLayout.LayoutParams(dp(48), dp(48)));
         header.addView(label(getString(R.string.settings), 26, text, true), new LinearLayout.LayoutParams(0, -2, 1));
         add(content, header, 0);
@@ -56,16 +60,41 @@ public final class SettingsActivity extends Activity {
         add(appearance, item(getString(R.string.theme), themeName(), v -> chooseTheme()), 0);
         add(content, appearance, 9);
 
+        add(content, label(getString(R.string.interaction), 14, sub, true), 23);
+        LinearLayout interaction = panel();
+        LinearLayout hapticRow = row(); hapticRow.setPadding(dp(16), dp(15), dp(14), dp(15));
+        LinearLayout hapticLabels = column();
+        add(hapticLabels, label(getString(R.string.haptics), 16, text, true), 0);
+        add(hapticLabels, label(getString(R.string.haptics_hint), 13, sub, false), 3);
+        hapticRow.addView(hapticLabels, new LinearLayout.LayoutParams(0, -2, 1));
+        Switch hapticSwitch = new Switch(this);
+        hapticSwitch.setContentDescription(getString(R.string.haptics));
+        hapticSwitch.setChecked(AppPreferences.haptics(this));
+        Haptics.configure(hapticSwitch);
+        hapticSwitch.setOnCheckedChangeListener((b, checked) -> {
+            AppPreferences.setHaptics(this, checked);
+            Haptics.configure(b); if (checked) Haptics.tap(b);
+        });
+        hapticRow.addView(hapticSwitch); add(interaction, hapticRow, 0);
+        add(content, interaction, 9);
+
         add(content, label(getString(R.string.notifications), 14, sub, true), 23);
         LinearLayout background = panel();
         add(background, item(getString(R.string.background_settings), getString(R.string.background_hint), v -> appDetails()), 0);
+        divider(background);
+        LinearLayout battery = item(getString(R.string.battery_settings), batteryStatus(), v -> batterySettings());
+        batteryValue = (TextView)((LinearLayout)battery.getChildAt(0)).getChildAt(1);
+        add(background, battery, 0);
         add(content, background, 9);
+        TextView help = label(getString(R.string.background_help), 12, sub, false);
+        help.setPadding(dp(5), dp(3), dp(5), 0);
+        add(content, help, 7);
 
         add(content, label(getString(R.string.about), 14, sub, true), 24);
         LinearLayout about = panel();
         add(about, item(getString(R.string.developer), "Vlan_Tech", null), 0);
         divider(about);
-        add(about, item(getString(R.string.version), "1.4.0", null), 0);
+        add(about, item(getString(R.string.version), "1.5.0", null), 0);
         divider(about);
         add(about, item(getString(R.string.source_code), "GitHub · ResetNotice", v -> {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VlanTech/ResetNotice"))); }
@@ -74,6 +103,22 @@ public final class SettingsActivity extends Activity {
         add(content, about, 9);
         TextView privacy = label(getString(R.string.local_only), 12, sub, false); privacy.setGravity(Gravity.CENTER);
         add(content, privacy, 22);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (batteryValue != null) batteryValue.setText(batteryStatus());
+    }
+
+    private String batteryStatus() {
+        PowerManager manager = getSystemService(PowerManager.class);
+        return getString(manager != null && manager.isIgnoringBatteryOptimizations(getPackageName())
+                ? R.string.battery_allowed : R.string.battery_restricted);
+    }
+
+    private void batterySettings() {
+        try { startActivity(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)); }
+        catch (Exception ignored) { appDetails(); }
     }
 
     private String languageName() {
@@ -132,7 +177,8 @@ public final class SettingsActivity extends Activity {
         row.addView(labels, new LinearLayout.LayoutParams(0, -2, 1));
         if (click != null) {
             ImageView arrow = new ImageView(this); arrow.setImageResource(R.drawable.ic_chevron); arrow.setColorFilter(accent); arrow.setRotation(-90f);
-            row.addView(arrow, new LinearLayout.LayoutParams(dp(25), dp(25))); row.setBackground(pressable(0x00000000, 15)); row.setOnClickListener(click); row.setFocusable(true);
+            row.addView(arrow, new LinearLayout.LayoutParams(dp(25), dp(25))); row.setBackground(pressable(0x00000000, 15));
+            Haptics.configure(row); row.setOnClickListener(v -> { Haptics.tap(v); click.onClick(v); }); row.setFocusable(true);
         }
         return row;
     }

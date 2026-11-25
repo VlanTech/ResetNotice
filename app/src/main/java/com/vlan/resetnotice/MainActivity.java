@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -18,12 +19,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.view.Gravity;
+import android.view.DragEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.animation.PathInterpolator;
+import android.transition.ChangeBounds;
+import android.transition.TransitionManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -49,6 +56,23 @@ public final class MainActivity extends Activity {
     private TextView groupCount, emptyState, backgroundStatus;
     private boolean notifyReady, exactReady, readinessInitialized;
     private String uiSignature;
+    private GroupViews dragging;
+    private List<Integer> originalDragOrder;
+    private long dragStartedAt, lastMoveAt;
+    private float dragScreenY = Float.NaN;
+    private final Runnable dragScroll = new Runnable() {
+        @Override public void run() {
+            if (dragging == null) return;
+            if (!Float.isNaN(dragScreenY)) {
+                int[] position = new int[2]; scroll.getLocationOnScreen(position);
+                if (dragScreenY < position[1] + dp(80)) scroll.scrollBy(0, -dp(9));
+                else if (dragScreenY > position[1] + scroll.getHeight() - dp(80)) scroll.scrollBy(0, dp(9));
+                groupList.getLocationOnScreen(position);
+                moveDraggedAt(dragScreenY - position[1]);
+            }
+            handler.postDelayed(this, 40L);
+        }
+    };
     private int page, card, text, sub, accent, onAccent, accentSoft, line, positive, positiveSoft, warning, warningSoft;
     private final Runnable ticker = new Runnable() {
         @Override public void run() {
@@ -60,11 +84,11 @@ public final class MainActivity extends Activity {
 
     static final class GroupViews {
         ReminderStore.Profile profile;
-        LinearLayout root, body, summary, shortBlock;
+        LinearLayout root, body, summary, shortBlock, header;
         FrameLayout bodyClip;
         TextView platform, account, shortSummary, shortDate, weekSummary, weekDate;
         ImageView logo;
-        ImageButton expandButton, manageButton;
+        ImageButton expandButton, manageButton, dragHandle;
         SlotViews shortView, weekView;
         boolean expanded;
         ValueAnimator animator;
@@ -76,7 +100,7 @@ public final class MainActivity extends Activity {
 
     static final class SlotViews {
         LinearLayout root;
-        TextView countdown, target, status, note, advance, clear, cycle;
+        TextView title, countdown, target, status, note, advance, clear, cycle;
         Switch earlySwitch, atSwitch;
         String statusKey = "";
     }
@@ -99,18 +123,26 @@ public final class MainActivity extends Activity {
         TimerService.refresh(this);
         refreshReadiness();
         updateCountdowns();
+        if (manualMode() && dragging == null) applyOrder(AccountOrder.manual(this), false);
         handler.removeCallbacks(ticker);
         handler.post(ticker);
     }
 
     @Override public void onPause() {
         handler.removeCallbacks(ticker);
+        handler.removeCallbacks(dragScroll);
+        if (dragging != null) {
+            dragging.root.setAlpha(1f);
+            if (originalDragOrder != null) applyOrder(originalDragOrder, false);
+            dragging = null; originalDragOrder = null; dragScreenY = Float.NaN;
+        }
         super.onPause();
     }
 
     @Override protected void onDestroy() {
         for (GroupViews g : groups.values()) cancelExpansion(g);
         handler.removeCallbacks(ticker);
+        handler.removeCallbacks(dragScroll);
         super.onDestroy();
     }
 
@@ -204,7 +236,8 @@ public final class MainActivity extends Activity {
                 rounded(primary ? accent : accentSoft, 14), rounded(0xFFFFFFFF, 14)));
         v.setClickable(true);
         v.setFocusable(true);
-        v.setOnClickListener(listener);
+        Haptics.configure(v);
+        v.setOnClickListener(clicked -> { Haptics.tap(clicked); listener.onClick(clicked); });
         return v;
     }
 
@@ -224,7 +257,8 @@ public final class MainActivity extends Activity {
         v.setPadding(dp(11), dp(11), dp(11), dp(11));
         v.setBackground(new RippleDrawable(ColorStateList.valueOf(0x226855A5), rounded(0x00000000, 24), rounded(0xFFFFFFFF, 24)));
         v.setContentDescription(description);
-        v.setOnClickListener(listener);
+        Haptics.configure(v);
+        v.setOnClickListener(clicked -> { Haptics.tap(clicked); listener.onClick(clicked); });
         return v;
     }
 
@@ -283,11 +317,13 @@ public final class MainActivity extends Activity {
         groupCount = label(tr(R.string.count_accounts, 0), 12, sub, false);
         add(heading, groupCount, 5);
         section.addView(heading, new LinearLayout.LayoutParams(0, -2, 1));
+        section.addView(iconButton(R.drawable.ic_sort, tr(R.string.sort), v -> chooseSort()), new LinearLayout.LayoutParams(dp(46), dp(46)));
         TextView create = button(tr(R.string.add_account), true, v -> editProfile(null));
-        create.setMinWidth(dp(100));
+        create.setMinWidth(dp(74));
         section.addView(create, new LinearLayout.LayoutParams(-2, -2));
         add(content, section, 22);
         groupList = column();
+        groupList.setOnDragListener((v, event) -> handleDrag(event));
         add(content, groupList, 12);
         emptyState = label(tr(R.string.empty_accounts), 14, sub, false);
         emptyState.setGravity(Gravity.CENTER);
@@ -339,8 +375,141 @@ public final class MainActivity extends Activity {
     }
 
     private void updateGroupCount() {
-        setText(groupCount, tr(R.string.count_accounts, groups.size()));
+        setText(groupCount, tr(R.string.count_accounts, groups.size()) + " · " + tr(manualMode() ? R.string.sort_manual : R.string.sort_next));
         emptyState.setVisibility(groups.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean manualMode() { return !AppPreferences.NEXT_RESET.equals(AppPreferences.order(this)); }
+
+    private void chooseSort() {
+        String[] options = {tr(R.string.sort_manual), tr(R.string.sort_next)};
+        new AlertDialog.Builder(this).setTitle(tr(R.string.sort)).setSingleChoiceItems(options, manualMode() ? 0 : 1, (d, which) -> {
+            AppPreferences.setOrder(this, which == 0 ? AppPreferences.MANUAL : AppPreferences.NEXT_RESET);
+            for (GroupViews g : groups.values()) g.dragHandle.setVisibility(manualMode() ? View.VISIBLE : View.GONE);
+            updateGroupCount();
+            applyOrder(manualMode() ? AccountOrder.manual(this) : AccountOrder.byNextReset(this, System.currentTimeMillis()), true);
+            d.dismiss();
+        }).setNegativeButton(tr(R.string.cancel), null).show();
+    }
+
+    private List<Integer> displayedOrder() {
+        List<Integer> ids = new ArrayList<>();
+        for (int i = 0; i < groupList.getChildCount(); i++) {
+            Object tag = groupList.getChildAt(i).getTag();
+            if (tag instanceof Integer && groups.containsKey((Integer)tag)) ids.add((Integer)tag);
+        }
+        return ids;
+    }
+
+    private void applyOrder(List<Integer> ids, boolean animate) {
+        if (groupList == null || ids.size() != groups.size() || displayedOrder().equals(ids)) return;
+        for (int id : ids) if (!groups.containsKey(id)) return;
+        boolean animations = animate && groupList.isLaidOut() && (Build.VERSION.SDK_INT < 26 || ValueAnimator.areAnimatorsEnabled());
+        if (animations) {
+            TransitionManager.endTransitions(groupList);
+            ChangeBounds bounds = new ChangeBounds(); bounds.setDuration(180L);
+            TransitionManager.beginDelayedTransition(groupList, bounds);
+        }
+        for (int i = 0; i < ids.size(); i++) {
+            View view = groups.get(ids.get(i)).root;
+            int position = 1 + i; // the empty-state placeholder is always child zero
+            if (groupList.indexOfChild(view) == position) continue;
+            android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
+            groupList.removeView(view);
+            groupList.addView(view, position, params);
+        }
+    }
+
+    private void manualStep(GroupViews g) {
+        List<Integer> order = displayedOrder(); int index = order.indexOf(g.profile.id);
+        List<String> labels = new ArrayList<>(); List<Integer> destinations = new ArrayList<>();
+        if (index > 0) { labels.add(tr(R.string.move_up)); destinations.add(index - 1); }
+        if (index >= 0 && index < order.size() - 1) { labels.add(tr(R.string.move_down)); destinations.add(index + 1); }
+        if (labels.isEmpty()) return;
+        new AlertDialog.Builder(this).setTitle(g.profile.label()).setItems(labels.toArray(new String[0]), (d, which) -> {
+            for (GroupViews card : groups.values()) if (card.expanded) setExpanded(card, false, true);
+            order.remove(Integer.valueOf(g.profile.id)); order.add(destinations.get(which), g.profile.id);
+            if (ReminderStore.reorder(this, order)) handler.postDelayed(() -> {
+                if (!isFinishing() && !isDestroyed() && manualMode() && dragging == null) applyOrder(AccountOrder.manual(this), true);
+            }, 285L);
+        }).setNegativeButton(tr(R.string.cancel), null).show();
+    }
+
+    private void attachDrag(GroupViews g) {
+        g.dragHandle.setOnTouchListener(new View.OnTouchListener() {
+            float downX, downY;
+            final int slop = ViewConfiguration.get(MainActivity.this).getScaledTouchSlop();
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                if (!manualMode()) return false;
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        downX = event.getRawX(); downY = event.getRawY();
+                        v.getParent().requestDisallowInterceptTouchEvent(true); return true;
+                    case MotionEvent.ACTION_MOVE:
+                        if (dragging == null && (Math.abs(event.getRawY() - downY) > slop || Math.abs(event.getRawX() - downX) > slop)) beginDrag(g);
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        v.getParent().requestDisallowInterceptTouchEvent(false);
+                        if (dragging == null) v.performClick(); return true;
+                    case MotionEvent.ACTION_CANCEL:
+                        v.getParent().requestDisallowInterceptTouchEvent(false); return true;
+                    default: return true;
+                }
+            }
+        });
+    }
+
+    private void beginDrag(GroupViews g) {
+        if (!manualMode() || dragging != null || groups.size() < 2) return;
+        originalDragOrder = displayedOrder(); dragging = g;
+        dragStartedAt = SystemClock.uptimeMillis(); lastMoveAt = 0; dragScreenY = Float.NaN;
+        for (GroupViews card : groups.values()) if (card.expanded || card.animator != null) setExpanded(card, false, true);
+        Haptics.tap(g.dragHandle);
+        View.DragShadowBuilder shadow = new View.DragShadowBuilder(g.header);
+        ClipData clip = ClipData.newPlainText("ResetNotice", "");
+        boolean started = Build.VERSION.SDK_INT >= 24 ? g.dragHandle.startDragAndDrop(clip, shadow, g, 0) : g.dragHandle.startDrag(clip, shadow, g, 0);
+        if (!started) { dragging = null; originalDragOrder = null; return; }
+        g.root.setAlpha(0.42f);
+        handler.removeCallbacks(dragScroll); handler.post(dragScroll);
+    }
+
+    private void moveDraggedAt(float y) {
+        moveDraggedAt(y, false);
+    }
+
+    private void moveDraggedAt(float y, boolean finalDrop) {
+        if (dragging == null || SystemClock.uptimeMillis() - dragStartedAt < 285L ||
+                (!finalDrop && SystemClock.uptimeMillis() - lastMoveAt < 150L)) return;
+        if (finalDrop) TransitionManager.endTransitions(groupList);
+        List<Integer> order = displayedOrder(); order.remove(Integer.valueOf(dragging.profile.id));
+        int index = 0;
+        for (int id : order) {
+            View card = groups.get(id).root;
+            if (y < card.getTop() + card.getHeight() / 2f) break;
+            index++;
+        }
+        order.add(index, dragging.profile.id);
+        if (!displayedOrder().equals(order)) { lastMoveAt = SystemClock.uptimeMillis(); applyOrder(order, true); }
+    }
+
+    private boolean handleDrag(DragEvent event) {
+        if (!(event.getLocalState() instanceof GroupViews)) return false;
+        switch (event.getAction()) {
+            case DragEvent.ACTION_DRAG_STARTED: return manualMode() && dragging == event.getLocalState();
+            case DragEvent.ACTION_DRAG_LOCATION:
+                int[] position = new int[2]; groupList.getLocationOnScreen(position);
+                dragScreenY = position[1] + event.getY(); moveDraggedAt(event.getY()); return true;
+            case DragEvent.ACTION_DRAG_EXITED: dragScreenY = Float.NaN; return true;
+            case DragEvent.ACTION_DROP:
+                moveDraggedAt(event.getY(), true);
+                return ReminderStore.reorder(this, displayedOrder());
+            case DragEvent.ACTION_DRAG_ENDED:
+                handler.removeCallbacks(dragScroll); dragScreenY = Float.NaN;
+                if (dragging != null) dragging.root.setAlpha(1f);
+                if (!event.getResult() && originalDragOrder != null) applyOrder(originalDragOrder, true);
+                dragging = null; originalDragOrder = null; return true;
+            default: return true;
+        }
     }
 
     private void addGroup(ReminderStore.Profile profile, boolean expanded) {
@@ -348,7 +517,8 @@ public final class MainActivity extends Activity {
         g.profile = profile;
         g.root = panel();
         g.root.setPadding(dp(14), dp(16), dp(14), dp(13));
-        LinearLayout header = row();
+        LinearLayout header = row(); g.header = header;
+        g.root.setTag(profile.id);
         g.logo = new ImageView(this);
         g.logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
         g.logo.setPadding(dp(5), dp(5), dp(5), dp(5));
@@ -364,6 +534,10 @@ public final class MainActivity extends Activity {
         header.addView(names, np);
         g.manageButton = iconButton(R.drawable.ic_settings, tr(R.string.manage_profile, profile.label()), v -> editProfile(g.profile));
         header.addView(g.manageButton, new LinearLayout.LayoutParams(dp(46), dp(46)));
+        g.dragHandle = iconButton(R.drawable.ic_drag, tr(R.string.drag_hint, profile.label()), v -> manualStep(g));
+        g.dragHandle.setVisibility(manualMode() ? View.VISIBLE : View.GONE);
+        header.addView(g.dragHandle, new LinearLayout.LayoutParams(dp(42), dp(46)));
+        attachDrag(g);
         add(g.root, header, 0);
 
         LinearLayout summaryRow = row();
@@ -534,6 +708,8 @@ public final class MainActivity extends Activity {
         Switch shortSwitch = new Switch(this);
         shortSwitch.setContentDescription(tr(R.string.enable_short));
         shortSwitch.setChecked(creating || previous.shortEnabled);
+        Haptics.configure(shortSwitch);
+        shortSwitch.setOnClickListener(Haptics::tap);
         shortRow.addView(shortSwitch);
         add(fields, shortRow, 19);
         if (!creating) add(fields, label(tr(R.string.disable_short_hint), 12, sub, false), 10);
@@ -544,6 +720,7 @@ public final class MainActivity extends Activity {
         if (!creating) builder.setNeutralButton(tr(R.string.delete_profile), (d, w) -> confirmDelete(previous));
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            Haptics.tap(v);
             String ai = platform.getText().toString().trim();
             String name = account.getText().toString().trim();
             if (ai.isEmpty()) { platform.setError(tr(R.string.required_platform)); return; }
@@ -568,6 +745,7 @@ public final class MainActivity extends Activity {
                     setText(g.account, profile.account);
                     BrandIcons.show(g.logo, profile.platform, text);
                     g.manageButton.setContentDescription(tr(R.string.manage_profile, profile.label()));
+                    g.dragHandle.setContentDescription(tr(R.string.drag_hint, profile.label()));
                     g.expandButton.setContentDescription(tr(g.expanded ? R.string.collapse_account : R.string.expand_account, profile.label()));
                     if (changed) rebuildGroupBody(g);
                     updateGroup(g, System.currentTimeMillis());
@@ -613,7 +791,8 @@ public final class MainActivity extends Activity {
         header.addView(marker, new LinearLayout.LayoutParams(dp(23), dp(23)));
         LinearLayout.LayoutParams titleParam = new LinearLayout.LayoutParams(0, -2, 1);
         titleParam.leftMargin = dp(8);
-        header.addView(label(I18n.slot(this, id), 17, text, true), titleParam);
+        sv.title = label(I18n.slot(this, s), 17, text, true);
+        header.addView(sv.title, titleParam);
         sv.status = badge(tr(R.string.unset), sub, accentSoft);
         header.addView(sv.status);
         add(p, header, 0);
@@ -644,7 +823,8 @@ public final class MainActivity extends Activity {
         LinearLayout earlyRow = row();
         earlyRow.addView(label(tr(R.string.early_alert), 14, text, true), new LinearLayout.LayoutParams(0, -2, 1));
         sv.earlySwitch = new Switch(this);
-        sv.earlySwitch.setContentDescription(I18n.slot(this, id) + " · " + tr(R.string.early_alert));
+        sv.earlySwitch.setContentDescription(I18n.slot(this, s) + " · " + tr(R.string.early_alert));
+        Haptics.configure(sv.earlySwitch);
         sv.earlySwitch.setChecked(s.early);
         earlyRow.addView(sv.earlySwitch);
         add(p, earlyRow, 0);
@@ -655,7 +835,8 @@ public final class MainActivity extends Activity {
         LinearLayout atRow = row();
         atRow.addView(label(tr(R.string.at_alert), 14, text, true), new LinearLayout.LayoutParams(0, -2, 1));
         sv.atSwitch = new Switch(this);
-        sv.atSwitch.setContentDescription(I18n.slot(this, id) + " · " + tr(R.string.at_alert));
+        sv.atSwitch.setContentDescription(I18n.slot(this, s) + " · " + tr(R.string.at_alert));
+        Haptics.configure(sv.atSwitch);
         sv.atSwitch.setChecked(s.at);
         atRow.addView(sv.atSwitch);
         add(p, atRow, 10);
@@ -668,7 +849,8 @@ public final class MainActivity extends Activity {
         sv.clear.setPadding(dp(8), dp(12), dp(8), dp(6));
         sv.clear.setClickable(true);
         sv.clear.setFocusable(true);
-        sv.clear.setOnClickListener(v -> new AlertDialog.Builder(this).setTitle(tr(R.string.clear_confirm, I18n.slot(this, id)))
+        Haptics.configure(sv.clear);
+        sv.clear.setOnClickListener(v -> { Haptics.tap(v); new AlertDialog.Builder(this).setTitle(tr(R.string.clear_confirm, I18n.slot(this, ReminderStore.load(this, profileId, id))))
                 .setMessage(tr(R.string.clear_hint))
                 .setNegativeButton(tr(R.string.keep), null).setPositiveButton(tr(R.string.clear), (d, w) -> {
                     ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
@@ -676,15 +858,17 @@ public final class MainActivity extends Activity {
                     current.earlyDelivered = current.atDelivered = false;
                     save(current);
                     AlarmEngine.cancelSlot(this, profileId, id, true);
-                }).show());
+                }).show(); });
         add(p, sv.clear, 1);
 
         sv.earlySwitch.setOnCheckedChangeListener((b, checked) -> {
+            Haptics.tap(b);
             ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
             current.early = checked;
             save(current);
         });
         sv.atSwitch.setOnCheckedChangeListener((b, checked) -> {
+            Haptics.tap(b);
             ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
             current.at = checked;
             save(current);
@@ -708,13 +892,18 @@ public final class MainActivity extends Activity {
         // visible timer advances at the actual system-clock boundary.
         AlarmEngine.reconcileDue(this, now);
         for (GroupViews g : groups.values()) updateGroup(g, now);
+        if (dragging == null && !manualMode()) {
+            boolean expanding = false;
+            for (GroupViews g : groups.values()) if (g.animator != null) { expanding = true; break; }
+            if (!expanding) applyOrder(AccountOrder.byNextReset(this, now), true);
+        }
         updateBackgroundStatus();
     }
 
     private void updateGroup(GroupViews g, long now) {
         if (g.profile.shortEnabled) {
             ReminderStore.Slot s = ReminderStore.load(this, g.profile.id, ReminderStore.SHORT);
-            setText(g.shortSummary, tr(R.string.short_quota) + " · " + compactTime(s, now));
+            setText(g.shortSummary, I18n.slot(this, s) + " · " + compactTime(s, now));
             setText(g.shortDate, s.target > 0 ? ResetMath.displayDateTime(s.target, now) : tr(R.string.unset_time));
             if (g.shortView != null) updateSlot(g.shortView, s, now);
         }
@@ -749,6 +938,12 @@ public final class MainActivity extends Activity {
             else note = tr(R.string.enabled);
         }
         // Only change text that actually changed; no repeated backgrounds/layout resets per second.
+        String quotaTitle = I18n.slot(this, s);
+        if (!quotaTitle.contentEquals(v.title.getText())) {
+            setText(v.title, quotaTitle);
+            v.earlySwitch.setContentDescription(quotaTitle + " · " + tr(R.string.early_alert));
+            v.atSwitch.setContentDescription(quotaTitle + " · " + tr(R.string.at_alert));
+        }
         setText(v.countdown, countdown); setText(v.target, target); setText(v.note, note);
         if (!status.equals(v.statusKey)) {
             v.statusKey = status;
@@ -786,7 +981,7 @@ public final class MainActivity extends Activity {
         // Clear any delivered notification from the previous quota cycle.
         AlarmEngine.cancelSlot(this, profileId, id, true);
         save(s);
-        toast(tr(R.string.saved_timer, profile.label() + " · " + I18n.slot(this, id)));
+        toast(tr(R.string.saved_timer, profile.label() + " · " + I18n.slot(this, s)));
     }
 
     private void chooseDateTime(int profileId, int id) {
@@ -850,9 +1045,10 @@ public final class MainActivity extends Activity {
         durationHint.setPadding(dp(20), dp(12), dp(20), 0);
         add(durationFields, durationHint, 0);
         add(durationFields, pickers, 0);
-        AlertDialog d = new AlertDialog.Builder(this).setTitle(I18n.slot(this, id) + " · " + tr(R.string.remaining))
+        AlertDialog d = new AlertDialog.Builder(this).setTitle(I18n.slot(this, s) + " · " + tr(R.string.remaining))
                 .setView(durationFields).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.set), null).create();
         d.setOnShowListener(dialog -> d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            Haptics.tap(v);
             days.clearFocus(); hours.clearFocus(); minutes.clearFocus();
             long duration = ResetMath.duration(days.getValue(), hours.getValue(), minutes.getValue());
             if (duration <= 0) { toast(tr(R.string.duration_min)); return; }
@@ -876,6 +1072,7 @@ public final class MainActivity extends Activity {
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(tr(R.string.cycle_title))
                 .setView(fields).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.save), null).create();
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            Haptics.tap(v);
             hours.clearFocus(); minutes.clearFocus();
             int period = hours.getValue() * 60 + minutes.getValue();
             if (period < 1 || period > ResetMath.WEEK_MINUTES) { toast(tr(R.string.cycle_limit)); return; }
@@ -900,6 +1097,7 @@ public final class MainActivity extends Activity {
         AlertDialog d = new AlertDialog.Builder(this).setTitle(tr(R.string.early_alert))
                 .setView(body).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.save), null).create();
         d.setOnShowListener(dialog -> d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            Haptics.tap(v);
             p.clearFocus();
             ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
             current.earlyMinutes = p.getValue();

@@ -27,9 +27,9 @@
     <string name="platform_hint">Ex. ChatGPT, Claude, Gemini</string>
     <string name="account_name">Nom du compte</string>
     <string name="account_hint">Ex. Principal, Plus</string>
-    <string name="enable_short">Quota à court terme</string>
+    <string name="enable_short">Quota horaire</string>
     <string name="only_week">Désactivé : quota hebdo seul</string>
-    <string name="disable_short_hint">Désactiver efface le minuteur court.</string>
+    <string name="disable_short_hint">Désactiver efface le minuteur horaire.</string>
     <string name="account_alias_hint">Utilisez un nom pour distinguer les comptes.</string>
     <string name="new_profile">Ajouter un compte IA</string>
     <string name="edit_profile">Modifier le compte IA</string>
@@ -44,7 +44,7 @@
     <string name="delete_message">Supprimer %1$s et ses minuteurs et alertes. Les autres comptes restent intacts.</string>
     <string name="delete">Supprimer</string>
     <string name="deleted">Compte supprimé</string>
-    <string name="short_quota">Court terme</string>
+    <string name="short_quota">Quota horaire</string>
     <string name="week_quota">Hebdomadaire</string>
     <string name="unset">Non défini</string>
     <string name="unset_time">Heure non définie</string>
@@ -83,7 +83,7 @@
     <string name="set">Définir</string>
     <string name="duration_min">Au moins une minute</string>
     <string name="cycle_hint">Répète à intervalle fixe sans modifier ce reset.</string>
-    <string name="cycle_title">Intervalle court</string>
+    <string name="cycle_title">Intervalle horaire</string>
     <string name="cycle_limit">Intervalle : de 1 min à 7 jours</string>
     <string name="advance_select">Minutes avant le reset (1–10080)</string>
     <string name="system_auth">Autorisez dans les réglages système</string>
@@ -116,6 +116,26 @@
     <string name="due_message">%1$s : %2$s atteint. Prochain reset : %3$s.</string>
     <string name="early_title">%1$s · Reset imminent</string>
     <string name="early_message">%1$s : %2$s se réinitialise dans environ %3$s. Heure : %4$s.</string>
-    <string name="test_title">ResetNotice · Test</string>
+    <string name="test_title">Notification de test reçue</string>
     <string name="test_message">Les alertes fonctionnent. Chaque compte reçoit ses alertes.</string>
+    <string name="sort">Ordre des comptes</string>
+    <string name="sort_manual">Ordre manuel</string>
+    <string name="sort_next">Prochain reset en premier</string>
+    <string name="drag_hint">Faire glisser %1$s</string>
+    <string name="move_up">Monter</string>
+    <string name="move_down">Descendre</string>
+    <string name="interaction">Interaction</string>
+    <string name="haptics">Retour haptique</string>
+    <string name="haptics_hint">Vibration légère au toucher et au déplacement</string>
+    <string name="battery_settings">Optimisation de batterie</string>
+    <string name="battery_allowed">Optimisation désactivée pour cette app</string>
+    <string name="battery_restricted">L’optimisation peut limiter l’activité en arrière-plan</string>
+    <string name="background_help">Si les alertes disparaissent en vidant les tâches récentes, autorisez le fond et le démarrage auto, puis verrouillez l’app. Rouvrez après un arrêt forcé.</string>
+    <string name="interval_quota">Quota de %1$s</string>
+    <string name="under_minute">moins de 1 min</string>
+    <string name="notify_countdown_title">Reset dans %1$s</string>
+    <string name="notify_due_title">Quota %1$s réinitialisé</string>
+    <string name="notify_planned_body">%1$s\nReset : %2$s</string>
+    <string name="notify_done_body">%1$s\nReset : %2$s\nProchain : %3$s</string>
+    <string name="notify_active_count">Minuteurs actifs : %1$d</string>
 </resources>

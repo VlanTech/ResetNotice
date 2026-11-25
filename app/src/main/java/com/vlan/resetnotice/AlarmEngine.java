@@ -94,18 +94,22 @@ final class AlarmEngine {
 
     private static void schedule(Context context, ReminderStore.Slot s, boolean early) {
         int request = AlarmIdentity.id(s.profileId, s.id, early);
-        cancel(context, request, intent(context, s.profileId, s.id, early));
         long now = System.currentTimeMillis();
         // The at-time alarm is also the cycle rollover. It must run even if the
         // user disables the at-time notification (or denies notifications entirely).
         long when = early ? ResetMath.trigger(now, s.target, true, s.earlyMinutes, s.early, s.earlyDelivered)
                 : ResetMath.rolloverTrigger(now, s.target);
-        if (when == ResetMath.NO_ALARM) return;
+        if (when == ResetMath.NO_ALARM) {
+            cancel(context, request, intent(context, s.profileId, s.id, early));
+            return;
+        }
         Intent delivery = intent(context, s.profileId, s.id, early).putExtra("target", s.target)
                 .putExtra("minutes", s.earlyMinutes);
         PendingIntent pi = PendingIntent.getBroadcast(context, request, delivery,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         AlarmManager manager = context.getSystemService(AlarmManager.class);
+        // Setting the same PendingIntent replaces the prior alarm. Do not cancel
+        // a valid alarm first: the process could be reclaimed between the two calls.
         if (exactAllowed(context)) {
             try {
                 manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
@@ -158,10 +162,10 @@ final class AlarmEngine {
                     if (current.at && !(due == current.target && current.atDelivered)
                             && due >= now - ResetMath.DAY && notificationsAllowed(context)) {
                         Context localized = AppPreferences.localized(context);
-                        String label = p.label() + " · " + I18n.slot(localized, current.id);
+                        String label = p.account + " · " + I18n.slot(localized, current);
                         notify(context, AlarmIdentity.id(p.id, current.id, false), p.id,
-                                localized.getString(R.string.alert_due, label),
-                                localized.getString(R.string.due_message, p.label(), timeLabel(due), timeLabel(next)));
+                                localized.getString(R.string.notify_due_title, p.platform),
+                                localized.getString(R.string.notify_done_body, label, timeLabel(due), timeLabel(next)));
                     }
                     rolled = ReminderStore.rollForward(context, current, now);
                 }
@@ -176,12 +180,11 @@ final class AlarmEngine {
         if (s.target <= 0 || !s.early || s.earlyDelivered || now >= s.target
                 || now < s.target - s.earlyMinutes * ResetMath.MINUTE || !notificationsAllowed(context)) return false;
         Context localized = AppPreferences.localized(context);
-        String slotName = I18n.slot(localized, s.id);
+        String slotName = I18n.slot(localized, s);
         String label = profile.label() + " · " + slotName;
-        long minutesLeft = Math.max(1L, (s.target - now + ResetMath.MINUTE - 1) / ResetMath.MINUTE);
-        String remaining = I18n.period(localized, (int)Math.min(Integer.MAX_VALUE, minutesLeft));
-        String content = localized.getString(R.string.early_message, profile.label(), slotName, remaining, timeLabel(s.target));
-        if (!notify(context, AlarmIdentity.id(profile.id, s.id, true), profile.id, localized.getString(R.string.early_title, label), content)) return false;
+        String remaining = I18n.remaining(localized, s.target - now);
+        String content = localized.getString(R.string.notify_planned_body, label, timeLabel(s.target));
+        if (!notify(context, AlarmIdentity.id(profile.id, s.id, true), profile.id, localized.getString(R.string.notify_countdown_title, remaining), content)) return false;
         s.earlyDelivered = true;
         ReminderStore.markDelivered(context, profile.id, s.id, true);
         return true;

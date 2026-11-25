@@ -27,9 +27,9 @@
     <string name="platform_hint">e.g. ChatGPT, Claude, Gemini</string>
     <string name="account_name">Account label</string>
     <string name="account_hint">e.g. Main, Plus</string>
-    <string name="enable_short">Short-term quota</string>
+    <string name="enable_short">Hourly quota</string>
     <string name="only_week">Off: weekly quota only</string>
-    <string name="disable_short_hint">Turning off clears the short-term timer.</string>
+    <string name="disable_short_hint">Turning off clears the hourly timer.</string>
     <string name="account_alias_hint">Use a label to distinguish accounts.</string>
     <string name="new_profile">Add AI account</string>
     <string name="edit_profile">Edit AI account</string>
@@ -44,7 +44,7 @@
     <string name="delete_message">Delete %1$s and its timers and reminders. Other accounts are unaffected.</string>
     <string name="delete">Delete</string>
     <string name="deleted">Account deleted</string>
-    <string name="short_quota">Short-term</string>
+    <string name="short_quota">Hourly quota</string>
     <string name="week_quota">Weekly</string>
     <string name="unset">Not set</string>
     <string name="unset_time">No reset time set</string>
@@ -83,7 +83,7 @@
     <string name="set">Set</string>
     <string name="duration_min">At least one minute</string>
     <string name="cycle_hint">Repeat at a fixed interval without changing this reset.</string>
-    <string name="cycle_title">Short-term interval</string>
+    <string name="cycle_title">Hourly quota interval</string>
     <string name="cycle_limit">Interval: 1 min to 7 days</string>
     <string name="advance_select">Minutes before reset (1–10080)</string>
     <string name="system_auth">Allow access in system settings</string>
@@ -116,6 +116,26 @@
     <string name="due_message">%1$s: %2$s reached. Next reset: %3$s.</string>
     <string name="early_title">%1$s · Reset soon</string>
     <string name="early_message">%1$s: %2$s resets in about %3$s. Time: %4$s.</string>
-    <string name="test_title">ResetNotice · Test alert</string>
+    <string name="test_title">Test notification delivered</string>
     <string name="test_message">Notifications work. Each account has separate alerts.</string>
+    <string name="sort">Account order</string>
+    <string name="sort_manual">Manual order</string>
+    <string name="sort_next">Next reset first</string>
+    <string name="drag_hint">Drag to reorder %1$s</string>
+    <string name="move_up">Move up</string>
+    <string name="move_down">Move down</string>
+    <string name="interaction">Interaction</string>
+    <string name="haptics">Haptic feedback</string>
+    <string name="haptics_hint">Light vibration on taps and dragging</string>
+    <string name="battery_settings">Battery optimization</string>
+    <string name="battery_allowed">Battery optimization disabled for this app</string>
+    <string name="battery_restricted">Battery optimization may restrict background activity</string>
+    <string name="background_help">If reminders disappear after clearing Recents, allow background activity, auto-start and lock the app in Recents. Reopen after force stop.</string>
+    <string name="interval_quota">%1$s quota</string>
+    <string name="under_minute">under 1 min</string>
+    <string name="notify_countdown_title">Reset in %1$s</string>
+    <string name="notify_due_title">%1$s quota reset</string>
+    <string name="notify_planned_body">%1$s\nReset: %2$s</string>
+    <string name="notify_done_body">%1$s\nReset: %2$s\nNext: %3$s</string>
+    <string name="notify_active_count">Active timers: %1$d</string>
 </resources>

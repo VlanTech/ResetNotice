@@ -27,9 +27,9 @@
     <string name="platform_hint">Ej. ChatGPT, Claude, Gemini</string>
     <string name="account_name">Nombre de cuenta</string>
     <string name="account_hint">Ej. Principal, Plus</string>
-    <string name="enable_short">Cuota a corto plazo</string>
+    <string name="enable_short">Cuota horaria</string>
     <string name="only_week">Desactivado: solo semanal</string>
-    <string name="disable_short_hint">Al desactivar se borra el temporizador corto.</string>
+    <string name="disable_short_hint">Al desactivar se borra el temporizador horario.</string>
     <string name="account_alias_hint">Usa un nombre para distinguir cuentas.</string>
     <string name="new_profile">Añadir cuenta IA</string>
     <string name="edit_profile">Editar cuenta IA</string>
@@ -44,7 +44,7 @@
     <string name="delete_message">Eliminar %1$s y sus avisos y temporizadores. Las demás cuentas no cambian.</string>
     <string name="delete">Eliminar</string>
     <string name="deleted">Cuenta eliminada</string>
-    <string name="short_quota">Corto plazo</string>
+    <string name="short_quota">Cuota horaria</string>
     <string name="week_quota">Semanal</string>
     <string name="unset">Sin definir</string>
     <string name="unset_time">Sin hora de reinicio</string>
@@ -83,7 +83,7 @@
     <string name="set">Fijar</string>
     <string name="duration_min">Mínimo un minuto</string>
     <string name="cycle_hint">Repite a un intervalo fijo sin cambiar este reinicio.</string>
-    <string name="cycle_title">Intervalo corto</string>
+    <string name="cycle_title">Intervalo horario</string>
     <string name="cycle_limit">Intervalo: de 1 min a 7 días</string>
     <string name="advance_select">Minutos de antelación (1–10080)</string>
     <string name="system_auth">Autoriza en los ajustes del sistema</string>
@@ -116,6 +116,26 @@
     <string name="due_message">%1$s: llegó %2$s. Próximo reinicio: %3$s.</string>
     <string name="early_title">%1$s · Reinicio próximo</string>
     <string name="early_message">%1$s: %2$s se reinicia en unos %3$s. Hora: %4$s.</string>
-    <string name="test_title">ResetNotice · Aviso de prueba</string>
+    <string name="test_title">Aviso de prueba recibido</string>
     <string name="test_message">Los avisos funcionan. Cada cuenta recibe los suyos.</string>
+    <string name="sort">Orden de cuentas</string>
+    <string name="sort_manual">Orden manual</string>
+    <string name="sort_next">Próximo reinicio primero</string>
+    <string name="drag_hint">Arrastra para ordenar %1$s</string>
+    <string name="move_up">Subir</string>
+    <string name="move_down">Bajar</string>
+    <string name="interaction">Interacción</string>
+    <string name="haptics">Respuesta háptica</string>
+    <string name="haptics_hint">Vibración suave al tocar y arrastrar</string>
+    <string name="battery_settings">Optimización de batería</string>
+    <string name="battery_allowed">Optimización desactivada para esta app</string>
+    <string name="battery_restricted">La optimización puede limitar la actividad en segundo plano</string>
+    <string name="background_help">Si desaparecen los avisos al limpiar Recientes, permite actividad en segundo plano, inicio automático y ancla la app. Reabre tras forzar detención.</string>
+    <string name="interval_quota">Cuota de %1$s</string>
+    <string name="under_minute">menos de 1 min</string>
+    <string name="notify_countdown_title">Reinicio en %1$s</string>
+    <string name="notify_due_title">Cuota de %1$s reiniciada</string>
+    <string name="notify_planned_body">%1$s\nReinicio: %2$s</string>
+    <string name="notify_done_body">%1$s\nReinicio: %2$s\nPróximo: %3$s</string>
+    <string name="notify_active_count">Temporizadores activos: %1$d</string>
 </resources>

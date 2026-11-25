@@ -10,6 +10,7 @@ final class TimerSnapshot {
     String nextLabel = "";
     String nextProfileLabel = "";
     int nextSlotId;
+    int nextPeriodMinutes;
 
     static TimerSnapshot read(Context context, long now) {
         TimerSnapshot snapshot = new TimerSnapshot();
@@ -24,6 +25,7 @@ final class TimerSnapshot {
                     snapshot.nextLabel = p.label() + " · " + s.title();
                     snapshot.nextProfileLabel = p.label();
                     snapshot.nextSlotId = s.id;
+                    snapshot.nextPeriodMinutes = s.periodMinutes;
                 }
                 snapshot.nextEvent = Math.min(snapshot.nextEvent, s.target);
                 if (s.early && !s.earlyDelivered) {

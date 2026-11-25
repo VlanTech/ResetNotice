@@ -69,6 +69,11 @@ final class ResetMath {
         return periodLabel(minutes, "天", "小时", "分钟", "");
     }
 
+    static String hoursLabel(int minutes, String hour, String minute, String separator) {
+        int h = minutes / 60, m = minutes % 60;
+        return (h > 0 ? h + hour : "") + (m > 0 ? (h > 0 ? separator : "") + m + minute : "");
+    }
+
     static String periodLabel(int minutes, String day, String hour, String minute, String separator) {
         int days = minutes / 1440, hours = minutes / 60 % 24, rest = minutes % 60;
         StringBuilder result = new StringBuilder();

@@ -27,9 +27,9 @@
     <string name="platform_hint">例如 ChatGPT、Claude、Gemini</string>
     <string name="account_name">帳戶備註</string>
     <string name="account_hint">例如主帳戶、Plus</string>
-    <string name="enable_short">管理短時限額</string>
+    <string name="enable_short">管理小時限額</string>
     <string name="only_week">關閉後僅管理週限額</string>
-    <string name="disable_short_hint">關閉會清除短時重置時間。</string>
+    <string name="disable_short_hint">關閉會清除該小時限額的重置時間。</string>
     <string name="account_alias_hint">用備註區分多個帳戶。</string>
     <string name="new_profile">新增 AI 帳戶</string>
     <string name="edit_profile">管理 AI 帳戶</string>
@@ -44,7 +44,7 @@
     <string name="delete_message">刪除 %1$s 及其計時與提醒。其他帳戶不受影響。</string>
     <string name="delete">刪除</string>
     <string name="deleted">帳戶已刪除</string>
-    <string name="short_quota">短時限額</string>
+    <string name="short_quota">小時限額</string>
     <string name="week_quota">週限額</string>
     <string name="unset">未設定</string>
     <string name="unset_time">尚未設定重置時間</string>
@@ -83,7 +83,7 @@
     <string name="set">設定</string>
     <string name="duration_min">時長至少為 1 分鐘</string>
     <string name="cycle_hint">按固定週期續排，不改變當前重置時間。</string>
-    <string name="cycle_title">短時限額 · 循環週期</string>
+    <string name="cycle_title">小時限額 · 循環週期</string>
     <string name="cycle_limit">週期須為 1 分鐘至 7 天</string>
     <string name="advance_select">提前分鐘數（1–10080）</string>
     <string name="system_auth">請在系統設定中手動授權</string>
@@ -116,6 +116,26 @@
     <string name="due_message">%1$s：%2$s 已到。下次重置：%3$s。</string>
     <string name="early_title">%1$s 即將重置</string>
     <string name="early_message">%1$s：距 %2$s 重置約 %3$s。計畫：%4$s。</string>
-    <string name="test_title">重置通知 · 測試提醒</string>
+    <string name="test_title">測試通知已送達</string>
     <string name="test_message">通知已正常傳送。各帳戶提醒會獨立送達。</string>
+    <string name="sort">帳戶排序</string>
+    <string name="sort_manual">手動排序</string>
+    <string name="sort_next">最先重置優先</string>
+    <string name="drag_hint">拖曳排序 %1$s</string>
+    <string name="move_up">上移</string>
+    <string name="move_down">下移</string>
+    <string name="interaction">互動</string>
+    <string name="haptics">觸感回饋</string>
+    <string name="haptics_hint">按鈕和拖曳時輕微震動</string>
+    <string name="battery_settings">電池最佳化設定</string>
+    <string name="battery_allowed">已允許不受電池最佳化限制</string>
+    <string name="battery_restricted">仍受系統電池最佳化限制</string>
+    <string name="background_help">如清理背景後提醒消失，請允許背景活動、自動啟動並鎖定最近任務。強制停止後需重新開啟。</string>
+    <string name="interval_quota">%1$s限額</string>
+    <string name="under_minute">不足 1 分鐘</string>
+    <string name="notify_countdown_title">距重置還有 %1$s</string>
+    <string name="notify_due_title">%1$s 額度已重置</string>
+    <string name="notify_planned_body">%1$s\n重置：%2$s</string>
+    <string name="notify_done_body">%1$s\n已重置：%2$s\n下次：%3$s</string>
+    <string name="notify_active_count">共 %1$d 個額度計時中</string>
 </resources>

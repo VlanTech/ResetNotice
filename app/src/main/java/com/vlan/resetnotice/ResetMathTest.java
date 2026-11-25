@@ -64,6 +64,10 @@ final class ResetMathTest {
         eq("5小时", ResetMath.periodLabel(300));
         eq("7天", ResetMath.periodLabel(10080));
         eq("1天2小时15分钟", ResetMath.periodLabel(1575));
+        eq("5小时", ResetMath.hoursLabel(300, "小时", "分钟", " "));
+        eq("1小时 30分钟", ResetMath.hoursLabel(90, "小时", "分钟", " "));
+        eq("30分钟", ResetMath.hoursLabel(30, "小时", "分钟", " "));
+        eq("168小时", ResetMath.hoursLabel(10080, "小时", "分钟", " "));
         // A recurrence must stay minute-aligned after many delayed wake-ups.
         long recurring = fiveHours;
         for (int cycle = 1; cycle <= 100; cycle++) {

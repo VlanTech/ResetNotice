@@ -27,9 +27,9 @@
     <string name="platform_hint">例：ChatGPT、Claude、Gemini</string>
     <string name="account_name">アカウント名</string>
     <string name="account_hint">例：メイン、Plus</string>
-    <string name="enable_short">短時間の利用枠</string>
+    <string name="enable_short">時間枠の管理</string>
     <string name="only_week">オフで週次のみ</string>
-    <string name="disable_short_hint">オフにすると短時間タイマーを消去します。</string>
+    <string name="disable_short_hint">オフにすると時間枠タイマーを消去します。</string>
     <string name="account_alias_hint">名前でアカウントを区別できます。</string>
     <string name="new_profile">AI アカウント追加</string>
     <string name="edit_profile">AI アカウント編集</string>
@@ -44,7 +44,7 @@
     <string name="delete_message">%1$s とタイマー・通知を削除します。他のアカウントには影響しません。</string>
     <string name="delete">削除</string>
     <string name="deleted">削除しました</string>
-    <string name="short_quota">短時間枠</string>
+    <string name="short_quota">時間枠</string>
     <string name="week_quota">週次枠</string>
     <string name="unset">未設定</string>
     <string name="unset_time">リセット時刻未設定</string>
@@ -83,7 +83,7 @@
     <string name="set">設定</string>
     <string name="duration_min">1分以上にしてください</string>
     <string name="cycle_hint">現在のリセット時刻は変えず固定周期で繰り返します。</string>
-    <string name="cycle_title">短時間枠の周期</string>
+    <string name="cycle_title">時間枠の周期</string>
     <string name="cycle_limit">周期は1分〜7日</string>
     <string name="advance_select">事前通知の分数（1–10080）</string>
     <string name="system_auth">システム設定で許可してください</string>
@@ -116,6 +116,26 @@
     <string name="due_message">%1$s：%2$s に到達。次回：%3$s。</string>
     <string name="early_title">%1$s · まもなくリセット</string>
     <string name="early_message">%1$s：%2$s のリセットまで約 %3$s。予定：%4$s。</string>
-    <string name="test_title">リセット通知 · テスト</string>
+    <string name="test_title">テスト通知が届きました</string>
     <string name="test_message">通知は正常です。アカウントごとに通知します。</string>
+    <string name="sort">アカウント順</string>
+    <string name="sort_manual">手動並べ替え</string>
+    <string name="sort_next">リセットが近い順</string>
+    <string name="drag_hint">%1$s をドラッグして並べ替え</string>
+    <string name="move_up">上へ移動</string>
+    <string name="move_down">下へ移動</string>
+    <string name="interaction">操作</string>
+    <string name="haptics">触覚フィードバック</string>
+    <string name="haptics_hint">タップとドラッグ時の軽い振動</string>
+    <string name="battery_settings">バッテリー最適化</string>
+    <string name="battery_allowed">このアプリのバッテリー最適化は無効</string>
+    <string name="battery_restricted">最適化によりバックグラウンド動作が制限される場合があります</string>
+    <string name="background_help">履歴から消して通知が消える場合、バックグラウンド動作と自動起動を許可し、履歴でロックしてください。強制停止後は再起動が必要です。</string>
+    <string name="interval_quota">%1$s枠</string>
+    <string name="under_minute">1分未満</string>
+    <string name="notify_countdown_title">リセットまで %1$s</string>
+    <string name="notify_due_title">%1$s の利用枠リセット</string>
+    <string name="notify_planned_body">%1$s\nリセット：%2$s</string>
+    <string name="notify_done_body">%1$s\nリセット済み：%2$s\n次回：%3$s</string>
+    <string name="notify_active_count">稼働中：%1$d 件</string>
 </resources>

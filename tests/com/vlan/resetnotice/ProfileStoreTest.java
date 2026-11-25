@@ -183,6 +183,31 @@ public final class ProfileStoreTest {
                 {"MiniMax","minimax"},{"Llama","meta"},{"Poe","poe"},{"Ollama","ollama"},{"Hugging Face","huggingface"},{"My own system","unknown"}};
         for (String[] entry : brands) require(BrandMatcher.match(entry[0]).equals(entry[1]), "brand mapping: " + entry[0]);
         require(BrandMatcher.match(null).equals("unknown"), "null vendor fallback");
+        String[][] nicknames = {{"哈基米","gemini"},{"氢基米","gemini"},{"谷歌","gemini"},{"做题龙·Astra","openai"},{"鸡皮提","openai"},
+                {"o/","openai"},{"a/","claude"},{"克洛德","claude"},{"格罗克","grok"},{"马一龙","grok"},{"DS","deepseek"},
+                {"小鲸鱼","deepseek"},{"PPLX","perplexity"},{"豆子","doubao"},{"清言","zhipu"},{"文小言","wenxin"},{"羊驼","meta"},{"微軟","copilot"}};
+        for (String[] entry : nicknames) require(BrandMatcher.match(entry[0]).equals(entry[1]), "nickname mapping: " + entry[0]);
+
+        FakeContext sort = new FakeContext();
+        ReminderStore.Profile first = ReminderStore.add(sort, "GPT", "A", true);
+        ReminderStore.Profile secondSort = ReminderStore.add(sort, "Claude", "B", true);
+        ReminderStore.Profile third = ReminderStore.add(sort, "Gemini", "C", false);
+        java.util.List<Integer> manual = java.util.Arrays.asList(third.id, first.id, secondSort.id);
+        require(ReminderStore.reorder(sort, manual), "save manual order");
+        require(AccountOrder.manual(sort).equals(manual), "manual order persists");
+        require(!ReminderStore.reorder(sort, java.util.Arrays.asList(first.id, first.id, third.id)), "duplicate order rejected");
+        require(AccountOrder.manual(sort).equals(manual), "invalid order leaves manual untouched");
+        ReminderStore.Slot firstShort = ReminderStore.load(sort, first.id, ReminderStore.SHORT);
+        firstShort.target = now + 2 * ResetMath.HOUR; ReminderStore.save(sort, firstShort);
+        ReminderStore.Slot secondShort = ReminderStore.load(sort, secondSort.id, ReminderStore.SHORT);
+        secondShort.target = now + ResetMath.HOUR; ReminderStore.save(sort, secondShort);
+        require(AccountOrder.byNextReset(sort, now).equals(java.util.Arrays.asList(secondSort.id, first.id, third.id)), "earliest deadline first; unset last");
+        require(AccountOrder.byNextReset(sort, now + ResetMath.HOUR).equals(java.util.Arrays.asList(first.id, secondSort.id, third.id)), "earliest rolls behind at deadline");
+        require(AccountOrder.manual(sort).equals(manual), "auto ordering never overwrites saved manual order");
+        ReminderStore.Slot firstWeek = ReminderStore.load(sort, first.id, ReminderStore.WEEK);
+        firstWeek.target = now + ResetMath.MINUTE; ReminderStore.save(sort, firstWeek);
+        require(AccountOrder.byNextReset(sort, now).get(0) == first.id, "earliest among either kind of quota ranks account");
+        require(ReminderStore.load(sort, secondSort.id, ReminderStore.SHORT).target == now + ResetMath.HOUR, "sorting does not modify timers");
         System.out.println(assertions + " profile isolation, migration and alarm identity assertions passed");
     }
 }

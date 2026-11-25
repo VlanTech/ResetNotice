@@ -27,9 +27,9 @@
     <string name="platform_hint">Напр. ChatGPT, Claude, Gemini</string>
     <string name="account_name">Имя аккаунта</string>
     <string name="account_hint">Напр. Основной, Plus</string>
-    <string name="enable_short">Краткосрочный лимит</string>
+    <string name="enable_short">Часовой лимит</string>
     <string name="only_week">Выкл.: только недельный</string>
-    <string name="disable_short_hint">Отключение удаляет краткосрочный таймер.</string>
+    <string name="disable_short_hint">Отключение удаляет часовой таймер.</string>
     <string name="account_alias_hint">Используйте имя для различения аккаунтов.</string>
     <string name="new_profile">Добавить аккаунт ИИ</string>
     <string name="edit_profile">Изменить аккаунт ИИ</string>
@@ -44,7 +44,7 @@
     <string name="delete_message">Удалить %1$s и его таймеры и уведомления. Другие аккаунты не затронуты.</string>
     <string name="delete">Удалить</string>
     <string name="deleted">Аккаунт удалён</string>
-    <string name="short_quota">Краткий лимит</string>
+    <string name="short_quota">Часовой лимит</string>
     <string name="week_quota">Недельный лимит</string>
     <string name="unset">Не задано</string>
     <string name="unset_time">Время сброса не задано</string>
@@ -83,7 +83,7 @@
     <string name="set">Задать</string>
     <string name="duration_min">Не менее минуты</string>
     <string name="cycle_hint">Повтор с постоянным интервалом; текущий сброс не меняется.</string>
-    <string name="cycle_title">Краткий интервал</string>
+    <string name="cycle_title">Часовой интервал</string>
     <string name="cycle_limit">Интервал: от 1 мин до 7 дней</string>
     <string name="advance_select">Минут до сброса (1–10080)</string>
     <string name="system_auth">Разрешите в настройках системы</string>
@@ -116,6 +116,26 @@
     <string name="due_message">%1$s: время %2$s наступило. Следующий сброс: %3$s.</string>
     <string name="early_title">%1$s · Скоро сброс</string>
     <string name="early_message">%1$s: %2$s сбросится примерно через %3$s. Время: %4$s.</string>
-    <string name="test_title">ResetNotice · Тест</string>
+    <string name="test_title">Тестовое уведомление получено</string>
     <string name="test_message">Уведомления работают. У каждого аккаунта отдельные напоминания.</string>
+    <string name="sort">Порядок аккаунтов</string>
+    <string name="sort_manual">Вручную</string>
+    <string name="sort_next">Ближайший сброс первым</string>
+    <string name="drag_hint">Перетащите %1$s</string>
+    <string name="move_up">Вверх</string>
+    <string name="move_down">Вниз</string>
+    <string name="interaction">Взаимодействие</string>
+    <string name="haptics">Тактильный отклик</string>
+    <string name="haptics_hint">Лёгкая вибрация при касании и перетаскивании</string>
+    <string name="battery_settings">Оптимизация батареи</string>
+    <string name="battery_allowed">Оптимизация для приложения отключена</string>
+    <string name="battery_restricted">Оптимизация может ограничивать работу в фоне</string>
+    <string name="background_help">Если после очистки недавних уведомления пропадают, разрешите фон, автозапуск и закрепите приложение. После принудительной остановки откройте снова.</string>
+    <string name="interval_quota">Лимит %1$s</string>
+    <string name="under_minute">менее 1 мин</string>
+    <string name="notify_countdown_title">Сброс через %1$s</string>
+    <string name="notify_due_title">Лимит %1$s сброшен</string>
+    <string name="notify_planned_body">%1$s\nСброс: %2$s</string>
+    <string name="notify_done_body">%1$s\nСброс: %2$s\nСледующий: %3$s</string>
+    <string name="notify_active_count">Активных таймеров: %1$d</string>
 </resources>

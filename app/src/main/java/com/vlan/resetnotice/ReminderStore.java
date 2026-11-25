@@ -3,6 +3,7 @@ package com.vlan.resetnotice;
 import android.content.Context;
 import android.content.SharedPreferences;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /** One persistent profile per AI/account. Profile identifiers are never recycled. */
@@ -132,6 +133,14 @@ final class ReminderStore {
             if (profile != null) result.add(profile);
         }
         return result;
+    }
+    static synchronized boolean reorder(Context context, List<Integer> newOrder) {
+        initialize(context);
+        SharedPreferences p = prefs(context);
+        List<Integer> original = ids(p);
+        if (newOrder.size() != original.size() || !new HashSet<>(newOrder).equals(new HashSet<>(original))) return false;
+        if (original.equals(newOrder)) return true;
+        return p.edit().putString(IDS, encodeIds(newOrder)).commit();
     }
     static Profile profile(Context context, int id) {
         initialize(context);

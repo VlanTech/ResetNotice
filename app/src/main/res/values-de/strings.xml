@@ -27,9 +27,9 @@
     <string name="platform_hint">Z. B. ChatGPT, Claude, Gemini</string>
     <string name="account_name">Kontobezeichnung</string>
     <string name="account_hint">Z. B. Hauptkonto, Plus</string>
-    <string name="enable_short">Kurzzeitkontingent</string>
+    <string name="enable_short">Stundenlimit</string>
     <string name="only_week">Aus: nur Wochenkontingent</string>
-    <string name="disable_short_hint">Ausschalten löscht den Kurzzeittimer.</string>
+    <string name="disable_short_hint">Ausschalten löscht den Stundentimer.</string>
     <string name="account_alias_hint">Konten mit Namen unterscheiden.</string>
     <string name="new_profile">KI-Konto hinzufügen</string>
     <string name="edit_profile">KI-Konto bearbeiten</string>
@@ -44,7 +44,7 @@
     <string name="delete_message">%1$s samt Timern und Erinnerungen löschen. Andere Konten bleiben unverändert.</string>
     <string name="delete">Löschen</string>
     <string name="deleted">Konto gelöscht</string>
-    <string name="short_quota">Kurzzeitlimit</string>
+    <string name="short_quota">Stundenlimit</string>
     <string name="week_quota">Wochenlimit</string>
     <string name="unset">Nicht gesetzt</string>
     <string name="unset_time">Keine Reset-Zeit gesetzt</string>
@@ -83,7 +83,7 @@
     <string name="set">Festlegen</string>
     <string name="duration_min">Mindestens eine Minute</string>
     <string name="cycle_hint">Festes Intervall, aktueller Reset bleibt unverändert.</string>
-    <string name="cycle_title">Kurzzeitintervall</string>
+    <string name="cycle_title">Stundenintervall</string>
     <string name="cycle_limit">Intervall: 1 Min. bis 7 Tage</string>
     <string name="advance_select">Minuten vorher (1–10080)</string>
     <string name="system_auth">In den Systemeinstellungen erlauben</string>
@@ -116,6 +116,26 @@
     <string name="due_message">%1$s: %2$s erreicht. Nächster Reset: %3$s.</string>
     <string name="early_title">%1$s · Reset in Kürze</string>
     <string name="early_message">%1$s: %2$s wird in etwa %3$s zurückgesetzt. Zeit: %4$s.</string>
-    <string name="test_title">ResetNotice · Test</string>
+    <string name="test_title">Testbenachrichtigung erhalten</string>
     <string name="test_message">Mitteilungen funktionieren. Jedes Konto erhält eigene Erinnerungen.</string>
+    <string name="sort">Kontoreihenfolge</string>
+    <string name="sort_manual">Manuell</string>
+    <string name="sort_next">Nächster Reset zuerst</string>
+    <string name="drag_hint">%1$s zum Sortieren ziehen</string>
+    <string name="move_up">Nach oben</string>
+    <string name="move_down">Nach unten</string>
+    <string name="interaction">Interaktion</string>
+    <string name="haptics">Haptisches Feedback</string>
+    <string name="haptics_hint">Leichte Vibration beim Tippen und Ziehen</string>
+    <string name="battery_settings">Akkuoptimierung</string>
+    <string name="battery_allowed">Akkuoptimierung für App deaktiviert</string>
+    <string name="battery_restricted">Optimierung kann Hintergrundaktivität einschränken</string>
+    <string name="background_help">Wenn Erinnerungen nach dem Leeren der letzten Apps verschwinden, Hintergrundaktivität und Autostart erlauben und App fixieren. Nach erzwungenem Stopp erneut öffnen.</string>
+    <string name="interval_quota">%1$s-Limit</string>
+    <string name="under_minute">unter 1 Min.</string>
+    <string name="notify_countdown_title">Reset in %1$s</string>
+    <string name="notify_due_title">%1$s-Limit zurückgesetzt</string>
+    <string name="notify_planned_body">%1$s\nReset: %2$s</string>
+    <string name="notify_done_body">%1$s\nReset: %2$s\nNächster: %3$s</string>
+    <string name="notify_active_count">Aktive Timer: %1$d</string>
 </resources>
