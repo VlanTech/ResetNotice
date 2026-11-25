@@ -185,4 +185,13 @@
     <string name="quiet_active">通知休止中 · タイマーは継続します。</string>
     <string name="quiet_early_skipped">今回の事前通知は休止設定により省略されました。</string>
     <string name="keep_background_hint">通知を確実に受け取るには、バックグラウンド動作と自動起動を許可し、履歴からアプリを消さないでください。</string>
+    <string name="widget_name">利用枠カウントダウン</string>
+    <string name="widget_add">ホーム画面に追加</string>
+    <string name="widget_description">ホーム画面でアカウントのリセット時刻と残り時間を確認できます。</string>
+    <string name="widget_choose">AI とアカウントを選択</string>
+    <string name="widget_confirm">ホーム画面でウィジェットの追加を確認してください。</string>
+    <string name="widget_manual">ランチャーがアプリからの追加に対応していない場合があります。ホーム画面を長押しし、ウィジェットからリセット通知を選び、アカウントを指定してください。</string>
+    <string name="widget_empty">リセット時刻が未設定です。タップして設定します。</string>
+    <string name="widget_missing">アカウントが削除されました。タップして選び直してください。</string>
+    <string name="widget_no_accounts">先にリセット通知でアカウントを追加してください。</string>
 </resources>

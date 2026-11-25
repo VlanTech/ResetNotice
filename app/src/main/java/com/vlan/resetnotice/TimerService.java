@@ -41,6 +41,7 @@ public final class TimerService extends Service {
     static void refresh(Context context) {
         TimerSnapshot snapshot = TimerSnapshot.read(context, System.currentTimeMillis());
         BootState.sync(context, snapshot);
+        QuotaWidgetProvider.updateAll(context);
         Intent intent = new Intent(context, TimerService.class);
         if (!snapshot.shouldRunService(AppPreferences.ongoingNotification(context))) {
             // Let an in-flight start complete its foreground promotion before stopping.

@@ -185,4 +185,13 @@
     <string name="quiet_active">Тихие часы активны · Таймер работает.</string>
     <string name="quiet_early_skipped">Раннее напоминание пропущено в тихие часы.</string>
     <string name="keep_background_hint">Для надёжных напоминаний разрешите фоновую работу и автозапуск и оставляйте приложение в списке недавних.</string>
+    <string name="widget_name">Карточка обратного отсчёта</string>
+    <string name="widget_add">Добавить виджет на экран</string>
+    <string name="widget_description">Показывает интервалы и время сброса квот аккаунта на главном экране.</string>
+    <string name="widget_choose">Выбрать ИИ и аккаунт</string>
+    <string name="widget_confirm">Подтвердите добавление виджета на главном экране.</string>
+    <string name="widget_manual">Лаунчер может не поддерживать добавление из приложения. Нажмите и удерживайте главный экран, откройте виджеты, выберите карточку ResetNotice и аккаунт.</string>
+    <string name="widget_empty">Время сброса не задано. Нажмите для настройки.</string>
+    <string name="widget_missing">Аккаунт удалён. Нажмите, чтобы выбрать другой.</string>
+    <string name="widget_no_accounts">Сначала добавьте аккаунт ИИ в ResetNotice.</string>
 </resources>

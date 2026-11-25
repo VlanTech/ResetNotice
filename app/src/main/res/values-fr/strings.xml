@@ -185,4 +185,13 @@
     <string name="quiet_active">Heures silencieuses actives · Le minuteur continue.</string>
     <string name="quiet_early_skipped">Rappel anticipé ignoré pendant les heures silencieuses.</string>
     <string name="keep_background_hint">Pour des rappels fiables, autorisez les activités en arrière-plan et le démarrage automatique, et gardez l’appli dans les récents.</string>
+    <string name="widget_name">Carte de compte à rebours</string>
+    <string name="widget_add">Ajouter un widget à l’accueil</string>
+    <string name="widget_description">Affiche les comptes à rebours et heures de réinitialisation de ce compte sur l’accueil.</string>
+    <string name="widget_choose">Choisir une IA et un compte</string>
+    <string name="widget_confirm">Confirmez l’ajout du widget sur l’accueil.</string>
+    <string name="widget_manual">Le lanceur peut ne pas accepter l’ajout depuis l’appli. Appuyez longuement sur l’accueil, ouvrez Widgets, choisissez la carte ResetNotice, puis le compte.</string>
+    <string name="widget_empty">Aucune heure de réinitialisation. Touchez pour la définir.</string>
+    <string name="widget_missing">Compte supprimé. Touchez pour en choisir un autre.</string>
+    <string name="widget_no_accounts">Ajoutez d’abord un compte IA dans ResetNotice.</string>
 </resources>

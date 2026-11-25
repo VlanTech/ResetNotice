@@ -185,4 +185,13 @@
     <string name="quiet_active">免打扰时段内 · 计时正常继续。</string>
     <string name="quiet_early_skipped">本轮提前提醒已按免打扰设置跳过。</string>
     <string name="keep_background_hint">为保证提醒及时送达，请允许后台活动和自启动，建议保留应用于最近任务中。</string>
+    <string name="widget_name">额度倒计时卡片</string>
+    <string name="widget_add">添加桌面卡片</string>
+    <string name="widget_description">在桌面查看指定账户的额度倒计时和重置时间。</string>
+    <string name="widget_choose">选择 AI 与账户</string>
+    <string name="widget_confirm">请在桌面确认添加卡片。</string>
+    <string name="widget_manual">当前桌面不支持应用内直接添加。长按桌面，进入小组件/卡片，选择重置通知的额度倒计时卡片，再选对应账户。</string>
+    <string name="widget_empty">尚未设置重置时间，点击进行设置。</string>
+    <string name="widget_missing">该账户已删除，点击重新选择账户。</string>
+    <string name="widget_no_accounts">请先在重置通知中添加 AI 与账户。</string>
 </resources>

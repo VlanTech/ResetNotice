@@ -42,7 +42,6 @@ public final class SettingsActivity extends Activity {
         FrameLayout wrapper = new FrameLayout(this);
         wrapper.addView(content, new FrameLayout.LayoutParams(Math.min(getResources().getDisplayMetrics().widthPixels, dp(600)), -2, Gravity.TOP | Gravity.CENTER_HORIZONTAL));
         scroll.addView(wrapper, new ScrollView.LayoutParams(-1, -2));
-        setContentView(scroll);
 
         LinearLayout header = row();
         ImageButton back = new ImageButton(this);
@@ -52,9 +51,9 @@ public final class SettingsActivity extends Activity {
         back.setOnClickListener(v -> { Haptics.tap(v); finish(); });
         header.addView(back, new LinearLayout.LayoutParams(dp(48), dp(48)));
         header.addView(label(getString(R.string.settings), 26, text, true), new LinearLayout.LayoutParams(0, -2, 1));
-        add(content, header, 0);
+        FrostedTopBar.install(this, scroll, content, header, page, 68);
 
-        add(content, label(getString(R.string.appearance), 14, sub, true), 24);
+        add(content, label(getString(R.string.appearance), 14, sub, true), 8);
         LinearLayout appearance = panel();
         add(appearance, item(getString(R.string.language), languageName(), v -> chooseLanguage()), 0);
         divider(appearance);
@@ -142,7 +141,7 @@ public final class SettingsActivity extends Activity {
         LinearLayout about = panel();
         add(about, item(getString(R.string.developer), "Vlan_Tech", null), 0);
         divider(about);
-        add(about, item(getString(R.string.version), "1.8.0", null), 0);
+        add(about, item(getString(R.string.version), "1.9.0", null), 0);
         divider(about);
         add(about, item(getString(R.string.source_code), "GitHub · ResetNotice", v -> {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VlanTech/ResetNotice"))); }
@@ -193,7 +192,7 @@ public final class SettingsActivity extends Activity {
         int selected = 0;
         for (int i = 0; i < keys.length; i++) if (keys[i].equals(AppPreferences.theme(this))) selected = i;
         new AlertDialog.Builder(this).setTitle(R.string.theme).setSingleChoiceItems(names, selected, (dialog, which) -> {
-            AppPreferences.setTheme(this, keys[which]); dialog.dismiss(); recreate();
+            AppPreferences.setTheme(this, keys[which]); QuotaWidgetProvider.updateAll(this); dialog.dismiss(); recreate();
         }).setNegativeButton(R.string.cancel, null).show();
     }
     private void appDetails() {

@@ -16,6 +16,7 @@ final class CountdownProgress extends Drawable {
     private final Path clip = new Path();
     private final int track, fill;
     private final float radius;
+    private boolean active = true;
 
     CountdownProgress(int background, int accent, float radius) {
         this(background, accent, radius, 0.25f);
@@ -31,6 +32,7 @@ final class CountdownProgress extends Drawable {
                 Math.round(Color.blue(a) * (1-f) + Color.blue(b) * f));
     }
     @Override public void draw(Canvas canvas) {
+        if (!active) return;
         rect.set(getBounds());
         paint.setColor(track);
         canvas.drawRoundRect(rect, radius, radius, paint);
@@ -42,6 +44,9 @@ final class CountdownProgress extends Drawable {
         paint.setColor(fill);
         canvas.drawRect(rect.left, rect.top, rect.left + rect.width() * getLevel() / 10000f, rect.bottom, paint);
         canvas.restoreToCount(save);
+    }
+    void setActive(boolean enabled) {
+        if (active != enabled) { active = enabled; invalidateSelf(); }
     }
     @Override protected boolean onLevelChange(int level) { invalidateSelf(); return true; }
     @Override public void setAlpha(int alpha) { paint.setAlpha(alpha); invalidateSelf(); }

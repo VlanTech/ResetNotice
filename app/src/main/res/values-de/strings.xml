@@ -185,4 +185,13 @@
     <string name="quiet_active">Ruhezeit aktiv · Timer läuft weiter.</string>
     <string name="quiet_early_skipped">Vorab-Erinnerung während der Ruhezeit übersprungen.</string>
     <string name="keep_background_hint">Für zuverlässige Erinnerungen Hintergrundaktivität und Autostart erlauben und die App in der Übersicht belassen.</string>
+    <string name="widget_name">Kontingent-Countdown-Karte</string>
+    <string name="widget_add">Startbildschirm-Widget hinzufügen</string>
+    <string name="widget_description">Zeigt die Reset-Countdowns und Termine dieses Kontos auf dem Startbildschirm.</string>
+    <string name="widget_choose">KI und Konto auswählen</string>
+    <string name="widget_confirm">Bestätige das Widget auf dem Startbildschirm.</string>
+    <string name="widget_manual">Der Launcher unterstützt das Hinzufügen aus der App möglicherweise nicht. Halte den Startbildschirm gedrückt, öffne Widgets, wähle die ResetNotice-Karte und das Konto.</string>
+    <string name="widget_empty">Keine Reset-Zeit eingestellt. Antippen zum Einstellen.</string>
+    <string name="widget_missing">Konto entfernt. Antippen, um ein anderes zu wählen.</string>
+    <string name="widget_no_accounts">Füge zuerst ein KI-Konto in ResetNotice hinzu.</string>
 </resources>

@@ -265,6 +265,37 @@ public final class ProfileStoreTest {
         require(ResetMath.countdownLevel(0, 300, now) == 0, "unset cycle empty");
         require(ResetMath.countdownLevel(now + 10 * ResetMath.HOUR, 300, now) == 10000, "duration beyond one cycle clamps full");
         require(ResetMath.countdownLevel(now + 7 * ResetMath.DAY, ResetMath.WEEK_MINUTES, now) == 10000, "weekly progress independent");
+        FakeContext widgets = new FakeContext();
+        ReminderStore.Profile wa = ReminderStore.add(widgets, "GPT", "A", true);
+        ReminderStore.Profile wb = ReminderStore.add(widgets, "Claude", "B", false);
+        require(WidgetBindingStore.profile(widgets, 401) == WidgetBindingStore.NONE, "unbound widget");
+        require(!WidgetBindingStore.bind(widgets, 0, wa.id), "reject invalid widget id");
+        require(!WidgetBindingStore.bind(widgets, 401, -1), "reject invalid profile id");
+        require(WidgetBindingStore.bind(widgets, 401, wa.id), "pin first account widget");
+        require(WidgetBindingStore.bind(widgets, 402, wb.id), "pin second account widget");
+        require(WidgetBindingStore.profile(widgets, 401) == wa.id && WidgetBindingStore.profile(widgets, 402) == wb.id,
+                "widget accounts remain independent");
+        require(WidgetBindingStore.bind(widgets, 403, wa.id), "multiple widgets may bind the same account");
+        ReminderStore.edit(widgets, wa.id, "GPT", "Renamed", true);
+        require(WidgetBindingStore.profile(widgets, 401) == wa.id, "rename preserves binding");
+        WidgetBindingStore.restore(widgets, new int[]{401,402}, new int[]{501,502});
+        require(WidgetBindingStore.profile(widgets, 501) == wa.id && WidgetBindingStore.profile(widgets, 502) == wb.id,
+                "widget restoration remaps IDs");
+        require(WidgetBindingStore.profile(widgets, 401) == WidgetBindingStore.NONE, "old restored binding removed");
+        WidgetBindingStore.delete(widgets, 501);
+        require(WidgetBindingStore.profile(widgets, 501) == WidgetBindingStore.NONE &&
+                WidgetBindingStore.profile(widgets, 403) == wa.id, "deleting widget does not delete account or sibling widgets");
+        ReminderStore.delete(widgets, wa.id);
+        require(ReminderStore.profile(widgets, WidgetBindingStore.profile(widgets, 403)) == null, "deleted account shows unbound state");
+        require(WidgetMath.displayTarget(false, now + ResetMath.HOUR, 60, now) == 0, "widget hides disabled quota");
+        require(WidgetMath.displayTarget(true, 0, 60, now) == 0, "widget hides unset quota");
+        require(WidgetMath.displayTarget(true, now + ResetMath.HOUR, 60, now) == now + ResetMath.HOUR, "widget future target unchanged");
+        require(WidgetMath.displayTarget(true, now, 60, now) == now + ResetMath.HOUR, "widget rolls exact boundary");
+        require(WidgetMath.displayTarget(true, now - 3 * ResetMath.HOUR, 60, now + 5 * ResetMath.MINUTE) == now + ResetMath.HOUR,
+                "widget skips elapsed cycles without changing original schedule");
+        require(WidgetMath.chronometerBase(12345L, now + ResetMath.HOUR, now) == 12345L + ResetMath.HOUR,
+                "widget chronometer maps wall clock to monotonic base");
+        require(WidgetMath.chronometerBase(12345L, now - 5000L, now) == 12345L, "widget base never starts expired");
         String[][] brands = {{"ChatGPT Plus","openai"},{"GPT-6.2 Sol","openai"},{"OpenAI","openai"},{"Codex","openai"},{"Claude Pro","claude"},
                 {"Anthropic","claude"},{"Google Gemini","gemini"},{"Grok 4","grok"},{"xAI","grok"},{"DeepSeek V4","deepseek"},
                 {"通义千问","qwen"},{"Qwen","qwen"},{"Perplexity Pro","perplexity"},{"Microsoft Copilot","copilot"},{"Kimi","kimi"},

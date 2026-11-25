@@ -1,10 +1,12 @@
 package com.vlan.resetnotice;
 
 import android.content.Context;
+import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.PathInterpolator;
 import android.widget.ScrollView;
 
 /** Content-only edge motion: the viewport is stationary, no Android stretch
@@ -15,6 +17,10 @@ final class ElasticScrollView extends ScrollView {
     private int activePointer = -1;
     private float downX, downY, lastY, rawOffset, nativeOffset;
     private boolean dragging;
+    private boolean touching, flingArmed;
+    private int flingDirection;
+    private float flingSpeed;
+    private long flingFrame, flingMotion;
 
     ElasticScrollView(Context context) {
         super(context);
@@ -26,9 +32,14 @@ final class ElasticScrollView extends ScrollView {
     private void start(MotionEvent event) {
         activePointer = event.getPointerId(0);
         downX = event.getX(0); downY = lastY = event.getY(0);
-        dragging = false; rawOffset = nativeOffset = 0;
+        dragging = false; rawOffset = nativeOffset = 0; touching = true; flingArmed = false;
         View child = getChildAt(0);
-        if (child != null) { child.animate().cancel(); child.setTranslationY(0f); }
+        if (child != null) {
+            child.animate().cancel();
+            float offset = child.getTranslationY();
+            if (offset != 0f) rawOffset = (float)(Math.signum(offset) * 350f * density *
+                    Math.expm1(Math.abs(offset) / (170f * density)));
+        }
     }
 
     @Override public boolean onInterceptTouchEvent(MotionEvent event) {
@@ -121,14 +132,59 @@ final class ElasticScrollView extends ScrollView {
     }
 
     private void release() {
-        activePointer = -1; rawOffset = nativeOffset = 0f; dragging = false;
+        activePointer = -1; rawOffset = nativeOffset = 0f; dragging = false; touching = false;
         View child = getChildAt(0);
-        if (child != null && child.getTranslationY() != 0f)
-            child.animate().translationY(0f).setDuration(260).setInterpolator(new DecelerateInterpolator(1.65f)).start();
+        if (child != null && child.getTranslationY() != 0f) settle(child);
+    }
+
+    private void settle(View child) {
+        child.animate().translationY(0f).setDuration(465)
+                .setInterpolator(new PathInterpolator(0.20f, 0.72f, 0.24f, 1f)).start();
+    }
+
+    @Override public void fling(int velocityY) {
+        int direction = Integer.signum(velocityY);
+        flingArmed = direction != 0 && Math.abs(rawOffset) < 1f && Math.abs(velocityY) >= 65f * density;
+        flingDirection = direction;
+        flingSpeed = Math.abs(velocityY);
+        flingFrame = flingMotion = SystemClock.uptimeMillis();
+        super.fling(velocityY);
+        if (flingArmed && !canScrollVertically(direction)) postInvalidateOnAnimation();
+    }
+
+    @Override public void computeScroll() {
+        int before = getScrollY();
+        super.computeScroll();
+        if (!flingArmed || touching) return;
+        long now = SystemClock.uptimeMillis();
+        int movement = Math.abs(getScrollY() - before);
+        long frame = Math.max(1L, now - flingFrame);
+        if (movement > 0) {
+            flingSpeed = Math.max(movement * 1000f / frame, flingSpeed * 0.66f);
+            flingMotion = now;
+        }
+        flingFrame = now;
+        if (!canScrollVertically(flingDirection)) {
+            flingArmed = false;
+            if (now - flingMotion <= 100 && flingSpeed >= 65f * density) {
+                View child = getChildAt(0);
+                if (child == null) return;
+                // Transform the impact of a single inertial scroll into a
+                // short, restrained translation, followed by the same soft
+                // return used for a finger pull.
+                float amplitude = (float)Math.min(68f * density,
+                        density * (10f + 25f * Math.log1p(flingSpeed / (900f * density))));
+                child.animate().cancel();
+                child.animate().translationY(-flingDirection * amplitude).setDuration(155)
+                        .setInterpolator(new DecelerateInterpolator(1.6f))
+                        .withEndAction(() -> { if (!touching) settle(child); }).start();
+            }
+        } else if (now - flingMotion > 140) flingArmed = false;
     }
     @Override protected void onDetachedFromWindow() {
         View child = getChildAt(0);
         if (child != null) { child.animate().cancel(); child.setTranslationY(0f); }
+        flingArmed = false; touching = false;
         super.onDetachedFromWindow();
     }
 }

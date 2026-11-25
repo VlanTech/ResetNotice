@@ -185,4 +185,13 @@
     <string name="quiet_active">Horário de silêncio ativo · O temporizador continua.</string>
     <string name="quiet_early_skipped">Aviso antecipado ignorado durante o horário de silêncio.</string>
     <string name="keep_background_hint">Para receber avisos com confiabilidade, permita atividade em segundo plano e início automático e mantenha o app nos Recentes.</string>
+    <string name="widget_name">Cartão de contagem regressiva</string>
+    <string name="widget_add">Adicionar widget à tela inicial</string>
+    <string name="widget_description">Veja a contagem regressiva e os horários de redefinição da conta na tela inicial.</string>
+    <string name="widget_choose">Escolher IA e conta</string>
+    <string name="widget_confirm">Confirme a adição do widget na tela inicial.</string>
+    <string name="widget_manual">O inicializador pode não permitir adicionar pelo app. Pressione a tela inicial, abra Widgets, escolha o cartão do ResetNotice e selecione a conta.</string>
+    <string name="widget_empty">Sem horário de redefinição. Toque para configurar.</string>
+    <string name="widget_missing">Conta removida. Toque para escolher outra.</string>
+    <string name="widget_no_accounts">Adicione primeiro uma conta de IA no ResetNotice.</string>
 </resources>

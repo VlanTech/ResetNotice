@@ -65,7 +65,7 @@ public final class MainActivity extends Activity {
             if (dragging == null) return;
             if (!Float.isNaN(dragScreenY)) {
                 int[] position = new int[2]; scroll.getLocationOnScreen(position);
-                if (dragScreenY < position[1] + dp(80)) scroll.scrollBy(0, -dp(9));
+                if (dragScreenY < position[1] + content.getPaddingTop() + dp(40)) scroll.scrollBy(0, -dp(9));
                 else if (dragScreenY > position[1] + scroll.getHeight() - dp(80)) scroll.scrollBy(0, dp(9));
                 groupList.getLocationOnScreen(position);
                 moveDraggedAt(dragScreenY - position[1]);
@@ -84,14 +84,14 @@ public final class MainActivity extends Activity {
 
     static final class GroupViews {
         ReminderStore.Profile profile;
-        LinearLayout root, body, summary, shortBlock, header, progressRail;
+        LinearLayout root, body, summary, shortBlock, weekBlock, header;
         View shortRail, weekRail;
         FrameLayout bodyClip;
         TextView platform, account, shortSummary, shortDate, weekSummary, weekDate;
         ImageView logo;
         ImageButton expandButton, manageButton, dragHandle;
         SlotViews shortView, weekView;
-        boolean expanded;
+        boolean expanded, shortHasProgress, weekHasProgress;
         ValueAnimator animator;
     }
 
@@ -289,7 +289,6 @@ public final class MainActivity extends Activity {
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         wrapper.addView(content, new FrameLayout.LayoutParams(Math.min(screenWidth, dp(600)), -2, Gravity.TOP | Gravity.CENTER_HORIZONTAL));
         scroll.addView(wrapper, new ScrollView.LayoutParams(-1, -2));
-        setContentView(scroll); // Once per Activity creation. Never called by a switch or timer.
 
         LinearLayout hero = row();
         ImageView portrait = new ImageView(this);
@@ -306,10 +305,10 @@ public final class MainActivity extends Activity {
         add(title, label(tr(R.string.app_name), 26, text, true), 0);
         add(title, label(tr(R.string.subtitle), 13, sub, false), 6);
         hero.addView(iconButton(R.drawable.ic_settings, tr(R.string.settings), v -> startActivity(new Intent(this, SettingsActivity.class))), new LinearLayout.LayoutParams(dp(48), dp(48)));
-        add(content, hero, 0);
+        FrostedTopBar.install(this, scroll, content, hero, page, 82);
 
         readiness = panel();
-        add(content, readiness, 18);
+        add(content, readiness, 8);
         refreshReadiness();
 
         LinearLayout section = row();
@@ -547,6 +546,7 @@ public final class MainActivity extends Activity {
         LinearLayout summaryRow = row();
         g.summary = column();
         g.shortBlock = column();
+        g.weekBlock = column();
         g.shortSummary = label("", 14, text, true);
         g.shortDate = label("", 12, sub, false);
         g.weekSummary = label("", 14, text, true);
@@ -557,9 +557,14 @@ public final class MainActivity extends Activity {
         g.weekDate.setFontFeatureSettings("tnum");
         add(g.shortBlock, g.shortSummary, 0);
         add(g.shortBlock, g.shortDate, 5);
+        g.shortRail = buildRail();
+        addRail(g.shortBlock, g.shortRail);
         add(g.summary, g.shortBlock, 0);
-        add(g.summary, g.weekSummary, 11);
-        add(g.summary, g.weekDate, 5);
+        add(g.weekBlock, g.weekSummary, 0);
+        add(g.weekBlock, g.weekDate, 5);
+        g.weekRail = buildRail();
+        addRail(g.weekBlock, g.weekRail);
+        add(g.summary, g.weekBlock, 13);
         summaryRow.addView(g.summary, new LinearLayout.LayoutParams(0, -2, 1));
         g.expandButton = iconButton(R.drawable.ic_chevron, tr(R.string.expand_account, profile.label()), v -> setExpanded(g, !g.expanded, true));
         LinearLayout.LayoutParams expandParam = new LinearLayout.LayoutParams(dp(48), dp(48));
@@ -574,20 +579,6 @@ public final class MainActivity extends Activity {
         g.body = column();
         g.bodyClip.addView(g.body, new FrameLayout.LayoutParams(-1, -2));
         add(g.root, g.bodyClip, 12);
-        // Compact cards get a thin rail beneath the weekly date instead of a
-        // colored text background. Two independent rails follow quota order.
-        g.progressRail = column();
-        g.progressRail.setClipChildren(true);
-        g.progressRail.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
-        g.shortRail = new View(this);
-        g.weekRail = new View(this);
-        g.shortRail.setBackground(new CountdownProgress(card, accent, dp(2), 0.72f));
-        g.weekRail.setBackground(new CountdownProgress(card, accent, dp(2), 0.72f));
-        g.progressRail.addView(g.shortRail, new LinearLayout.LayoutParams(-1, dp(3)));
-        LinearLayout.LayoutParams weekRailParams = new LinearLayout.LayoutParams(-1, dp(3));
-        weekRailParams.topMargin = dp(4);
-        g.progressRail.addView(g.weekRail, weekRailParams);
-        add(g.root, g.progressRail, 10);
         groups.put(profile.id, g);
         add(groupList, g.root, 12);
         rebuildGroupBody(g);
@@ -605,14 +596,67 @@ public final class MainActivity extends Activity {
         g.weekView = buildSlot(g.profile.id, ReminderStore.WEEK);
         add(g.body, g.weekView.root, g.profile.shortEnabled ? 12 : 0);
         g.shortBlock.setVisibility(g.profile.shortEnabled ? View.VISIBLE : View.GONE);
-        g.shortRail.setVisibility(g.profile.shortEnabled ? View.VISIBLE : View.GONE);
-        LinearLayout.LayoutParams railParams = (LinearLayout.LayoutParams)g.weekRail.getLayoutParams();
-        railParams.topMargin = g.profile.shortEnabled ? dp(4) : 0;
-        g.weekRail.setLayoutParams(railParams);
-        LinearLayout.LayoutParams weekParams = (LinearLayout.LayoutParams) g.weekSummary.getLayoutParams();
-        weekParams.topMargin = g.profile.shortEnabled ? dp(11) : 0;
-        g.weekSummary.setLayoutParams(weekParams);
+        LinearLayout.LayoutParams weekParams = (LinearLayout.LayoutParams) g.weekBlock.getLayoutParams();
+        weekParams.topMargin = g.profile.shortEnabled ? dp(13) : 0;
+        g.weekBlock.setLayoutParams(weekParams);
         updateGroup(g, System.currentTimeMillis());
+    }
+
+    private View buildRail() {
+        View rail = new View(this);
+        rail.setBackground(new CountdownProgress(card, accent, dp(2), 0.72f));
+        rail.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        rail.setVisibility(View.GONE);
+        return rail;
+    }
+
+    private void addRail(LinearLayout block, View rail) {
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, dp(3));
+        p.topMargin = dp(6); block.addView(rail, p);
+    }
+
+    private void settleRail(View rail, boolean visible) {
+        LinearLayout.LayoutParams p = (LinearLayout.LayoutParams)rail.getLayoutParams();
+        if (p.height != dp(3) || p.topMargin != dp(6)) {
+            p.height = dp(3); p.topMargin = dp(6); rail.setLayoutParams(p);
+        }
+        if (rail.getAlpha() != 1f) rail.setAlpha(1f);
+        int visibility = visible ? View.VISIBLE : View.GONE;
+        if (rail.getVisibility() != visibility) rail.setVisibility(visibility);
+    }
+
+    private final class RailMotion {
+        final View view;
+        final int height, margin, endHeight, endMargin;
+        final float alpha, endAlpha;
+        final boolean animate;
+        RailMotion(View rail, boolean show) {
+            view = rail;
+            boolean visible = rail.getVisibility() == View.VISIBLE;
+            LinearLayout.LayoutParams p = (LinearLayout.LayoutParams)rail.getLayoutParams();
+            height = visible ? p.height : 0;
+            margin = visible ? p.topMargin : 0;
+            alpha = visible ? rail.getAlpha() : 0f;
+            endHeight = show ? dp(3) : 0;
+            endMargin = show ? dp(6) : 0;
+            endAlpha = show ? 1f : 0f;
+            animate = visible || show;
+        }
+        void prepare() {
+            if (!animate) return;
+            view.setVisibility(View.VISIBLE);
+            apply(0f);
+        }
+        void apply(float fraction) {
+            if (!animate) return;
+            LinearLayout.LayoutParams p = (LinearLayout.LayoutParams)view.getLayoutParams();
+            int h = Math.round(height + (endHeight - height) * fraction);
+            int m = Math.round(margin + (endMargin - margin) * fraction);
+            if (p.height != h || p.topMargin != m) {
+                p.height = h; p.topMargin = m; view.setLayoutParams(p);
+            }
+            view.setAlpha(alpha + (endAlpha - alpha) * fraction);
+        }
     }
 
     private void cancelExpansion(GroupViews g) {
@@ -632,10 +676,8 @@ public final class MainActivity extends Activity {
         g.body.setLayoutParams(bodyParams);
         g.body.setAlpha(1f);
         g.bodyClip.setVisibility(g.expanded ? View.VISIBLE : View.GONE);
-        LinearLayout.LayoutParams rail = (LinearLayout.LayoutParams) g.progressRail.getLayoutParams();
-        rail.height = -2; rail.topMargin = dp(10); g.progressRail.setLayoutParams(rail);
-        g.progressRail.setAlpha(1f);
-        g.progressRail.setVisibility(g.expanded ? View.GONE : View.VISIBLE);
+        settleRail(g.shortRail, !g.expanded && g.shortHasProgress);
+        settleRail(g.weekRail, !g.expanded && g.weekHasProgress);
     }
 
     private void setExpanded(GroupViews g, boolean expanded, boolean animate) {
@@ -644,11 +686,8 @@ public final class MainActivity extends Activity {
         int startHeight = visible ? (clipParams.height >= 0 ? clipParams.height : g.bodyClip.getHeight()) : 0;
         int startMargin = visible ? clipParams.topMargin : 0;
         float startAlpha = visible ? g.body.getAlpha() : 0f;
-        boolean railVisible = g.progressRail.getVisibility() == View.VISIBLE;
-        LinearLayout.LayoutParams railParams = (LinearLayout.LayoutParams)g.progressRail.getLayoutParams();
-        int startRailHeight = railVisible ? (railParams.height >= 0 ? railParams.height : g.progressRail.getHeight()) : 0;
-        int startRailMargin = railVisible ? railParams.topMargin : 0;
-        float startRailAlpha = railVisible ? g.progressRail.getAlpha() : 0f;
+        RailMotion shortMotion = new RailMotion(g.shortRail, !expanded && g.shortHasProgress);
+        RailMotion weekMotion = new RailMotion(g.weekRail, !expanded && g.weekHasProgress);
         cancelExpansion(g); // Keep the current geometry if the user reverses mid-animation.
         g.expanded = expanded;
         g.expandButton.setContentDescription(tr(expanded ? R.string.collapse_account : R.string.expand_account, g.profile.label()));
@@ -668,15 +707,7 @@ public final class MainActivity extends Activity {
         int endHeight = expanded ? naturalHeight : 0;
         int endMargin = expanded ? dp(12) : 0;
         float endAlpha = expanded ? 1f : 0f;
-        g.progressRail.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        int endRailHeight = expanded ? 0 : g.progressRail.getMeasuredHeight();
-        int endRailMargin = expanded ? 0 : dp(10);
-        float endRailAlpha = expanded ? 0f : 1f;
-        railParams.height = startRailHeight; railParams.topMargin = startRailMargin;
-        g.progressRail.setLayoutParams(railParams);
-        g.progressRail.setVisibility(View.VISIBLE);
-        g.progressRail.setAlpha(startRailAlpha);
+        shortMotion.prepare(); weekMotion.prepare();
         FrameLayout.LayoutParams bodyParams = (FrameLayout.LayoutParams) g.body.getLayoutParams();
         bodyParams.height = naturalHeight;
         g.body.setLayoutParams(bodyParams);
@@ -701,13 +732,7 @@ public final class MainActivity extends Activity {
                 g.bodyClip.setLayoutParams(p);
             }
             g.body.setAlpha(startAlpha + (endAlpha - startAlpha) * f);
-            LinearLayout.LayoutParams rail = (LinearLayout.LayoutParams)g.progressRail.getLayoutParams();
-            int rh = Math.round(startRailHeight + (endRailHeight - startRailHeight) * f);
-            int rm = Math.round(startRailMargin + (endRailMargin - startRailMargin) * f);
-            if (rail.height != rh || rail.topMargin != rm) {
-                rail.height = rh; rail.topMargin = rm; g.progressRail.setLayoutParams(rail);
-            }
-            g.progressRail.setAlpha(startRailAlpha + (endRailAlpha - startRailAlpha) * f);
+            shortMotion.apply(f); weekMotion.apply(f);
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override public void onAnimationEnd(Animator animation) {
@@ -723,7 +748,7 @@ public final class MainActivity extends Activity {
         GroupViews g = groups.get(id);
         if (g == null) return;
         setExpanded(g, true, false);
-        scroll.post(() -> scroll.smoothScrollTo(0, content.getTop() + groupList.getTop() + g.root.getTop()));
+        scroll.post(() -> scroll.smoothScrollTo(0, Math.max(0, content.getTop() + groupList.getTop() + g.root.getTop() - content.getPaddingTop())));
     }
 
     private EditText input(String hint, String initial, int maxLength) {
@@ -761,6 +786,11 @@ public final class MainActivity extends Activity {
         add(fields, shortRow, 19);
         if (!creating) add(fields, label(tr(R.string.disable_short_hint), 12, sub, false), 10);
         else add(fields, label(tr(R.string.account_alias_hint), 12, sub, false), 10);
+        if (!creating) add(fields, button(tr(R.string.widget_add), false, v -> {
+            if (QuotaWidgetProvider.requestPin(this, previous.id)) toast(tr(R.string.widget_confirm));
+            else new AlertDialog.Builder(this).setTitle(R.string.widget_add).setMessage(R.string.widget_manual)
+                    .setPositiveButton(android.R.string.ok, null).show();
+        }), 16);
         QuietHoursEditor quiet = new QuietHoursEditor(this, creating ? QuietHours.OFF : previous.quiet, false, null);
         add(fields, quiet, 20);
         ElasticScrollView dialogScroll = new ElasticScrollView(this);
@@ -946,8 +976,10 @@ public final class MainActivity extends Activity {
     }
     private void updateProgress(View view, ReminderStore.Slot s, long now) {
         android.graphics.drawable.Drawable background = view.getBackground();
-        if (background instanceof CountdownProgress)
+        if (background instanceof CountdownProgress) {
+            ((CountdownProgress)background).setActive(s.target > 0);
             background.setLevel(ResetMath.countdownLevel(s.target, s.periodMinutes, now));
+        }
     }
 
     private void updateCountdowns() {
@@ -966,18 +998,25 @@ public final class MainActivity extends Activity {
 
     private void updateGroup(GroupViews g, long now) {
         boolean quietNow = ReminderStore.globalQuiet(this).contains(now) || g.profile.quiet.contains(now);
+        g.shortHasProgress = false;
         if (g.profile.shortEnabled) {
             ReminderStore.Slot s = ReminderStore.load(this, g.profile.id, ReminderStore.SHORT);
+            g.shortHasProgress = s.target > 0;
             setText(g.shortSummary, I18n.slot(this, s) + " · " + compactTime(s, now));
             updateProgress(g.shortRail, s, now);
             setText(g.shortDate, s.target > 0 ? ResetMath.displayDateTime(s.target, now) : tr(R.string.unset_time));
             if (g.shortView != null) updateSlot(g.shortView, s, now, quietNow);
         }
         ReminderStore.Slot week = ReminderStore.load(this, g.profile.id, ReminderStore.WEEK);
+        g.weekHasProgress = week.target > 0;
         setText(g.weekSummary, tr(R.string.week_quota) + " · " + compactTime(week, now));
         updateProgress(g.weekRail, week, now);
         setText(g.weekDate, week.target > 0 ? ResetMath.displayDateTime(week.target, now) : tr(R.string.unset_time));
         if (g.weekView != null) updateSlot(g.weekView, week, now, quietNow);
+        if (g.animator == null) {
+            settleRail(g.shortRail, !g.expanded && g.shortHasProgress);
+            settleRail(g.weekRail, !g.expanded && g.weekHasProgress);
+        }
     }
 
     private void updateSlot(SlotViews v, ReminderStore.Slot s, long now, boolean quietNow) {

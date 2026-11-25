@@ -209,6 +209,7 @@ final class AlarmEngine {
      * boot/time-change recovery and the foreground system-clock ticker. */
     static void reconcileDue(Context context, long now) {
         boolean changed = false;
+        boolean rolledAny = false;
         QuietHours global = ReminderStore.globalQuiet(context);
         for (ReminderStore.Profile p : ReminderStore.profiles(context)) {
             for (int quota : new int[]{ReminderStore.SHORT, ReminderStore.WEEK}) {
@@ -234,11 +235,13 @@ final class AlarmEngine {
                 }
                 boolean earlySent = deliverEarly(context, p, current, now, global);
                 changed |= rolled || earlySent;
+                rolledAny |= rolled;
                 if (rolled) schedule(context, current, false);
                 if (rolled || earlySent) schedule(context, current, true);
             }
         }
         if (changed) BootState.sync(context, TimerSnapshot.read(context, now));
+        if (rolledAny) QuotaWidgetProvider.updateAll(context);
     }
 
     private static boolean deliverEarly(Context context, ReminderStore.Profile profile, ReminderStore.Slot s, long now, QuietHours global) {

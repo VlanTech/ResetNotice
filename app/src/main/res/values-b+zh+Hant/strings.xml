@@ -185,4 +185,13 @@
     <string name="quiet_active">勿擾時段內 · 計時正常繼續。</string>
     <string name="quiet_early_skipped">本輪提前提醒已依勿擾設定略過。</string>
     <string name="keep_background_hint">為確保提醒及時送達，請允許背景活動和自動啟動，建議在最近任務中保留應用程式。</string>
+    <string name="widget_name">額度倒數卡片</string>
+    <string name="widget_add">新增桌面卡片</string>
+    <string name="widget_description">在桌面查看指定帳戶的額度倒數與重置時間。</string>
+    <string name="widget_choose">選擇 AI 與帳戶</string>
+    <string name="widget_confirm">請在桌面確認新增卡片。</string>
+    <string name="widget_manual">目前桌面不支援應用程式內直接新增。長按桌面，開啟小工具／卡片，選擇重置通知的額度倒數卡片，再選擇帳戶。</string>
+    <string name="widget_empty">尚未設定重置時間，點擊進行設定。</string>
+    <string name="widget_missing">此帳戶已刪除，點擊重新選擇帳戶。</string>
+    <string name="widget_no_accounts">請先在重置通知中新增 AI 與帳戶。</string>
 </resources>

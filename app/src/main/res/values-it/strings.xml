@@ -185,4 +185,13 @@
     <string name="quiet_active">Orario silenzioso attivo · Il timer continua.</string>
     <string name="quiet_early_skipped">Avviso anticipato saltato durante l’orario silenzioso.</string>
     <string name="keep_background_hint">Per avvisi affidabili, consenti attività in background e avvio automatico e mantieni l’app tra le recenti.</string>
+    <string name="widget_name">Scheda conto alla rovescia</string>
+    <string name="widget_add">Aggiungi widget alla home</string>
+    <string name="widget_description">Mostra i countdown e gli orari di ripristino dell’account sulla schermata iniziale.</string>
+    <string name="widget_choose">Scegli IA e account</string>
+    <string name="widget_confirm">Conferma il widget sulla schermata iniziale.</string>
+    <string name="widget_manual">Il launcher potrebbe non consentire l’aggiunta dall’app. Tieni premuta la home, apri Widget, scegli la scheda ResetNotice e seleziona l’account.</string>
+    <string name="widget_empty">Nessun orario di ripristino. Tocca per impostarlo.</string>
+    <string name="widget_missing">Account eliminato. Tocca per sceglierne un altro.</string>
+    <string name="widget_no_accounts">Aggiungi prima un account IA in ResetNotice.</string>
 </resources>
