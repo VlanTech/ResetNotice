@@ -194,4 +194,30 @@
     <string name="widget_empty">No hay hora de restablecimiento. Toca para configurarla.</string>
     <string name="widget_missing">Cuenta eliminada. Toca para elegir otra.</string>
     <string name="widget_no_accounts">Añade primero una cuenta de IA en ResetNotice.</string>
+    <string name="history_title">Historial de restablecimiento</string>
+    <string name="history_hint">Registros desde esta versión. Guarda las últimas %1$d entradas de la cuenta.</string>
+    <string name="history_more">Cargar más</string>
+    <string name="history_empty">Aún no hay historial.</string>
+    <string name="history_manual">Cambio manual</string>
+    <string name="history_natural">Restablecimiento automático</string>
+    <string name="history_modified_at">Cambio: %1$s</string>
+    <string name="history_reset_at">Restablecimiento: %1$s</string>
+    <string name="history_change">%1$s → %2$s</string>
+    <string name="history_next">Próximo: %1$s</string>
+    <string name="history_recorded_at">Registrado: %1$s</string>
+    <string name="history_notice_sent">Aviso de restablecimiento: enviado</string>
+    <string name="history_notice_no">Aviso de restablecimiento: no enviado · %1$s</string>
+    <string name="history_reason_quiet">Horario de silencio</string>
+    <string name="history_reason_disabled">Aviso desactivado</string>
+    <string name="history_reason_permission">Permiso restringido</string>
+    <string name="history_reason_missed">Ciclo transcurrido recuperado</string>
+    <string name="history_reason_manual">Cambio manual</string>
+    <string name="history_reason_failed">Error de aviso</string>
+    <string name="widget_glass_title">Cristal esmerilado del widget</string>
+    <string name="widget_glass_hint" formatted="false">Ajusta la transparencia del fondo degradado. 0% opaco, 100% transparente.</string>
+    <string name="widget_glass_value">Transparencia %1$d%%</string>
+    <string name="widget_stack_name">Pila de todas las cuentas</string>
+    <string name="widget_stack_add">Añadir pila de cuentas</string>
+    <string name="widget_stack_hint">Desliza arriba o abajo para cambiar entre cuentas en un widget.</string>
+    <string name="widget_stack_manual">Si no puedes añadir desde la app, mantén pulsada la pantalla de inicio y selecciona la pila de cuentas de ResetNotice en Widgets.</string>
 </resources>

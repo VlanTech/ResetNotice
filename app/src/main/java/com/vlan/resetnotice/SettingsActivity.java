@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +59,37 @@ public final class SettingsActivity extends Activity {
         add(appearance, item(getString(R.string.language), languageName(), v -> chooseLanguage()), 0);
         divider(appearance);
         add(appearance, item(getString(R.string.theme), themeName(), v -> chooseTheme()), 0);
+        divider(appearance);
+        LinearLayout glass = column(); glass.setPadding(dp(16), dp(15), dp(14), dp(12));
+        add(glass, label(getString(R.string.widget_glass_title), 16, text, true), 0);
+        add(glass, label(getString(R.string.widget_glass_hint), 12, sub, false), 4);
+        TextView opacity = label(getString(R.string.widget_glass_value, AppPreferences.widgetTransparency(this)), 13, accent, true);
+        add(glass, opacity, 6);
+        SeekBar slider = new SeekBar(this);
+        slider.setMax(100); slider.setProgress(AppPreferences.widgetTransparency(this));
+        slider.setProgressTintList(ColorStateList.valueOf(accent)); slider.setThumbTintList(ColorStateList.valueOf(accent));
+        slider.setContentDescription(getString(R.string.widget_glass_title));
+        final Runnable refreshWidgets = () -> QuotaWidgetProvider.updateAll(this);
+        slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+                opacity.setText(getString(R.string.widget_glass_value, progress));
+                if (fromUser) {
+                    AppPreferences.setWidgetTransparency(SettingsActivity.this, progress);
+                    bar.removeCallbacks(refreshWidgets); bar.postDelayed(refreshWidgets, 220L);
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar bar) { Haptics.tap(bar); }
+            @Override public void onStopTrackingTouch(SeekBar bar) {
+                bar.removeCallbacks(refreshWidgets); refreshWidgets.run();
+            }
+        });
+        add(glass, slider, 4); add(appearance, glass, 0);
+        divider(appearance);
+        add(appearance, item(getString(R.string.widget_stack_add), getString(R.string.widget_stack_hint), v -> {
+            if (AllAccountsWidgetProvider.requestPin(this)) Toast.makeText(this, R.string.widget_confirm, Toast.LENGTH_SHORT).show();
+            else new AlertDialog.Builder(this).setTitle(R.string.widget_stack_add).setMessage(R.string.widget_stack_manual)
+                    .setPositiveButton(android.R.string.ok, null).show();
+        }), 0);
         add(content, appearance, 9);
 
         add(content, label(getString(R.string.interaction), 14, sub, true), 23);
@@ -141,7 +173,7 @@ public final class SettingsActivity extends Activity {
         LinearLayout about = panel();
         add(about, item(getString(R.string.developer), "Vlan_Tech", null), 0);
         divider(about);
-        add(about, item(getString(R.string.version), "1.9.0", null), 0);
+        add(about, item(getString(R.string.version), "1.10.0", null), 0);
         divider(about);
         add(about, item(getString(R.string.source_code), "GitHub · ResetNotice", v -> {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VlanTech/ResetNotice"))); }

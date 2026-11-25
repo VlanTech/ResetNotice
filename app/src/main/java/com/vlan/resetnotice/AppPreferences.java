@@ -25,6 +25,10 @@ final class AppPreferences {
     static boolean haptics(Context c) { return prefs(c).getBoolean("haptics", true); }
     static boolean ongoingNotification(Context c) { return prefs(c).getBoolean("ongoing_notification", true); }
     static boolean clockAlarmMode(Context c) { return prefs(c).getBoolean("clock_alarm_mode", false); }
+    static int widgetTransparency(Context c) { return Math.max(0, Math.min(100, prefs(c).getInt("widget_transparency", 0))); }
+    static void setWidgetTransparency(Context c, int value) {
+        prefs(c).edit().putInt("widget_transparency", Math.max(0, Math.min(100, value))).apply();
+    }
     static void setClockAlarmMode(Context c, boolean enabled) {
         prefs(c).edit().putBoolean("clock_alarm_mode", enabled).commit();
     }

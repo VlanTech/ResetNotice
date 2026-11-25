@@ -194,4 +194,30 @@
     <string name="widget_empty">Sem horário de redefinição. Toque para configurar.</string>
     <string name="widget_missing">Conta removida. Toque para escolher outra.</string>
     <string name="widget_no_accounts">Adicione primeiro uma conta de IA no ResetNotice.</string>
+    <string name="history_title">Histórico de redefinições</string>
+    <string name="history_hint">Registra a partir desta versão. Mantém as últimas %1$d entradas da conta.</string>
+    <string name="history_more">Carregar mais</string>
+    <string name="history_empty">Ainda não há histórico.</string>
+    <string name="history_manual">Alteração manual</string>
+    <string name="history_natural">Redefinição automática</string>
+    <string name="history_modified_at">Alterado: %1$s</string>
+    <string name="history_reset_at">Redefinição: %1$s</string>
+    <string name="history_change">%1$s → %2$s</string>
+    <string name="history_next">Próxima: %1$s</string>
+    <string name="history_recorded_at">Registrado: %1$s</string>
+    <string name="history_notice_sent">Aviso de redefinição: enviado</string>
+    <string name="history_notice_no">Aviso de redefinição: não enviado · %1$s</string>
+    <string name="history_reason_quiet">Horário de silêncio</string>
+    <string name="history_reason_disabled">Aviso desativado</string>
+    <string name="history_reason_permission">Permissão restrita</string>
+    <string name="history_reason_missed">Ciclo decorrido recuperado</string>
+    <string name="history_reason_manual">Alteração manual</string>
+    <string name="history_reason_failed">Falha no aviso</string>
+    <string name="widget_glass_title">Vidro fosco do widget</string>
+    <string name="widget_glass_hint" formatted="false">Ajuste a transparência do degradê de fundo. 0% opaco, 100% transparente.</string>
+    <string name="widget_glass_value">Transparência %1$d%%</string>
+    <string name="widget_stack_name">Pilha de todas as contas</string>
+    <string name="widget_stack_add">Adicionar pilha de contas</string>
+    <string name="widget_stack_hint">Deslize para cima ou para baixo para alternar contas no widget.</string>
+    <string name="widget_stack_manual">Se não puder adicionar pelo app, pressione a tela inicial e selecione a pilha de contas do ResetNotice nos Widgets.</string>
 </resources>

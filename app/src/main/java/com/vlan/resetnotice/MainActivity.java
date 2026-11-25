@@ -388,6 +388,7 @@ public final class MainActivity extends Activity {
         String[] options = {tr(R.string.sort_manual), tr(R.string.sort_next)};
         new AlertDialog.Builder(this).setTitle(tr(R.string.sort)).setSingleChoiceItems(options, manualMode() ? 0 : 1, (d, which) -> {
             AppPreferences.setOrder(this, which == 0 ? AppPreferences.MANUAL : AppPreferences.NEXT_RESET);
+            QuotaWidgetProvider.updateAll(this);
             for (GroupViews g : groups.values()) g.dragHandle.setVisibility(manualMode() ? View.VISIBLE : View.GONE);
             updateGroupCount();
             applyOrder(manualMode() ? AccountOrder.manual(this) : AccountOrder.byNextReset(this, System.currentTimeMillis()), true);
@@ -432,9 +433,12 @@ public final class MainActivity extends Activity {
         new AlertDialog.Builder(this).setTitle(g.profile.label()).setItems(labels.toArray(new String[0]), (d, which) -> {
             for (GroupViews card : groups.values()) if (card.expanded) setExpanded(card, false, true);
             order.remove(Integer.valueOf(g.profile.id)); order.add(destinations.get(which), g.profile.id);
-            if (ReminderStore.reorder(this, order)) handler.postDelayed(() -> {
-                if (!isFinishing() && !isDestroyed() && manualMode() && dragging == null) applyOrder(AccountOrder.manual(this), true);
-            }, 285L);
+            if (ReminderStore.reorder(this, order)) {
+                QuotaWidgetProvider.updateAll(this);
+                handler.postDelayed(() -> {
+                    if (!isFinishing() && !isDestroyed() && manualMode() && dragging == null) applyOrder(AccountOrder.manual(this), true);
+                }, 285L);
+            }
         }).setNegativeButton(tr(R.string.cancel), null).show();
     }
 
@@ -505,7 +509,9 @@ public final class MainActivity extends Activity {
             case DragEvent.ACTION_DRAG_EXITED: dragScreenY = Float.NaN; return true;
             case DragEvent.ACTION_DROP:
                 moveDraggedAt(event.getY(), true);
-                return ReminderStore.reorder(this, displayedOrder());
+                boolean saved = ReminderStore.reorder(this, displayedOrder());
+                if (saved) QuotaWidgetProvider.updateAll(this);
+                return saved;
             case DragEvent.ACTION_DRAG_ENDED:
                 handler.removeCallbacks(dragScroll); dragScreenY = Float.NaN;
                 if (dragging != null) dragging.root.setAlpha(1f);
@@ -791,6 +797,8 @@ public final class MainActivity extends Activity {
             else new AlertDialog.Builder(this).setTitle(R.string.widget_add).setMessage(R.string.widget_manual)
                     .setPositiveButton(android.R.string.ok, null).show();
         }), 16);
+        if (!creating) add(fields, button(tr(R.string.history_title), false, v ->
+                startActivity(new Intent(this, HistoryActivity.class).putExtra("profile_id", previous.id))), 8);
         QuietHoursEditor quiet = new QuietHoursEditor(this, creating ? QuietHours.OFF : previous.quiet, false, null);
         add(fields, quiet, 20);
         ElasticScrollView dialogScroll = new ElasticScrollView(this);
@@ -937,6 +945,7 @@ public final class MainActivity extends Activity {
         sv.clear.setOnClickListener(v -> { Haptics.tap(v); new AlertDialog.Builder(this).setTitle(tr(R.string.clear_confirm, I18n.slot(this, ReminderStore.load(this, profileId, id))))
                 .setMessage(tr(R.string.clear_hint))
                 .setNegativeButton(tr(R.string.keep), null).setPositiveButton(tr(R.string.clear), (d, w) -> {
+                    AlarmEngine.reconcileDue(this, System.currentTimeMillis());
                     ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
                     current.target = 0;
                     current.earlyDelivered = current.atDelivered = current.earlySuppressed = false;
@@ -1071,7 +1080,7 @@ public final class MainActivity extends Activity {
     }
 
     private void save(ReminderStore.Slot s) {
-        ReminderStore.save(this, s);
+        ReminderStore.saveManual(this, s, System.currentTimeMillis());
         AlarmEngine.rescheduleSlot(this, s.profileId, s.id);
         TimerService.refresh(this);
         // Update only the affected account. Native Switch objects and scrolling remain untouched.
@@ -1084,6 +1093,7 @@ public final class MainActivity extends Activity {
         if (target <= System.currentTimeMillis()) { toast(tr(R.string.time_future)); return; }
         ReminderStore.Profile profile = ReminderStore.profile(this, profileId);
         if (profile == null || !profile.allows(id)) return;
+        AlarmEngine.reconcileDue(this, System.currentTimeMillis());
         ReminderStore.Slot s = ReminderStore.load(this, profileId, id);
         s.target = target;
         s.earlyDelivered = s.atDelivered = s.earlySuppressed = false;

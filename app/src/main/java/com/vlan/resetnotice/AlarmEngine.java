@@ -222,16 +222,21 @@ final class AlarmEngine {
                     long next = ResetMath.nextTarget(current.target, current.periodMinutes, now);
                     // On long offline gaps only the most recent reset is relevant.
                     // Never emit many old notifications or repeat the same delivered cycle.
-                    if (current.at && !(due == current.target && current.atDelivered)
-                            && due >= now - ResetMath.DAY && !QuietHours.suppressed(global, p.quiet, due, now)
-                            && notificationsAllowed(context)) {
+                    int notificationStatus;
+                    if (!current.at) notificationStatus = HistoryStore.DISABLED;
+                    else if (due == current.target && current.atDelivered) notificationStatus = HistoryStore.SENT;
+                    else if (due < now - ResetMath.DAY) notificationStatus = HistoryStore.MISSED;
+                    else if (QuietHours.suppressed(global, p.quiet, due, now)) notificationStatus = HistoryStore.QUIET;
+                    else if (!notificationsAllowed(context)) notificationStatus = HistoryStore.PERMISSION;
+                    else {
                         Context localized = AppPreferences.localized(context);
                         String label = p.account + " · " + I18n.slot(localized, current);
-                        notify(context, AlarmIdentity.id(p.id, current.id, false), p.id,
+                        boolean submitted = notify(context, AlarmIdentity.id(p.id, current.id, false), p.id,
                                 localized.getString(R.string.notify_due_title, p.platform),
                                 localized.getString(R.string.notify_done_body, label, timeLabel(due), timeLabel(next)));
+                        notificationStatus = submitted ? HistoryStore.SENT : HistoryStore.FAILED;
                     }
-                    rolled = ReminderStore.rollForward(context, current, now);
+                    rolled = ReminderStore.rollForward(context, current, now, notificationStatus);
                 }
                 boolean earlySent = deliverEarly(context, p, current, now, global);
                 changed |= rolled || earlySent;
@@ -292,6 +297,6 @@ final class AlarmEngine {
         try {
             context.getSystemService(NotificationManager.class).notify(notificationId, builder.build());
             return true;
-        } catch (SecurityException ignored) { return false; }
+        } catch (RuntimeException ignored) { return false; }
     }
 }

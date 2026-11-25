@@ -296,6 +296,84 @@ public final class ProfileStoreTest {
         require(WidgetMath.chronometerBase(12345L, now + ResetMath.HOUR, now) == 12345L + ResetMath.HOUR,
                 "widget chronometer maps wall clock to monotonic base");
         require(WidgetMath.chronometerBase(12345L, now - 5000L, now) == 12345L, "widget base never starts expired");
+        require(WidgetMath.glassAlpha(0) == 255 && WidgetMath.glassAlpha(100) == 0 &&
+                WidgetMath.glassAlpha(50) == 128, "widget glass transparency maps to image alpha");
+        long weekDisplay = now + 4 * ResetMath.DAY + 3 * ResetMath.HOUR + 20 * ResetMath.MINUTE;
+        WidgetMath.WeekParts parts = WidgetMath.weekParts(weekDisplay, now);
+        require(parts.days == 4 && parts.clockTarget - now == 3 * ResetMath.HOUR + 20 * ResetMath.MINUTE,
+                "weekly display separates whole days from the remainder");
+        require(!parts.padHours && parts.refreshAt == parts.clockTarget - ResetMath.HOUR + 1,
+                "weekly hour format changes at the hour boundary");
+        parts = WidgetMath.weekParts(now + 4 * ResetMath.DAY + 30 * ResetMath.MINUTE, now);
+        require(parts.days == 4 && parts.padHours && parts.refreshAt == now + 30 * ResetMath.MINUTE + 1,
+                "day prefix advances after the last remainder hour");
+        parts = WidgetMath.weekParts(now + 2 * ResetMath.DAY, now);
+        require(parts.days == 2 && parts.clockTarget == now && parts.refreshAt == now + 1, "exact whole-day boundary");
+        parts = WidgetMath.weekParts(now + 2 * ResetMath.DAY, now + 1);
+        require(parts.days == 1 && parts.clockTarget - now == ResetMath.DAY, "day count decreases across the boundary");
+        require(WidgetMath.weekParts(now + 30 * ResetMath.MINUTE, now).refreshAt == Long.MAX_VALUE,
+                "final hour waits for normal rollover, no unnecessary widget alarm");
+
+        FakeContext logs = new FakeContext();
+        ReminderStore.Profile logA = ReminderStore.add(logs, "GPT", "A", true);
+        ReminderStore.Profile logB = ReminderStore.add(logs, "Gemini", "B", true);
+        ReminderStore.Slot logShort = ReminderStore.load(logs, logA.id, ReminderStore.SHORT);
+        logShort.periodMinutes = 60;
+        require(HistoryStore.entries(logs, logA.id).isEmpty(), "history starts empty");
+        logShort.target = now + ResetMath.HOUR;
+        ReminderStore.saveManual(logs, logShort, now);
+        require(HistoryStore.entries(logs, logA.id).size() == 1 && HistoryStore.entries(logs, logA.id).get(0).manual(),
+                "first configured reset recorded as manual");
+        logShort.at = false;
+        ReminderStore.saveManual(logs, logShort, now + 1000);
+        require(HistoryStore.entries(logs, logA.id).size() == 1, "switch changes do not generate manual time history");
+        logShort.target = now + 2 * ResetMath.HOUR;
+        ReminderStore.saveManual(logs, logShort, now + 2000);
+        HistoryStore.Entry manualEntry = HistoryStore.entries(logs, logA.id).get(0);
+        require(manualEntry.previous == now + ResetMath.HOUR && manualEntry.next == now + 2 * ResetMath.HOUR &&
+                !manualEntry.notified(), "manual old/new targets and no notification");
+        require(ReminderStore.rollForward(logs, logShort, now + 2 * ResetMath.HOUR + 500, HistoryStore.QUIET),
+                "quiet rollover still recorded");
+        HistoryStore.Entry quietEntry = HistoryStore.entries(logs, logA.id).get(0);
+        require(!quietEntry.manual() && !quietEntry.notified() && quietEntry.status == HistoryStore.QUIET &&
+                quietEntry.when == now + 2 * ResetMath.HOUR && quietEntry.recorded == now + 2 * ResetMath.HOUR + 500,
+                "quiet rollover records scheduled and actual timestamps");
+        require(!ReminderStore.rollForward(logs, logShort, now + 2 * ResetMath.HOUR + 500, HistoryStore.QUIET),
+                "same cycle cannot be recorded twice");
+        require(ReminderStore.rollForward(logs, logShort, now + 5 * ResetMath.HOUR + 2000, HistoryStore.SENT),
+                "offline cycles and last notification recorded");
+        java.util.List<HistoryStore.Entry> logEntries = HistoryStore.entries(logs, logA.id);
+        require(logEntries.get(0).notified() && logEntries.get(0).when == now + 5 * ResetMath.HOUR,
+                "latest actual submitted notification recorded");
+        require(logEntries.get(1).status == HistoryStore.MISSED && logEntries.get(2).status == HistoryStore.MISSED,
+                "older elapsed cycles never falsely marked as notified");
+        require(HistoryStore.entries(logs, logB.id).isEmpty(), "history isolation by account");
+        logShort.target = 0;
+        ReminderStore.saveManual(logs, logShort, now + 5 * ResetMath.HOUR + 5000);
+        require(HistoryStore.entries(logs, logA.id).get(0).manual() &&
+                HistoryStore.entries(logs, logA.id).get(0).next == 0, "clear target is manual history");
+        ReminderStore.delete(logs, logA.id);
+        require(HistoryStore.entries(logs, logA.id).isEmpty(), "history removed only when account deleted");
+        ReminderStore.Slot backlog = ReminderStore.load(logs, logB.id, ReminderStore.SHORT);
+        backlog.periodMinutes = 1; backlog.target = now + ResetMath.MINUTE;
+        ReminderStore.save(logs, backlog);
+        require(ReminderStore.rollForward(logs, backlog, now + 1500 * ResetMath.MINUTE, HistoryStore.DISABLED),
+                "large offline backlog recorded without unbounded storage");
+        logEntries = HistoryStore.entries(logs, logB.id);
+        require(logEntries.size() == HistoryStore.LIMIT && logEntries.get(0).status == HistoryStore.DISABLED &&
+                logEntries.get(HistoryStore.LIMIT - 1).when == now + 501 * ResetMath.MINUTE,
+                "history retains precisely the most recent 1000 cycles");
+
+        EdgeMotion.Tracker motion = new EdgeMotion.Tracker();
+        motion.seed(0, 1000); motion.sample(10, 1010); motion.sample(25, 1020);
+        require(motion.acceleration() > 0, "drag acceleration calculated from motion samples");
+        require(motion.predict(1020, .012f) > motion.predict(1020, 0f), "impact prediction incorporates acceleration");
+        require(motion.predict(1200, .01f) == 0f, "stale release motion does not invent velocity");
+        require(Math.abs(EdgeMotion.position(24, 120, 0) - 24) < 0.01f &&
+                Math.abs(EdgeMotion.velocity(24, 120, 0) - 120) < 0.01f, "spring matches initial position and velocity");
+        require(EdgeMotion.position(0, 1800, .11) > EdgeMotion.position(0, 400, .11), "faster fling travels farther, not fixed amplitude");
+        require(Math.abs(EdgeMotion.position(24, 120, 1.5)) < .1f, "damped spring returns to rest");
+        require(Math.abs(EdgeMotion.inverseRubber(EdgeMotion.rubber(-200, 2), 2) + 200) < .01f, "catching moving content has continuous displacement");
         String[][] brands = {{"ChatGPT Plus","openai"},{"GPT-6.2 Sol","openai"},{"OpenAI","openai"},{"Codex","openai"},{"Claude Pro","claude"},
                 {"Anthropic","claude"},{"Google Gemini","gemini"},{"Grok 4","grok"},{"xAI","grok"},{"DeepSeek V4","deepseek"},
                 {"通义千问","qwen"},{"Qwen","qwen"},{"Perplexity Pro","perplexity"},{"Microsoft Copilot","copilot"},{"Kimi","kimi"},

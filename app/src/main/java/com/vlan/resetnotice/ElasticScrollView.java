@@ -1,12 +1,13 @@
 package com.vlan.resetnotice;
 
 import android.content.Context;
+import android.animation.ValueAnimator;
+import android.os.Build;
 import android.os.SystemClock;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.PathInterpolator;
 import android.widget.ScrollView;
 
 /** Content-only edge motion: the viewport is stationary, no Android stretch
@@ -19,8 +20,27 @@ final class ElasticScrollView extends ScrollView {
     private boolean dragging;
     private boolean touching, flingArmed;
     private int flingDirection;
-    private float flingSpeed;
     private long flingFrame, flingMotion;
+    private final EdgeMotion.Tracker touchMotion = new EdgeMotion.Tracker(), flingTrack = new EdgeMotion.Tracker();
+    private boolean springActive;
+    private long springStart;
+    private float springX, springV, springSign;
+    private final Choreographer.FrameCallback springFrame = new Choreographer.FrameCallback() {
+        @Override public void doFrame(long nanos) {
+            if (!springActive || touching) return;
+            View child = getChildAt(0);
+            if (child == null) { springActive = false; return; }
+            double t = Math.max(0, nanos - springStart) / 1_000_000_000.0;
+            float x = EdgeMotion.position(springX, springV, t);
+            float v = EdgeMotion.velocity(springX, springV, t);
+            if (x * springSign < 0 || t > 1.65 ||
+                    (t > 0.045 && Math.abs(x) < .35f * density && Math.abs(v) < 3f * density)) {
+                child.setTranslationY(0); springActive = false; return;
+            }
+            child.setTranslationY(x);
+            Choreographer.getInstance().postFrameCallback(this);
+        }
+    };
 
     ElasticScrollView(Context context) {
         super(context);
@@ -33,12 +53,13 @@ final class ElasticScrollView extends ScrollView {
         activePointer = event.getPointerId(0);
         downX = event.getX(0); downY = lastY = event.getY(0);
         dragging = false; rawOffset = nativeOffset = 0; touching = true; flingArmed = false;
+        cancelSpring();
+        touchMotion.seed(0, event.getEventTime());
         View child = getChildAt(0);
         if (child != null) {
             child.animate().cancel();
             float offset = child.getTranslationY();
-            if (offset != 0f) rawOffset = (float)(Math.signum(offset) * 350f * density *
-                    Math.expm1(Math.abs(offset) / (170f * density)));
+            if (offset != 0f) rawOffset = EdgeMotion.inverseRubber(offset, density);
         }
     }
 
@@ -117,10 +138,8 @@ final class ElasticScrollView extends ScrollView {
                     else rawOffset = 0f;
                     View child = getChildAt(0);
                     if (child != null) {
-                        // Logarithmic resistance approaches no artificial limit,
-                        // while long pulls remain subtle and reversible.
-                        float offset = (float)(Math.signum(rawOffset) * 170f * density *
-                                Math.log1p(Math.abs(rawOffset) / (350f * density)));
+                        float offset = EdgeMotion.rubber(rawOffset, density);
+                        touchMotion.sample(offset - child.getTranslationY(), event.getEventTime());
                         child.setTranslationY(offset);
                     }
                 }
@@ -132,22 +151,37 @@ final class ElasticScrollView extends ScrollView {
     }
 
     private void release() {
+        if (!touching) return;
         activePointer = -1; rawOffset = nativeOffset = 0f; dragging = false; touching = false;
         View child = getChildAt(0);
-        if (child != null && child.getTranslationY() != 0f) settle(child);
+        if (child != null && child.getTranslationY() != 0f)
+            startSpring(child, child.getTranslationY(), touchMotion.predict(SystemClock.uptimeMillis(), 0.012f));
     }
 
-    private void settle(View child) {
-        child.animate().translationY(0f).setDuration(465)
-                .setInterpolator(new PathInterpolator(0.20f, 0.72f, 0.24f, 1f)).start();
+    private void cancelSpring() {
+        springActive = false;
+        Choreographer.getInstance().removeFrameCallback(springFrame);
+    }
+    private void startSpring(View child, float initialPosition, float initialVelocity) {
+        cancelSpring();
+        if (Build.VERSION.SDK_INT >= 26 && !ValueAnimator.areAnimatorsEnabled()) { child.setTranslationY(0f); return; }
+        // Bound pathological multi-pointer/clock samples, not the rebound
+        // distance: normal travel and duration follow incident energy.
+        springX = initialPosition;
+        springV = Math.max(-4500f * density, Math.min(4500f * density, initialVelocity));
+        springSign = Math.signum(springX != 0 ? springX : springV);
+        if (springSign == 0) { child.setTranslationY(0); return; }
+        springStart = System.nanoTime();
+        springActive = true;
+        Choreographer.getInstance().postFrameCallback(springFrame);
     }
 
     @Override public void fling(int velocityY) {
         int direction = Integer.signum(velocityY);
         flingArmed = direction != 0 && Math.abs(rawOffset) < 1f && Math.abs(velocityY) >= 65f * density;
         flingDirection = direction;
-        flingSpeed = Math.abs(velocityY);
         flingFrame = flingMotion = SystemClock.uptimeMillis();
+        flingTrack.seed(velocityY, flingFrame);
         super.fling(velocityY);
         if (flingArmed && !canScrollVertically(direction)) postInvalidateOnAnimation();
     }
@@ -157,32 +191,26 @@ final class ElasticScrollView extends ScrollView {
         super.computeScroll();
         if (!flingArmed || touching) return;
         long now = SystemClock.uptimeMillis();
-        int movement = Math.abs(getScrollY() - before);
+        int movement = getScrollY() - before;
         long frame = Math.max(1L, now - flingFrame);
-        if (movement > 0) {
-            flingSpeed = Math.max(movement * 1000f / frame, flingSpeed * 0.66f);
-            flingMotion = now;
-        }
         flingFrame = now;
         if (!canScrollVertically(flingDirection)) {
             flingArmed = false;
-            if (now - flingMotion <= 100 && flingSpeed >= 65f * density) {
+            float predicted = flingTrack.predict(now, Math.min(.016f, frame / 2000f));
+            float incidentSpeed = Math.max(Math.abs(movement) * 1000f / frame, Math.max(0, predicted * flingDirection));
+            if ((movement != 0 || now - flingMotion <= 100) && incidentSpeed >= 65f * density) {
                 View child = getChildAt(0);
                 if (child == null) return;
-                // Transform the impact of a single inertial scroll into a
-                // short, restrained translation, followed by the same soft
-                // return used for a finger pull.
-                float amplitude = (float)Math.min(68f * density,
-                        density * (10f + 25f * Math.log1p(flingSpeed / (900f * density))));
-                child.animate().cancel();
-                child.animate().translationY(-flingDirection * amplitude).setDuration(155)
-                        .setInterpolator(new DecelerateInterpolator(1.6f))
-                        .withEndAction(() -> { if (!touching) settle(child); }).start();
+                startSpring(child, child.getTranslationY(), -flingDirection * incidentSpeed * .43f);
             }
+        } else if (movement != 0) {
+            flingTrack.sample(movement, now);
+            flingMotion = now;
         } else if (now - flingMotion > 140) flingArmed = false;
     }
     @Override protected void onDetachedFromWindow() {
         View child = getChildAt(0);
+        cancelSpring();
         if (child != null) { child.animate().cancel(); child.setTranslationY(0f); }
         flingArmed = false; touching = false;
         super.onDetachedFromWindow();

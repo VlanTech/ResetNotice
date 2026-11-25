@@ -32,7 +32,7 @@ mkdir -p "$WORK"/{generated,classes,dex,tests}
 mapfile -t sources < <(find app/src/main/java "$WORK/generated" -name '*.java' ! -name '*Test.java' -print)
 java -jar "$ECJ" -1.8 -proc:none -encoding UTF-8 -classpath "$ANDROID_JAR" -d "$WORK/classes" "${sources[@]}"
 mapfile -t tests < <(find tests -name '*.java' -print)
-java -jar "$ECJ" -1.8 -proc:none -encoding UTF-8 -d "$WORK/tests" app/src/main/java/com/vlan/resetnotice/{ResetMath,ResetMathTest,ReminderStore,AlarmIdentity,TimerSnapshot,BrandMatcher,AccountOrder,AlarmPolicy,PushVendor,QuietHours,WidgetBindingStore,WidgetMath}.java "${tests[@]}"
+java -jar "$ECJ" -1.8 -proc:none -encoding UTF-8 -d "$WORK/tests" app/src/main/java/com/vlan/resetnotice/{ResetMath,ResetMathTest,ReminderStore,AlarmIdentity,TimerSnapshot,BrandMatcher,AccountOrder,AlarmPolicy,PushVendor,QuietHours,WidgetBindingStore,WidgetMath,HistoryStore,EdgeMotion}.java "${tests[@]}"
 java -cp "$WORK/tests" com.vlan.resetnotice.ResetMathTest
 java -cp "$WORK/tests" com.vlan.resetnotice.ProfileStoreTest
 mapfile -t classes < <(find "$WORK/classes" -name '*.class' -print)

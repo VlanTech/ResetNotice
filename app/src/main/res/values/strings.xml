@@ -194,4 +194,30 @@
     <string name="widget_empty">No reset time configured. Tap to set one.</string>
     <string name="widget_missing">This account was removed. Tap to choose another account.</string>
     <string name="widget_no_accounts">Add an AI account in ResetNotice first.</string>
+    <string name="history_title">Reset history</string>
+    <string name="history_hint">Records start with this version. Keeps the latest %1$d entries for this account.</string>
+    <string name="history_more">Load more</string>
+    <string name="history_empty">No reset history yet.</string>
+    <string name="history_manual">Manual change</string>
+    <string name="history_natural">Automatic reset</string>
+    <string name="history_modified_at">Changed: %1$s</string>
+    <string name="history_reset_at">Reset: %1$s</string>
+    <string name="history_change">%1$s → %2$s</string>
+    <string name="history_next">Next reset: %1$s</string>
+    <string name="history_recorded_at">Recorded: %1$s</string>
+    <string name="history_notice_sent">Reset notification: sent</string>
+    <string name="history_notice_no">Reset notification: not sent · %1$s</string>
+    <string name="history_reason_quiet">Quiet hours</string>
+    <string name="history_reason_disabled">Reset notification disabled</string>
+    <string name="history_reason_permission">Notification permission restricted</string>
+    <string name="history_reason_missed">Elapsed cycle recovered</string>
+    <string name="history_reason_manual">Manual change</string>
+    <string name="history_reason_failed">Notification unavailable</string>
+    <string name="widget_glass_title">Desktop card frosted glass</string>
+    <string name="widget_glass_hint" formatted="false">Adjust the translucent gradient background. 0% is opaque, 100% is transparent.</string>
+    <string name="widget_glass_value">Transparency %1$d%%</string>
+    <string name="widget_stack_name">All-account card stack</string>
+    <string name="widget_stack_add">Add all-account card stack</string>
+    <string name="widget_stack_hint">Swipe up or down through all AI accounts in one desktop widget.</string>
+    <string name="widget_stack_manual">If in-app pinning is unavailable, long-press the home screen and add ResetNotice’s all-account card stack from Widgets.</string>
 </resources>

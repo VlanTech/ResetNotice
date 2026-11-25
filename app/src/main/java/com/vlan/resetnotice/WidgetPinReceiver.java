@@ -13,5 +13,6 @@ public final class WidgetPinReceiver extends BroadcastReceiver {
         if (!QuotaWidgetProvider.validWidget(context, id)) return;
         if (ReminderStore.profile(context, profile) != null) WidgetBindingStore.bind(context, id, profile);
         QuotaWidgetProvider.updateOne(context, AppWidgetManager.getInstance(context), id);
+        WidgetRefreshReceiver.schedule(context);
     }
 }

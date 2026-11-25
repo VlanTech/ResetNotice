@@ -194,4 +194,30 @@
     <string name="widget_empty">リセット時刻が未設定です。タップして設定します。</string>
     <string name="widget_missing">アカウントが削除されました。タップして選び直してください。</string>
     <string name="widget_no_accounts">先にリセット通知でアカウントを追加してください。</string>
+    <string name="history_title">リセット履歴</string>
+    <string name="history_hint">このバージョンから記録。アカウントごとに最新 %1$d 件を保存します。</string>
+    <string name="history_more">もっと表示</string>
+    <string name="history_empty">リセット履歴はありません。</string>
+    <string name="history_manual">手動変更</string>
+    <string name="history_natural">自動リセット</string>
+    <string name="history_modified_at">変更：%1$s</string>
+    <string name="history_reset_at">リセット：%1$s</string>
+    <string name="history_change">%1$s → %2$s</string>
+    <string name="history_next">次回：%1$s</string>
+    <string name="history_recorded_at">記録：%1$s</string>
+    <string name="history_notice_sent">リセット通知：送信済み</string>
+    <string name="history_notice_no">リセット通知：未送信 · %1$s</string>
+    <string name="history_reason_quiet">通知休止</string>
+    <string name="history_reason_disabled">リセット通知オフ</string>
+    <string name="history_reason_permission">通知権限制限</string>
+    <string name="history_reason_missed">経過周期を復元</string>
+    <string name="history_reason_manual">手動変更</string>
+    <string name="history_reason_failed">通知送信失敗</string>
+    <string name="widget_glass_title">ホームカードのすりガラス</string>
+    <string name="widget_glass_hint" formatted="false">半透明のグラデーションを調整します。0% は不透明、100% は透明。</string>
+    <string name="widget_glass_value">透明度 %1$d%%</string>
+    <string name="widget_stack_name">全アカウントカード</string>
+    <string name="widget_stack_add">全アカウントカードを追加</string>
+    <string name="widget_stack_hint">1つのウィジェットで上下にスワイプしてアカウントを切り替えます。</string>
+    <string name="widget_stack_manual">ホーム画面を長押しし、ウィジェットからリセット通知の全アカウントカードを追加してください。</string>
 </resources>

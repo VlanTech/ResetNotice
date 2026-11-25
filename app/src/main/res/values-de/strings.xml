@@ -194,4 +194,30 @@
     <string name="widget_empty">Keine Reset-Zeit eingestellt. Antippen zum Einstellen.</string>
     <string name="widget_missing">Konto entfernt. Antippen, um ein anderes zu wählen.</string>
     <string name="widget_no_accounts">Füge zuerst ein KI-Konto in ResetNotice hinzu.</string>
+    <string name="history_title">Reset-Verlauf</string>
+    <string name="history_hint">Aufzeichnung ab dieser Version. Speichert die letzten %1$d Einträge pro Konto.</string>
+    <string name="history_more">Mehr laden</string>
+    <string name="history_empty">Noch kein Reset-Verlauf.</string>
+    <string name="history_manual">Manuelle Änderung</string>
+    <string name="history_natural">Automatischer Reset</string>
+    <string name="history_modified_at">Geändert: %1$s</string>
+    <string name="history_reset_at">Reset: %1$s</string>
+    <string name="history_change">%1$s → %2$s</string>
+    <string name="history_next">Nächster Reset: %1$s</string>
+    <string name="history_recorded_at">Erfasst: %1$s</string>
+    <string name="history_notice_sent">Reset-Benachrichtigung: gesendet</string>
+    <string name="history_notice_no">Reset-Benachrichtigung: nicht gesendet · %1$s</string>
+    <string name="history_reason_quiet">Ruhezeit</string>
+    <string name="history_reason_disabled">Benachrichtigung deaktiviert</string>
+    <string name="history_reason_permission">Berechtigung eingeschränkt</string>
+    <string name="history_reason_missed">Verstrichener Zyklus nachgeholt</string>
+    <string name="history_reason_manual">Manuelle Änderung</string>
+    <string name="history_reason_failed">Benachrichtigung fehlgeschlagen</string>
+    <string name="widget_glass_title">Milchglas für Desktop-Karte</string>
+    <string name="widget_glass_hint" formatted="false">Transparenz des Verlaufshintergrunds einstellen. 0% undurchsichtig, 100% transparent.</string>
+    <string name="widget_glass_value">Transparenz %1$d%%</string>
+    <string name="widget_stack_name">Stapel aller Konten</string>
+    <string name="widget_stack_add">Kontenstapel hinzufügen</string>
+    <string name="widget_stack_hint">Wische nach oben oder unten, um im Widget zwischen Konten zu wechseln.</string>
+    <string name="widget_stack_manual">Falls das Hinzufügen aus der App nicht möglich ist, halte den Startbildschirm gedrückt und wähle den ResetNotice-Kontenstapel unter Widgets.</string>
 </resources>

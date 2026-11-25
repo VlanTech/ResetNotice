@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.vlan.resetnotice" android:versionCode="10" android:versionName="1.9.0">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.vlan.resetnotice" android:versionCode="11" android:versionName="1.10.0">
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="34" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
@@ -14,6 +14,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".SettingsActivity" android:exported="false" />
+        <activity android:name=".HistoryActivity" android:exported="false" />
         <activity android:name=".WidgetConfigActivity" android:exported="true" android:label="@string/widget_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
@@ -26,6 +27,12 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/quota_widget_info" />
         </receiver>
         <receiver android:name=".WidgetPinReceiver" android:exported="false" />
+        <receiver android:name=".WidgetRefreshReceiver" android:exported="false" />
+        <receiver android:name=".AllAccountsWidgetProvider" android:exported="false" android:label="@string/widget_stack_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/quota_widget_stack_info" />
+        </receiver>
+        <service android:name=".WidgetStackService" android:exported="false" android:permission="android.permission.BIND_REMOTEVIEWS" />
         <receiver android:name=".ReminderReceiver" android:exported="false" />
         <receiver android:name=".ProbeReceiver" android:exported="false" />
         <receiver android:name=".BootReceiver" android:exported="false" android:directBootAware="true">

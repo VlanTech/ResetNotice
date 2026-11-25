@@ -194,4 +194,30 @@
     <string name="widget_empty">Nessun orario di ripristino. Tocca per impostarlo.</string>
     <string name="widget_missing">Account eliminato. Tocca per sceglierne un altro.</string>
     <string name="widget_no_accounts">Aggiungi prima un account IA in ResetNotice.</string>
+    <string name="history_title">Cronologia dei ripristini</string>
+    <string name="history_hint">Registra da questa versione. Conserva le ultime %1$d voci per l’account.</string>
+    <string name="history_more">Carica altro</string>
+    <string name="history_empty">Nessuna cronologia per ora.</string>
+    <string name="history_manual">Modifica manuale</string>
+    <string name="history_natural">Ripristino automatico</string>
+    <string name="history_modified_at">Modifica: %1$s</string>
+    <string name="history_reset_at">Ripristino: %1$s</string>
+    <string name="history_change">%1$s → %2$s</string>
+    <string name="history_next">Prossimo: %1$s</string>
+    <string name="history_recorded_at">Registrato: %1$s</string>
+    <string name="history_notice_sent">Avviso di ripristino: inviato</string>
+    <string name="history_notice_no">Avviso di ripristino: non inviato · %1$s</string>
+    <string name="history_reason_quiet">Orario silenzioso</string>
+    <string name="history_reason_disabled">Avviso disattivato</string>
+    <string name="history_reason_permission">Autorizzazione limitata</string>
+    <string name="history_reason_missed">Ciclo trascorso recuperato</string>
+    <string name="history_reason_manual">Modifica manuale</string>
+    <string name="history_reason_failed">Errore di invio</string>
+    <string name="widget_glass_title">Vetro satinato del widget</string>
+    <string name="widget_glass_hint" formatted="false">Regola la trasparenza dello sfondo sfumato. 0% opaco, 100% trasparente.</string>
+    <string name="widget_glass_value">Trasparenza %1$d%%</string>
+    <string name="widget_stack_name">Pila di tutti gli account</string>
+    <string name="widget_stack_add">Aggiungi pila di account</string>
+    <string name="widget_stack_hint">Scorri verso l’alto o il basso per cambiare account in un widget.</string>
+    <string name="widget_stack_manual">Se l’aggiunta dall’app non è disponibile, tieni premuta la home e scegli la pila di account ResetNotice nei Widget.</string>
 </resources>

@@ -194,4 +194,30 @@
     <string name="widget_empty">Aucune heure de réinitialisation. Touchez pour la définir.</string>
     <string name="widget_missing">Compte supprimé. Touchez pour en choisir un autre.</string>
     <string name="widget_no_accounts">Ajoutez d’abord un compte IA dans ResetNotice.</string>
+    <string name="history_title">Historique des réinitialisations</string>
+    <string name="history_hint">Enregistre à partir de cette version. Conserve les %1$d entrées les plus récentes du compte.</string>
+    <string name="history_more">Afficher plus</string>
+    <string name="history_empty">Aucun historique pour le moment.</string>
+    <string name="history_manual">Modification manuelle</string>
+    <string name="history_natural">Réinitialisation automatique</string>
+    <string name="history_modified_at">Modifié : %1$s</string>
+    <string name="history_reset_at">Réinitialisé : %1$s</string>
+    <string name="history_change">%1$s → %2$s</string>
+    <string name="history_next">Prochaine : %1$s</string>
+    <string name="history_recorded_at">Enregistré : %1$s</string>
+    <string name="history_notice_sent">Rappel : envoyé</string>
+    <string name="history_notice_no">Rappel : non envoyé · %1$s</string>
+    <string name="history_reason_quiet">Heures silencieuses</string>
+    <string name="history_reason_disabled">Rappel désactivé</string>
+    <string name="history_reason_permission">Autorisation restreinte</string>
+    <string name="history_reason_missed">Cycle écoulé récupéré</string>
+    <string name="history_reason_manual">Modification manuelle</string>
+    <string name="history_reason_failed">Échec du rappel</string>
+    <string name="widget_glass_title">Verre dépoli du widget</string>
+    <string name="widget_glass_hint" formatted="false">Réglez la transparence du dégradé. 0 % opaque, 100 % transparent.</string>
+    <string name="widget_glass_value">Transparence %1$d%%</string>
+    <string name="widget_stack_name">Pile de tous les comptes</string>
+    <string name="widget_stack_add">Ajouter la pile de comptes</string>
+    <string name="widget_stack_hint">Balayez vers le haut ou le bas pour changer de compte dans un widget.</string>
+    <string name="widget_stack_manual">Si l’ajout depuis l’appli échoue, appuyez longuement sur l’accueil et choisissez la pile de comptes de ResetNotice dans Widgets.</string>
 </resources>

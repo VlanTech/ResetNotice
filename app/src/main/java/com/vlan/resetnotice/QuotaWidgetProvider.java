@@ -61,23 +61,29 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
             AppWidgetManager manager = AppWidgetManager.getInstance(context);
             int[] ids = manager.getAppWidgetIds(component(context));
             for (int id : ids) updateOne(context, manager, id);
+            AllAccountsWidgetProvider.refreshAll(context, manager);
+            WidgetRefreshReceiver.schedule(context);
         } catch (RuntimeException e) { Log.w(TAG, "Widget refresh unavailable", e); }
     }
 
     static void updateOne(Context context, AppWidgetManager manager, int id) {
         if (!BootState.unlocked(context)) return;
         try {
-            manager.updateAppWidget(id, render(context, id));
+            manager.updateAppWidget(id, render(context, id, WidgetBindingStore.profile(context, id), false));
         } catch (RuntimeException e) { Log.w(TAG, "Widget refresh failed", e); }
     }
 
-    private static RemoteViews render(Context context, int id) {
+    static RemoteViews renderStackItem(Context context, int profileId) {
+        return render(context, -1, profileId, true);
+    }
+
+    private static RemoteViews render(Context context, int id, int profileId, boolean collection) {
         Context c = AppPreferences.localized(context);
         String theme = AppPreferences.theme(context);
         int layout = AppPreferences.LIGHT.equals(theme) ? R.layout.widget_account_light :
                 AppPreferences.DARK.equals(theme) ? R.layout.widget_account_dark : R.layout.widget_account;
         RemoteViews v = new RemoteViews(context.getPackageName(), layout);
-        int profileId = WidgetBindingStore.profile(context, id);
+        v.setInt(R.id.widget_glass, "setImageAlpha", WidgetMath.glassAlpha(AppPreferences.widgetTransparency(context)));
         ReminderStore.Profile profile = ReminderStore.profile(context, profileId);
         v.setViewVisibility(R.id.widget_short, View.GONE);
         v.setViewVisibility(R.id.widget_week, View.GONE);
@@ -87,6 +93,10 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
             v.setTextViewText(R.id.widget_empty, c.getString(profileId > 0 ? R.string.widget_missing : R.string.widget_description));
             v.setViewVisibility(R.id.widget_empty, View.VISIBLE);
             v.setImageViewResource(R.id.widget_logo, R.drawable.portrait);
+            if (collection) {
+                v.setOnClickFillInIntent(R.id.widget_root, new Intent());
+                return v;
+            }
             Intent intent = new Intent(context, WidgetConfigActivity.class)
                     .setAction(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
                     .setData(Uri.parse("resetnotice://widget/config/" + id))
@@ -108,6 +118,10 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
         boolean weekShown = renderSlot(v, c, weekSlot, true, now, elapsed, false);
         v.setTextViewText(R.id.widget_empty, c.getString(R.string.widget_empty));
         v.setViewVisibility(R.id.widget_empty, shortShown || weekShown ? View.GONE : View.VISIBLE);
+        if (collection) {
+            v.setOnClickFillInIntent(R.id.widget_root, new Intent().putExtra("open_profile", profile.id));
+            return v;
+        }
         Intent open = new Intent(context, MainActivity.class)
                 .setData(Uri.parse("resetnotice://widget/open/" + id))
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -135,7 +149,15 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
             v.setViewVisibility(staticText, View.GONE);
             v.setViewVisibility(chronometer, View.VISIBLE);
             v.setChronometerCountDown(chronometer, true);
-            v.setChronometer(chronometer, WidgetMath.chronometerBase(elapsed, target, now), null, true);
+            long clockTarget = target;
+            String format = null;
+            if (!shortSlot) {
+                WidgetMath.WeekParts parts = WidgetMath.weekParts(target, now);
+                clockTarget = parts.clockTarget;
+                format = (parts.days > 0 ? parts.days + c.getString(R.string.unit_d) + " " : "")
+                        + (parts.padHours ? "00:%s" : "%s");
+            }
+            v.setChronometer(chronometer, WidgetMath.chronometerBase(elapsed, clockTarget, now), format, true);
         } else {
             v.setViewVisibility(chronometer, View.GONE);
             v.setViewVisibility(staticText, View.VISIBLE);
@@ -146,12 +168,15 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
 
     @Override public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
         for (int id : ids) updateOne(context, manager, id);
+        WidgetRefreshReceiver.schedule(context);
     }
     @Override public void onAppWidgetOptionsChanged(Context context, AppWidgetManager manager, int id, Bundle options) {
         updateOne(context, manager, id);
+        WidgetRefreshReceiver.schedule(context);
     }
     @Override public void onDeleted(Context context, int[] ids) {
         for (int id : ids) WidgetBindingStore.delete(context, id);
+        WidgetRefreshReceiver.schedule(context);
     }
     @Override public void onRestored(Context context, int[] oldIds, int[] newIds) {
         WidgetBindingStore.restore(context, oldIds, newIds);

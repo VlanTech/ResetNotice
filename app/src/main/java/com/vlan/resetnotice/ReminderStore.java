@@ -207,6 +207,8 @@ final class ReminderStore {
         writeProfile(editor, result);
         if (previous.shortEnabled && !shortEnabled) {
             Slot shortSlot = readSlot(p, id, SHORT, false);
+            HistoryStore.manual(p, editor, id, SHORT, shortSlot.periodMinutes,
+                    shortSlot.target, 0, System.currentTimeMillis());
             shortSlot.target = 0;
             shortSlot.earlyDelivered = shortSlot.atDelivered = shortSlot.earlySuppressed = false;
             writeSlot(editor, shortSlot);
@@ -237,13 +239,38 @@ final class ReminderStore {
         writeSlot(e, s);
         e.commit();
     }
+    static synchronized void saveManual(Context context, Slot s, long now) {
+        Profile p = profile(context, s.profileId);
+        if (p == null || !p.allows(s.id)) return;
+        s.target = ResetMath.minuteBoundary(s.target);
+        s.periodMinutes = s.id == WEEK ? ResetMath.WEEK_MINUTES : ResetMath.validPeriod(s.periodMinutes);
+        SharedPreferences prefs = prefs(context);
+        Slot before = readSlot(prefs, s.profileId, s.id, false);
+        SharedPreferences.Editor e = prefs.edit();
+        HistoryStore.manual(prefs, e, s.profileId, s.id, s.periodMinutes, before.target, s.target, now);
+        writeSlot(e, s);
+        e.commit();
+    }
     static boolean rollForward(Context context, Slot s, long now) {
+        return rollForward(context, s, now, HistoryStore.MISSED);
+    }
+    static synchronized boolean rollForward(Context context, Slot s, long now, int notificationStatus) {
         long next = ResetMath.nextTarget(s.target, s.periodMinutes, now);
         if (next == s.target) return false;
+        Profile p = profile(context, s.profileId);
+        if (p == null || !p.allows(s.id)) return false;
+        SharedPreferences prefs = prefs(context);
+        SharedPreferences.Editor e = prefs.edit();
+        HistoryStore.rollovers(prefs, e, s, now, notificationStatus);
+        long previousTarget = s.target;
+        boolean previousEarly = s.earlyDelivered, previousAt = s.atDelivered, previousSuppressed = s.earlySuppressed;
         s.target = next;
         s.earlyDelivered = s.atDelivered = s.earlySuppressed = false;
-        save(context, s);
-        return true;
+        writeSlot(e, s);
+        if (e.commit()) return true;
+        s.target = previousTarget;
+        s.earlyDelivered = previousEarly; s.atDelivered = previousAt; s.earlySuppressed = previousSuppressed;
+        return false;
     }
     static void markDelivered(Context context, int profileId, int slot, boolean early) {
         Profile p = profile(context, profileId);

@@ -29,6 +29,7 @@ public final class WidgetConfigActivity extends Activity {
                     if (ReminderStore.profile(this, profiles.get(index).id) == null ||
                             !WidgetBindingStore.bind(this, id, profiles.get(index).id)) { finish(); return; }
                     QuotaWidgetProvider.updateOne(this, AppWidgetManager.getInstance(this), id);
+                    WidgetRefreshReceiver.schedule(this);
                     Intent result = new Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id);
                     setResult(RESULT_OK, result); finish();
                 }).setNegativeButton(R.string.cancel, (dialog, which) -> finish())

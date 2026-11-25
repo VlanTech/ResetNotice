@@ -194,4 +194,30 @@
     <string name="widget_empty">尚未設定重置時間，點擊進行設定。</string>
     <string name="widget_missing">此帳戶已刪除，點擊重新選擇帳戶。</string>
     <string name="widget_no_accounts">請先在重置通知中新增 AI 與帳戶。</string>
+    <string name="history_title">重置歷史</string>
+    <string name="history_hint">從本版本開始記錄，每個帳戶保留最近 %1$d 筆記錄。</string>
+    <string name="history_more">載入更多</string>
+    <string name="history_empty">尚無重置記錄。</string>
+    <string name="history_manual">手動修改</string>
+    <string name="history_natural">自然重置</string>
+    <string name="history_modified_at">修改時間：%1$s</string>
+    <string name="history_reset_at">重置時間：%1$s</string>
+    <string name="history_change">%1$s → %2$s</string>
+    <string name="history_next">下次重置：%1$s</string>
+    <string name="history_recorded_at">記錄時間：%1$s</string>
+    <string name="history_notice_sent">到點通知：已推播</string>
+    <string name="history_notice_no">到點通知：未推播 · %1$s</string>
+    <string name="history_reason_quiet">勿擾</string>
+    <string name="history_reason_disabled">到點提醒已關閉</string>
+    <string name="history_reason_permission">通知權限受限</string>
+    <string name="history_reason_missed">過期週期補算</string>
+    <string name="history_reason_manual">手動修改</string>
+    <string name="history_reason_failed">通知傳送失敗</string>
+    <string name="widget_glass_title">桌面卡片毛玻璃</string>
+    <string name="widget_glass_hint" formatted="false">調整卡片漸層底色透明度。0% 為不透明，100% 為全透明。</string>
+    <string name="widget_glass_value">透明度 %1$d%%</string>
+    <string name="widget_stack_name">全部帳戶疊卡</string>
+    <string name="widget_stack_add">新增全部帳戶疊卡</string>
+    <string name="widget_stack_hint">在一張桌面卡片中上下滑動切換各 AI 帳戶。</string>
+    <string name="widget_stack_manual">若桌面不支援應用程式內新增，請長按桌面，在小工具中選擇重置通知的全部帳戶疊卡。</string>
 </resources>
