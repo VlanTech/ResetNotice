@@ -40,8 +40,9 @@ public final class TimerService extends Service {
     /** Called on the main thread by the activity and authorized alarm/system receivers. */
     static void refresh(Context context) {
         TimerSnapshot snapshot = TimerSnapshot.read(context, System.currentTimeMillis());
+        BootState.sync(context, snapshot);
         Intent intent = new Intent(context, TimerService.class);
-        if (snapshot.count == 0) {
+        if (!snapshot.shouldRunService(AppPreferences.ongoingNotification(context))) {
             // Let an in-flight start complete its foreground promotion before stopping.
             if (active != null) active.requestCheck();
             return;
@@ -100,7 +101,7 @@ public final class TimerService extends Service {
         }
         active = this;
         remember(snapshot, now);
-        if (snapshot.count == 0) { stopWhenEmpty(); return START_NOT_STICKY; }
+        if (!snapshot.shouldRunService(AppPreferences.ongoingNotification(this))) { stopWhenEmpty(); return START_NOT_STICKY; }
         // A sticky restart may have no intent. Re-read persistent timers and rearm
         // their exact alarms rather than relying on any old in-memory state.
         AlarmEngine.rescheduleAll(this);
@@ -114,10 +115,11 @@ public final class TimerService extends Service {
     }
 
     private void reconcile() {
+        if (!AppPreferences.ongoingNotification(this)) { stopWhenEmpty(); return; }
         long now = System.currentTimeMillis();
         AlarmEngine.reconcileDue(this, now);
         TimerSnapshot snapshot = TimerSnapshot.read(this, now);
-        if (snapshot.count == 0) { stopWhenEmpty(); return; }
+        if (!snapshot.shouldRunService(AppPreferences.ongoingNotification(this))) { stopWhenEmpty(); return; }
         String locale = AppPreferences.localized(this).getResources().getConfiguration().locale.toLanguageTag();
         String title = title(snapshot, AppPreferences.localized(this), now);
         if (snapshot.count != lastCount || snapshot.nextReset != lastReset || snapshot.nextPeriodMinutes != lastPeriod

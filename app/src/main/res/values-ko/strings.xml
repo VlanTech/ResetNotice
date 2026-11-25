@@ -130,7 +130,7 @@
     <string name="battery_settings">배터리 최적화</string>
     <string name="battery_allowed">이 앱의 배터리 최적화 해제됨</string>
     <string name="battery_restricted">최적화로 백그라운드 활동이 제한될 수 있음</string>
-    <string name="background_help">최근 앱 정리 후 알림이 사라지면 백그라운드 활동과 자동 시작을 허용하고 최근 앱에서 잠그세요. 강제 종료 후 다시 여세요.</string>
+    <string name="background_help">백그라운드 활동과 자동 시작을 허용하세요. 재부팅하면 창을 열지 않고 알람을 복원합니다. 강제 종료 후 앱을 다시 여세요.</string>
     <string name="interval_quota">%1$s 한도</string>
     <string name="under_minute">1분 미만</string>
     <string name="notify_countdown_title">리셋까지 %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\n리셋: %2$s</string>
     <string name="notify_done_body">%1$s\n리셋: %2$s\n다음: %3$s</string>
     <string name="notify_active_count">활성 타이머: %1$d개</string>
+    <string name="ongoing_notification">상시 카운트다운 알림</string>
+    <string name="ongoing_hint">끄면 상시 알림과 포그라운드 서비스만 중지됩니다. 예약 알림과 부팅 복원은 유지됩니다.</string>
+    <string name="bg_alarm_mode">알람 모드 · 타이머 %1$d개</string>
+    <string name="boot_recovery">최근 부팅 자동 복원</string>
+    <string name="boot_never">복원 기록이 없습니다. 재부팅 후 잠금을 해제하세요.</string>
+    <string name="boot_exact">%1$s · 타이머 %2$d개 재등록 (정확)</string>
+    <string name="boot_approximate">%1$s · 타이머 %2$d개 재등록 (부정확)</string>
+    <string name="boot_failed">%1$s · 복원 실패. 시스템 설정을 확인하세요.</string>
+    <string name="gms_status">Google Play 서비스 / 푸시</string>
+    <string name="gms_detected">Google Play 서비스와 스토어가 감지되었습니다. 클라우드 푸시는 설정되지 않았습니다.</string>
+    <string name="gms_unavailable">Google Play 서비스 또는 스토어를 사용할 수 없습니다. 로컬 알림은 유지됩니다.</string>
+    <string name="boot_alert_title">동기화 대기 중인 한도 알림</string>
+    <string name="boot_alert_body">잠금을 해제하면 상세 한도 알림을 동기화합니다.</string>
 </resources>

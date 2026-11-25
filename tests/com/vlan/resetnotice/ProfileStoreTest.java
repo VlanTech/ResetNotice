@@ -142,9 +142,12 @@ public final class ProfileStoreTest {
                     require(alarmIds.add(AlarmIdentity.id(profile, slot, early)), "alarm identity collision");
         require(!alarmIds.contains(100) && !alarmIds.contains(199), "legacy/test IDs are disjoint");
         require(!alarmIds.contains(198), "foreground timer notification ID disjoint");
+        require(!alarmIds.contains(200), "Direct Boot reminder notification ID disjoint");
 
         FakeContext background = new FakeContext();
         require(TimerSnapshot.read(background, now).count == 0, "no profile needs no foreground service");
+        require(!TimerSnapshot.read(background, now).shouldRunService(true), "no timers cannot start service");
+        require(TimerSnapshot.read(background, now).nextVisibleAlert == Long.MAX_VALUE, "no timers need no boot alert");
         ReminderStore.Profile bg = ReminderStore.add(background, "ChatGPT", "主账号", true);
         require(TimerSnapshot.read(background, now).count == 0, "unset profile needs no foreground service");
         ReminderStore.Slot bgShort = ReminderStore.load(background, bg.id, ReminderStore.SHORT);
@@ -155,6 +158,8 @@ public final class ProfileStoreTest {
         ReminderStore.save(background, bgShort);
         TimerSnapshot snap = TimerSnapshot.read(background, now);
         require(snap.count == 1 && snap.nextReset == bgShort.target, "active even with at-time notification disabled");
+        require(snap.shouldRunService(true) && !snap.shouldRunService(false), "ongoing switch controls service, not timer existence");
+        require(snap.nextVisibleAlert == bgShort.target - 15 * ResetMath.MINUTE, "boot mirror early notification");
         require(snap.nextLabel.equals("ChatGPT · 主账号 · 短时限额"), "notification names active timer");
         require(snap.nextEvent == bgShort.target - 15 * ResetMath.MINUTE, "early event is next check");
         require(snap.nextCheckDelay(now) == 60_000L, "background checks are bounded and not per-second");
@@ -166,14 +171,24 @@ public final class ProfileStoreTest {
         snap = TimerSnapshot.read(background, now);
         require(snap.count == 2 && snap.nextReset == bgWeek.target, "weekly timer selected even with both reminders disabled");
         require(snap.nextEvent == bgWeek.target, "next event selects earliest rollover");
+        require(snap.nextVisibleAlert == bgShort.target - 15 * ResetMath.MINUTE, "silent rollovers are not mirrored notifications");
+        ReminderStore.markDelivered(background, bg.id, ReminderStore.SHORT, true);
+        require(TimerSnapshot.read(background, now).nextVisibleAlert == Long.MAX_VALUE, "delivered early and disabled at do not create boot alert");
+        bgWeek.at = true;
+        ReminderStore.save(background, bgWeek);
+        require(TimerSnapshot.read(background, now).nextVisibleAlert == bgWeek.target, "enabled at-time reminder mirrored");
+        bgWeek.at = false;
+        ReminderStore.save(background, bgWeek);
         require(TimerSnapshot.read(background, bgWeek.target + 1).count == 2, "overdue recurring timer remains active after process restart");
         ReminderStore.rollForward(background, bgWeek, bgWeek.target + 1);
         require(TimerSnapshot.read(background, now).nextReset == bgShort.target, "snapshot updates after rollover");
         ReminderStore.edit(background, bg.id, "ChatGPT", "主账号", false);
         require(TimerSnapshot.read(background, now).count == 1, "disabled short excluded from service");
+        require(TimerSnapshot.read(background, now).nextVisibleAlert == Long.MAX_VALUE, "disabled short removed from boot mirror");
         bgWeek.target = 0;
         ReminderStore.save(background, bgWeek);
         require(TimerSnapshot.read(background, now).count == 0, "clearing final timer ends foreground service");
+        require(!TimerSnapshot.read(background, now).shouldRunService(true), "clearing final timer stops ongoing service even if enabled");
         ReminderStore.delete(background, bg.id);
         require(TimerSnapshot.read(background, now).count == 0, "deleting account does not keep stale timers");
         String[][] brands = {{"ChatGPT Plus","openai"},{"GPT-6.2 Sol","openai"},{"OpenAI","openai"},{"Codex","openai"},{"Claude Pro","claude"},

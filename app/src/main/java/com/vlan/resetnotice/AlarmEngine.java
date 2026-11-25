@@ -69,6 +69,7 @@ final class AlarmEngine {
             rescheduleSlot(context, p.id, ReminderStore.SHORT);
             rescheduleSlot(context, p.id, ReminderStore.WEEK);
         }
+        BootState.sync(context, TimerSnapshot.read(context, System.currentTimeMillis()));
     }
 
     static void cancelSlot(Context context, int profile, int slot, boolean removeNotifications) {
@@ -148,6 +149,7 @@ final class AlarmEngine {
     /** Reconcile each due cycle from its saved calendar boundary. Called by alarms,
      * boot/time-change recovery and the foreground system-clock ticker. */
     static void reconcileDue(Context context, long now) {
+        boolean changed = false;
         for (ReminderStore.Profile p : ReminderStore.profiles(context)) {
             for (int quota : new int[]{ReminderStore.SHORT, ReminderStore.WEEK}) {
                 if (!p.allows(quota)) continue;
@@ -170,10 +172,12 @@ final class AlarmEngine {
                     rolled = ReminderStore.rollForward(context, current, now);
                 }
                 boolean earlySent = deliverEarly(context, p, current, now);
+                changed |= rolled || earlySent;
                 if (rolled) schedule(context, current, false);
                 if (rolled || earlySent) schedule(context, current, true);
             }
         }
+        if (changed) BootState.sync(context, TimerSnapshot.read(context, now));
     }
 
     private static boolean deliverEarly(Context context, ReminderStore.Profile profile, ReminderStore.Slot s, long now) {

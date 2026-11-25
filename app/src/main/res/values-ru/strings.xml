@@ -130,7 +130,7 @@
     <string name="battery_settings">Оптимизация батареи</string>
     <string name="battery_allowed">Оптимизация для приложения отключена</string>
     <string name="battery_restricted">Оптимизация может ограничивать работу в фоне</string>
-    <string name="background_help">Если после очистки недавних уведомления пропадают, разрешите фон, автозапуск и закрепите приложение. После принудительной остановки откройте снова.</string>
+    <string name="background_help">Разрешите фоновую работу и автозапуск. Будильники восстанавливаются после перезапуска без открытия окна. После принудительной остановки откройте приложение снова.</string>
     <string name="interval_quota">Лимит %1$s</string>
     <string name="under_minute">менее 1 мин</string>
     <string name="notify_countdown_title">Сброс через %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\nСброс: %2$s</string>
     <string name="notify_done_body">%1$s\nСброс: %2$s\nСледующий: %3$s</string>
     <string name="notify_active_count">Активных таймеров: %1$d</string>
+    <string name="ongoing_notification">Постоянное уведомление таймера</string>
+    <string name="ongoing_hint">Отключает только постоянное уведомление и службу переднего плана. Напоминания и восстановление при запуске остаются активными.</string>
+    <string name="bg_alarm_mode">Режим будильника · Таймеров: %1$d</string>
+    <string name="boot_recovery">Последнее восстановление при запуске</string>
+    <string name="boot_never">Нет записи о восстановлении. Перезагрузите и разблокируйте устройство для проверки.</string>
+    <string name="boot_exact">%1$s · Таймеров восстановлено: %2$d (точные)</string>
+    <string name="boot_approximate">%1$s · Таймеров восстановлено: %2$d (неточные)</string>
+    <string name="boot_failed">%1$s · Ошибка восстановления. Проверьте системные настройки.</string>
+    <string name="gms_status">Сервисы Google Play / Push</string>
+    <string name="gms_detected">Сервисы Google Play и магазин найдены. Облачные уведомления не настроены.</string>
+    <string name="gms_unavailable">Сервисы Google Play или магазин недоступны. Локальные напоминания работают.</string>
+    <string name="boot_alert_title">Ожидающее напоминание о квоте</string>
+    <string name="boot_alert_body">Разблокируйте устройство для синхронизации подробностей.</string>
 </resources>

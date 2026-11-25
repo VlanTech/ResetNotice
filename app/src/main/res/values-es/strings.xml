@@ -130,7 +130,7 @@
     <string name="battery_settings">Optimización de batería</string>
     <string name="battery_allowed">Optimización desactivada para esta app</string>
     <string name="battery_restricted">La optimización puede limitar la actividad en segundo plano</string>
-    <string name="background_help">Si desaparecen los avisos al limpiar Recientes, permite actividad en segundo plano, inicio automático y ancla la app. Reabre tras forzar detención.</string>
+    <string name="background_help">Permite la actividad en segundo plano y el inicio automático. Las alarmas se restauran al reiniciar sin abrir una ventana. Tras una detención forzada, vuelve a abrir la app.</string>
     <string name="interval_quota">Cuota de %1$s</string>
     <string name="under_minute">menos de 1 min</string>
     <string name="notify_countdown_title">Reinicio en %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\nReinicio: %2$s</string>
     <string name="notify_done_body">%1$s\nReinicio: %2$s\nPróximo: %3$s</string>
     <string name="notify_active_count">Temporizadores activos: %1$d</string>
+    <string name="ongoing_notification">Notificación de cuenta atrás permanente</string>
+    <string name="ongoing_hint">Al desactivarla, solo se detienen la notificación permanente y el servicio en primer plano. Los avisos y la recuperación al iniciar siguen activos.</string>
+    <string name="bg_alarm_mode">Modo alarma · %1$d temporizadores activos</string>
+    <string name="boot_recovery">Última recuperación automática al iniciar</string>
+    <string name="boot_never">Sin registro de recuperación. Reinicia y desbloquea el dispositivo para comprobarlo.</string>
+    <string name="boot_exact">%1$s · %2$d temporizadores reprogramados (exactos)</string>
+    <string name="boot_approximate">%1$s · %2$d temporizadores reprogramados (inexactos)</string>
+    <string name="boot_failed">%1$s · Error de recuperación. Revisa los ajustes del sistema.</string>
+    <string name="gms_status">Servicios de Google Play / Push</string>
+    <string name="gms_detected">Servicios de Google Play y tienda detectados. Push en la nube sin configurar.</string>
+    <string name="gms_unavailable">Servicios de Google Play o tienda no disponibles. Los avisos locales siguen activos.</string>
+    <string name="boot_alert_title">Aviso de cuota pendiente</string>
+    <string name="boot_alert_body">Desbloquea el dispositivo para sincronizar los detalles.</string>
 </resources>

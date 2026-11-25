@@ -2,7 +2,7 @@
   <img src="app/src/main/res/drawable-nodpi/portrait.png" alt="ResetNotice" width="112" />
   <h1>重置通知 · ResetNotice</h1>
   <p>多平台 AI 额度重置提醒 · 离线 · 自动续排</p>
-  <p><a href="releases/ResetNotice-v1.5.0.apk">下载 v1.5.0 APK</a> · <a href="https://github.com/VlanTech/ResetNotice/releases">Releases</a> · <a href="CHANGELOG.md">版本记录</a> · <a href="LICENSE">MIT</a></p>
+  <p><a href="releases/ResetNotice-v1.6.0.apk">下载 v1.6.0 APK</a> · <a href="https://github.com/VlanTech/ResetNotice/releases">Releases</a> · <a href="CHANGELOG.md">版本记录</a> · <a href="LICENSE">MIT</a></p>
 </div>
 
 ## 简介
@@ -18,32 +18,35 @@ ResetNotice 是一款轻量级原生 Android 应用，将多个 AI 平台、多�
 - **实时倒计时**：使用手机系统时钟，重置时间精确对齐至整分钟；折叠后仍显示倒计时和实际日期时间。
 - **自动循环**：短时限额默认每 5 小时循环，支持自定义周期；周限额每 7 天循环。关机或短暂离线后直接补算到下一轮。
 - **通知管理**：提前提醒、到点提醒独立开关，提前时间可自定义；关闭通知不影响计时器续排。
-- **后台计时**：有效计时器自动启动可见的前台服务与常驻状态通知，划掉最近任务后保持运行，同时保留精确闹钟；清除全部计时器自动停止服务。
+- **后台计时**：可在设置中手动开启或关闭常驻计时通知和对应前台服务；关闭后独立闹钟仍正常安排提醒和循环，清除全部计时器自动停止服务。
+- **开机恢复**：系统开机广播自动恢复闹钟，无需打开应用窗口；Android 7.0 及以上首次解锁前可显示不包含账户信息的通用提醒，解锁后恢复全部计划并按设置启动前台服务。设置页显示最近恢复记录及 GMS 组件检测状态。
 - **原生体验**：日夜间主题、平滑折叠动画、账户内局部更新，无需联网。
 - **界面与语言**：18 种主要 AI 厂商标识自动匹配，简洁的齿轮与展开图标；独立设置页支持跟随系统、日间、夜间主题及 11 种语言（简体中文、繁體中文、English、日本語、한국어、Español、Português、Français、Italiano、Deutsch、Русский）。
 - **交互与通知**：小时额度名称随循环周期自动显示；原生预测式返回、可关闭触感反馈，常驻通知以最近重置倒计时为标题，重置提醒以厂商为标题。
 
 ## 安装与使用
 
-1. 下载 [ResetNotice-v1.5.0.apk](releases/ResetNotice-v1.5.0.apk) 或从 [Releases](https://github.com/VlanTech/ResetNotice/releases) 获取最新签名 APK，允许系统安装应用。
+1. 下载 [ResetNotice-v1.6.0.apk](releases/ResetNotice-v1.6.0.apk) 或从 [Releases](https://github.com/VlanTech/ResetNotice/releases) 获取最新签名 APK，允许系统安装应用。
 2. 打开应用，授权通知与精确提醒（Android 系统中的「闹钟和提醒」）。
 3. 点击首页「＋ 新增」，填写 AI 名称和账户备注；不需要短时额度时可将其关闭。
 4. 展开账户，选择具体重置日期时间，或输入剩余天数、小时、分钟。短时周期可独立修改。
 5. 按需开启提前提醒和到点提醒。到期后自动顺延，无需反复录入。
 
-覆盖安装本仓库发布的 APK 可保留现有配置。首次打开升级后的应用，检查首页后台运行状态及通知栏常驻状态。ColorOS 等系统可能限制后台服务及精确闹钟，可点击首页右上角齿轮，在设置页查看电池优化状态、进入后台运行设置，允许后台活动和自启动，并在最近任务中锁定应用（如系统提供该选项）。前台服务在系统回收时请求恢复；最近任务移除时重新确认闹钟，系统硬停止仍可能移除前台服务和通知，需重新打开应用补算下一次重置时间。
+覆盖安装本仓库发布的 APK 可保留现有配置。首次打开升级后的应用，检查首页后台运行状态及通知栏常驻状态。ColorOS 等系统可能限制后台服务及精确闹钟，可点击首页右上角齿轮，在设置页查看电池优化状态、进入后台运行设置，允许后台活动和自启动。随后无需保留活动窗口。前台服务在普通系统回收时请求恢复；最近任务移除时重新确认闹钟。系统强行停止仍可能取消闹钟和通知，需重新打开应用补算下一次重置时间。重启并首次解锁后，打开设置页确认「最近一次开机自动恢复」的时间和计时器数量。
+
+本版仍是完全离线的应用，GMS 状态仅检测组件是否存在并启用，未接入远程推送。真正的 Google FCM 推送需另外配置 Firebase 项目及可信消息发送端，详见 [GMS 推送设计说明](docs/gms-push.md)。
 
 ## 技术信息
 
 | 项目 | 规格 |
 |---|---|
-| 当前版本 | v1.5.0 |
+| 当前版本 | v1.6.0 |
 | applicationId | `com.vlan.resetnotice` |
 | 最低系统 | Android 6.0（API 23） |
 | 目标 SDK / 编译 SDK | API 34 / API 35 |
 | 实现 | 原生 Java、Android SDK |
-| 通知 | AlarmManager、NotificationManager、Foreground Service |
-| 数据 | SharedPreferences，本地持久化 |
+| 通知 | AlarmManager、NotificationManager、可选 Foreground Service、Direct Boot |
+| 数据 | SharedPreferences，本地持久化；首次解锁前只读取下一条提醒时间 |
 
 ## 源码与构建
 
@@ -54,7 +57,7 @@ bash fetch-toolchain.sh
 bash build-apk.sh
 ```
 
-构建脚本会校验工具链下载文件、编译资源和 Java、执行计时及账户数据测试，然后自动签名并检查 APK。未指定正式签名时输出 `deliverables/ResetNotice-v1.5.0-local.apk`，仅供本地测试，签名与正式发行版不同，不能覆盖安装正式发行版。
+构建脚本会校验工具链下载文件、编译资源和 Java、执行计时及账户数据测试，然后自动签名并检查 APK。未指定正式签名时输出 `deliverables/ResetNotice-v1.6.0-local.apk`，仅供本地测试，签名与正式发行版不同，不能覆盖安装正式发行版。
 
 正式发布时须使用项目原有的发布签名密钥，并在本机安全设置下列环境变量：
 

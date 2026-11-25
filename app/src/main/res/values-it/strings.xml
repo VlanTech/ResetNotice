@@ -130,7 +130,7 @@
     <string name="battery_settings">Ottimizzazione batteria</string>
     <string name="battery_allowed">Ottimizzazione disattivata per l’app</string>
     <string name="battery_restricted">L’ottimizzazione può limitare il background</string>
-    <string name="background_help">Se gli avvisi spariscono dopo la pulizia delle app recenti, consenti attività in background, avvio automatico e blocca l’app. Riapri dopo arresto forzato.</string>
+    <string name="background_help">Consenti attività in background e avvio automatico. Gli allarmi vengono ripristinati al riavvio senza aprire finestre. Riapri dopo un arresto forzato.</string>
     <string name="interval_quota">Quota di %1$s</string>
     <string name="under_minute">meno di 1 min</string>
     <string name="notify_countdown_title">Reset tra %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\nReset: %2$s</string>
     <string name="notify_done_body">%1$s\nReset: %2$s\nProssimo: %3$s</string>
     <string name="notify_active_count">Timer attivi: %1$d</string>
+    <string name="ongoing_notification">Notifica permanente del conto alla rovescia</string>
+    <string name="ongoing_hint">Disattiva solo la notifica permanente e il servizio in primo piano. Promemoria e ripristino al riavvio restano attivi.</string>
+    <string name="bg_alarm_mode">Modalità allarme · %1$d timer attivi</string>
+    <string name="boot_recovery">Ultimo ripristino automatico al riavvio</string>
+    <string name="boot_never">Nessun ripristino registrato. Riavvia e sblocca il dispositivo per verificare.</string>
+    <string name="boot_exact">%1$s · %2$d timer riprogrammati (esatti)</string>
+    <string name="boot_approximate">%1$s · %2$d timer riprogrammati (inesatti)</string>
+    <string name="boot_failed">%1$s · Ripristino non riuscito. Controlla le impostazioni di sistema.</string>
+    <string name="gms_status">Google Play Services / Push</string>
+    <string name="gms_detected">Google Play Services e Store rilevati. Push cloud non configurato.</string>
+    <string name="gms_unavailable">Google Play Services o Store non disponibili. I promemoria locali restano attivi.</string>
+    <string name="boot_alert_title">Promemoria quota in attesa</string>
+    <string name="boot_alert_body">Sblocca il dispositivo per sincronizzare i dettagli.</string>
 </resources>

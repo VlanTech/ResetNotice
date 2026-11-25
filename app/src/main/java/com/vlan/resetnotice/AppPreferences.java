@@ -23,6 +23,10 @@ final class AppPreferences {
     static String order(Context c) { return prefs(c).getString("order", MANUAL); }
     static void setOrder(Context c, String order) { prefs(c).edit().putString("order", order).apply(); }
     static boolean haptics(Context c) { return prefs(c).getBoolean("haptics", true); }
+    static boolean ongoingNotification(Context c) { return prefs(c).getBoolean("ongoing_notification", true); }
+    static void setOngoingNotification(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean("ongoing_notification", enabled).commit();
+    }
     static void setHaptics(Context c, boolean enabled) { prefs(c).edit().putBoolean("haptics", enabled).apply(); }
     static void setLanguage(Context c, String language) { prefs(c).edit().putString("language", language).apply(); }
     static void setTheme(Context c, String theme) { prefs(c).edit().putString("theme", theme).apply(); }

@@ -371,6 +371,7 @@ public final class MainActivity extends Activity {
         if (backgroundStatus == null) return;
         int activeCount = TimerSnapshot.read(this, System.currentTimeMillis()).count;
         setText(backgroundStatus, activeCount == 0 ? tr(R.string.bg_idle) :
+                !AppPreferences.ongoingNotification(this) ? tr(R.string.bg_alarm_mode, activeCount) :
                 TimerService.isRunning() ? tr(R.string.bg_running, activeCount) : tr(R.string.bg_wait));
     }
 

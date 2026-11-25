@@ -7,6 +7,9 @@ final class TimerSnapshot {
     int count;
     long nextReset = Long.MAX_VALUE;
     long nextEvent = Long.MAX_VALUE;
+    // Earliest user-enabled notification, not a silent rollover. Safe to mirror
+    // the instant alone into device-protected storage for Direct Boot.
+    long nextVisibleAlert = Long.MAX_VALUE;
     String nextLabel = "";
     String nextProfileLabel = "";
     int nextSlotId;
@@ -28,8 +31,12 @@ final class TimerSnapshot {
                     snapshot.nextPeriodMinutes = s.periodMinutes;
                 }
                 snapshot.nextEvent = Math.min(snapshot.nextEvent, s.target);
+                if (s.at && !s.atDelivered)
+                    snapshot.nextVisibleAlert = Math.min(snapshot.nextVisibleAlert, s.target);
                 if (s.early && !s.earlyDelivered) {
                     long early = s.target - s.earlyMinutes * ResetMath.MINUTE;
+                    if (s.target > now)
+                        snapshot.nextVisibleAlert = Math.min(snapshot.nextVisibleAlert, early);
                     // Already-due reminders are reconciled once per normal check,
                     // rather than repeatedly spinning if permission was denied.
                     if (early > now) snapshot.nextEvent = Math.min(snapshot.nextEvent, early);
@@ -38,6 +45,8 @@ final class TimerSnapshot {
         }
         return snapshot;
     }
+
+    boolean shouldRunService(boolean ongoingNotification) { return ongoingNotification && count > 0; }
 
     long nextCheckDelay(long now) {
         if (count == 0) return 60_000L;

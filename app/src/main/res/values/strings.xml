@@ -130,7 +130,7 @@
     <string name="battery_settings">Battery optimization</string>
     <string name="battery_allowed">Battery optimization disabled for this app</string>
     <string name="battery_restricted">Battery optimization may restrict background activity</string>
-    <string name="background_help">If reminders disappear after clearing Recents, allow background activity, auto-start and lock the app in Recents. Reopen after force stop.</string>
+    <string name="background_help">Allow background activity and auto-start in your phone settings. The app restores alarms after reboot without opening a window. System force-stop requires reopening.</string>
     <string name="interval_quota">%1$s quota</string>
     <string name="under_minute">under 1 min</string>
     <string name="notify_countdown_title">Reset in %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\nReset: %2$s</string>
     <string name="notify_done_body">%1$s\nReset: %2$s\nNext: %3$s</string>
     <string name="notify_active_count">Active timers: %1$d</string>
+    <string name="ongoing_notification">Ongoing countdown notification</string>
+    <string name="ongoing_hint">Off: only the foreground timer and its ongoing notification stop. Scheduled reminders and boot recovery remain enabled.</string>
+    <string name="bg_alarm_mode">Alarm mode · %1$d active timers</string>
+    <string name="boot_recovery">Last automatic boot recovery</string>
+    <string name="boot_never">No boot recovery recorded yet. Restart and unlock once to check.</string>
+    <string name="boot_exact">%1$s · %2$d timers rearmed (exact alarms)</string>
+    <string name="boot_approximate">%1$s · %2$d timers rearmed (inexact alarms)</string>
+    <string name="boot_failed">%1$s · Recovery failed. Check system settings.</string>
+    <string name="gms_status">Google Play services / push</string>
+    <string name="gms_detected">Google Play services and Play Store detected. Cloud push is not configured.</string>
+    <string name="gms_unavailable">Google Play services or Play Store unavailable. Local reminders still work.</string>
+    <string name="boot_alert_title">Quota reminder pending</string>
+    <string name="boot_alert_body">Unlock your device to synchronize detailed quota reminders.</string>
 </resources>

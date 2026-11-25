@@ -130,7 +130,7 @@
     <string name="battery_settings">電池最佳化設定</string>
     <string name="battery_allowed">已允許不受電池最佳化限制</string>
     <string name="battery_restricted">仍受系統電池最佳化限制</string>
-    <string name="background_help">如清理背景後提醒消失，請允許背景活動、自動啟動並鎖定最近任務。強制停止後需重新開啟。</string>
+    <string name="background_help">請允許背景活動及自動啟動。重新啟動後無須開啟視窗即可恢復鬧鐘；系統強制停止後需重新開啟。</string>
     <string name="interval_quota">%1$s限額</string>
     <string name="under_minute">不足 1 分鐘</string>
     <string name="notify_countdown_title">距重置還有 %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\n重置：%2$s</string>
     <string name="notify_done_body">%1$s\n已重置：%2$s\n下次：%3$s</string>
     <string name="notify_active_count">共 %1$d 個額度計時中</string>
+    <string name="ongoing_notification">常駐計時通知</string>
+    <string name="ongoing_hint">關閉僅停止常駐通知和前景計時服務，提前／到點提醒及開機恢復仍有效。</string>
+    <string name="bg_alarm_mode">系統鬧鐘模式 · %1$d 個額度計時中</string>
+    <string name="boot_recovery">最近一次開機自動恢復</string>
+    <string name="boot_never">尚無開機恢復記錄。重新啟動並解鎖一次後可查看。</string>
+    <string name="boot_exact">%1$s · 已重新登記 %2$d 個計時器（精確鬧鐘）</string>
+    <string name="boot_approximate">%1$s · 已重新登記 %2$d 個計時器（非精確鬧鐘）</string>
+    <string name="boot_failed">%1$s · 恢復失敗，請檢查系統設定。</string>
+    <string name="gms_status">Google Play 服務 / 推播</string>
+    <string name="gms_detected">已偵測到 Google Play 服務與商店；雲端推播尚未設定。</string>
+    <string name="gms_unavailable">Google Play 服務或商店無法使用，本機提醒仍有效。</string>
+    <string name="boot_alert_title">有待同步的額度提醒</string>
+    <string name="boot_alert_body">解鎖裝置後同步詳細額度提醒。</string>
 </resources>

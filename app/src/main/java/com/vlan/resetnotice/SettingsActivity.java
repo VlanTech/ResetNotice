@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -27,6 +28,8 @@ import android.widget.Toast;
 public final class SettingsActivity extends Activity {
     private int page, card, text, sub, line, accent;
     private TextView batteryValue;
+    private TextView bootValue;
+    private TextView gmsValue;
     @Override protected void attachBaseContext(Context base) { super.attachBaseContext(AppPreferences.wrap(base)); }
 
     @Override public void onCreate(Bundle state) {
@@ -80,11 +83,37 @@ public final class SettingsActivity extends Activity {
 
         add(content, label(getString(R.string.notifications), 14, sub, true), 23);
         LinearLayout background = panel();
+        LinearLayout ongoingRow = row(); ongoingRow.setPadding(dp(16), dp(15), dp(14), dp(15));
+        LinearLayout ongoingLabels = column();
+        add(ongoingLabels, label(getString(R.string.ongoing_notification), 16, text, true), 0);
+        add(ongoingLabels, label(getString(R.string.ongoing_hint), 13, sub, false), 3);
+        ongoingRow.addView(ongoingLabels, new LinearLayout.LayoutParams(0, -2, 1));
+        Switch ongoingSwitch = new Switch(this);
+        ongoingSwitch.setContentDescription(getString(R.string.ongoing_notification));
+        ongoingSwitch.setChecked(AppPreferences.ongoingNotification(this));
+        Haptics.configure(ongoingSwitch);
+        ongoingSwitch.setOnCheckedChangeListener((b, checked) -> {
+            Haptics.tap(b);
+            AppPreferences.setOngoingNotification(this, checked);
+            AlarmEngine.rescheduleAll(this);
+            TimerService.refresh(this);
+        });
+        ongoingRow.addView(ongoingSwitch);
+        add(background, ongoingRow, 0);
+        divider(background);
         add(background, item(getString(R.string.background_settings), getString(R.string.background_hint), v -> appDetails()), 0);
         divider(background);
         LinearLayout battery = item(getString(R.string.battery_settings), batteryStatus(), v -> batterySettings());
         batteryValue = (TextView)((LinearLayout)battery.getChildAt(0)).getChildAt(1);
         add(background, battery, 0);
+        divider(background);
+        LinearLayout boot = item(getString(R.string.boot_recovery), bootStatus(), null);
+        bootValue = (TextView)((LinearLayout)boot.getChildAt(0)).getChildAt(1);
+        add(background, boot, 0);
+        divider(background);
+        LinearLayout gms = item(getString(R.string.gms_status), gmsStatus(), null);
+        gmsValue = (TextView)((LinearLayout)gms.getChildAt(0)).getChildAt(1);
+        add(background, gms, 0);
         add(content, background, 9);
         TextView help = label(getString(R.string.background_help), 12, sub, false);
         help.setPadding(dp(5), dp(3), dp(5), 0);
@@ -94,7 +123,7 @@ public final class SettingsActivity extends Activity {
         LinearLayout about = panel();
         add(about, item(getString(R.string.developer), "Vlan_Tech", null), 0);
         divider(about);
-        add(about, item(getString(R.string.version), "1.5.0", null), 0);
+        add(about, item(getString(R.string.version), "1.6.0", null), 0);
         divider(about);
         add(about, item(getString(R.string.source_code), "GitHub · ResetNotice", v -> {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VlanTech/ResetNotice"))); }
@@ -108,6 +137,26 @@ public final class SettingsActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         if (batteryValue != null) batteryValue.setText(batteryStatus());
+        if (bootValue != null) bootValue.setText(bootStatus());
+        if (gmsValue != null) gmsValue.setText(gmsStatus());
+    }
+
+    private String bootStatus() {
+        long time = BootState.recoveryTime(this);
+        if (time <= 0) return getString(R.string.boot_never);
+        String date = ResetMath.displayDateTime(time, System.currentTimeMillis());
+        int count = BootState.recoveryCount(this);
+        if (count < 0) return getString(R.string.boot_failed, date);
+        return getString(BootState.recoveryExact(this) ? R.string.boot_exact : R.string.boot_approximate, date, count);
+    }
+
+    private boolean packageEnabled(String name) {
+        try { return getPackageManager().getApplicationInfo(name, 0).enabled; }
+        catch (PackageManager.NameNotFoundException e) { return false; }
+    }
+    private String gmsStatus() {
+        return getString(packageEnabled("com.google.android.gms") && packageEnabled("com.android.vending")
+                ? R.string.gms_detected : R.string.gms_unavailable);
     }
 
     private String batteryStatus() {

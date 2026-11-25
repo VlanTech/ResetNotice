@@ -130,7 +130,7 @@
     <string name="battery_settings">Akkuoptimierung</string>
     <string name="battery_allowed">Akkuoptimierung für App deaktiviert</string>
     <string name="battery_restricted">Optimierung kann Hintergrundaktivität einschränken</string>
-    <string name="background_help">Wenn Erinnerungen nach dem Leeren der letzten Apps verschwinden, Hintergrundaktivität und Autostart erlauben und App fixieren. Nach erzwungenem Stopp erneut öffnen.</string>
+    <string name="background_help">Hintergrundaktivität und Autostart erlauben. Alarme werden nach dem Neustart ohne Fenster wiederhergestellt. Nach erzwungenem Stopp die App erneut öffnen.</string>
     <string name="interval_quota">%1$s-Limit</string>
     <string name="under_minute">unter 1 Min.</string>
     <string name="notify_countdown_title">Reset in %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\nReset: %2$s</string>
     <string name="notify_done_body">%1$s\nReset: %2$s\nNächster: %3$s</string>
     <string name="notify_active_count">Aktive Timer: %1$d</string>
+    <string name="ongoing_notification">Dauerhafte Countdown-Benachrichtigung</string>
+    <string name="ongoing_hint">Deaktiviert nur die dauerhafte Benachrichtigung und den Vordergrunddienst. Erinnerungen und Wiederherstellung beim Start bleiben aktiv.</string>
+    <string name="bg_alarm_mode">Alarmmodus · %1$d aktive Timer</string>
+    <string name="boot_recovery">Letzte automatische Wiederherstellung</string>
+    <string name="boot_never">Noch keine Wiederherstellung erfasst. Zum Prüfen neu starten und entsperren.</string>
+    <string name="boot_exact">%1$s · %2$d Timer neu geplant (exakt)</string>
+    <string name="boot_approximate">%1$s · %2$d Timer neu geplant (ungenau)</string>
+    <string name="boot_failed">%1$s · Wiederherstellung fehlgeschlagen. Systemeinstellungen prüfen.</string>
+    <string name="gms_status">Google Play-Dienste / Push</string>
+    <string name="gms_detected">Google Play-Dienste und Store erkannt. Cloud-Push nicht konfiguriert.</string>
+    <string name="gms_unavailable">Google Play-Dienste oder Store nicht verfügbar. Lokale Erinnerungen bleiben aktiv.</string>
+    <string name="boot_alert_title">Ausstehende Kontingent-Erinnerung</string>
+    <string name="boot_alert_body">Entsperre das Gerät, um Details zu synchronisieren.</string>
 </resources>

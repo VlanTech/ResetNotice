@@ -130,7 +130,7 @@
     <string name="battery_settings">バッテリー最適化</string>
     <string name="battery_allowed">このアプリのバッテリー最適化は無効</string>
     <string name="battery_restricted">最適化によりバックグラウンド動作が制限される場合があります</string>
-    <string name="background_help">履歴から消して通知が消える場合、バックグラウンド動作と自動起動を許可し、履歴でロックしてください。強制停止後は再起動が必要です。</string>
+    <string name="background_help">バックグラウンド動作と自動起動を許可してください。再起動時は画面を開かずにアラームを復元します。強制停止後は再度アプリを開いてください。</string>
     <string name="interval_quota">%1$s枠</string>
     <string name="under_minute">1分未満</string>
     <string name="notify_countdown_title">リセットまで %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\nリセット：%2$s</string>
     <string name="notify_done_body">%1$s\nリセット済み：%2$s\n次回：%3$s</string>
     <string name="notify_active_count">稼働中：%1$d 件</string>
+    <string name="ongoing_notification">カウントダウンの常駐通知</string>
+    <string name="ongoing_hint">オフにすると常駐通知とフォアグラウンドサービスのみ停止します。予約通知と起動時の復元は有効です。</string>
+    <string name="bg_alarm_mode">アラームモード · %1$d 件のタイマー</string>
+    <string name="boot_recovery">前回の起動時自動復元</string>
+    <string name="boot_never">復元記録はありません。再起動してロックを解除してください。</string>
+    <string name="boot_exact">%1$s · %2$d 件のタイマーを再登録（正確）</string>
+    <string name="boot_approximate">%1$s · %2$d 件のタイマーを再登録（不正確）</string>
+    <string name="boot_failed">%1$s · 復元に失敗しました。システム設定を確認してください。</string>
+    <string name="gms_status">Google Play サービス / プッシュ</string>
+    <string name="gms_detected">Google Play サービスとストアを検出しました。クラウドプッシュは未設定です。</string>
+    <string name="gms_unavailable">Google Play サービスまたはストアが利用できません。ローカル通知は有効です。</string>
+    <string name="boot_alert_title">同期待ちの利用枠通知</string>
+    <string name="boot_alert_body">端末のロックを解除して詳細を同期してください。</string>
 </resources>

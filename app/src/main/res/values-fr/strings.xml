@@ -130,7 +130,7 @@
     <string name="battery_settings">Optimisation de batterie</string>
     <string name="battery_allowed">Optimisation désactivée pour cette app</string>
     <string name="battery_restricted">L’optimisation peut limiter l’activité en arrière-plan</string>
-    <string name="background_help">Si les alertes disparaissent en vidant les tâches récentes, autorisez le fond et le démarrage auto, puis verrouillez l’app. Rouvrez après un arrêt forcé.</string>
+    <string name="background_help">Autorisez les activités en arrière-plan et le démarrage automatique. Les alarmes sont restaurées au redémarrage sans ouvrir de fenêtre. Relancez après un arrêt forcé.</string>
     <string name="interval_quota">Quota de %1$s</string>
     <string name="under_minute">moins de 1 min</string>
     <string name="notify_countdown_title">Reset dans %1$s</string>
@@ -138,4 +138,17 @@
     <string name="notify_planned_body">%1$s\nReset : %2$s</string>
     <string name="notify_done_body">%1$s\nReset : %2$s\nProchain : %3$s</string>
     <string name="notify_active_count">Minuteurs actifs : %1$d</string>
+    <string name="ongoing_notification">Notification de compte à rebours permanente</string>
+    <string name="ongoing_hint">Désactive uniquement la notification permanente et le service au premier plan. Les rappels et la restauration au démarrage restent actifs.</string>
+    <string name="bg_alarm_mode">Mode alarme · %1$d minuteurs actifs</string>
+    <string name="boot_recovery">Dernière restauration au démarrage</string>
+    <string name="boot_never">Aucune restauration enregistrée. Redémarrez puis déverrouillez pour vérifier.</string>
+    <string name="boot_exact">%1$s · %2$d minuteurs réenregistrés (exacts)</string>
+    <string name="boot_approximate">%1$s · %2$d minuteurs réenregistrés (inexacts)</string>
+    <string name="boot_failed">%1$s · Échec de la restauration. Vérifiez les paramètres système.</string>
+    <string name="gms_status">Services Google Play / Push</string>
+    <string name="gms_detected">Services Google Play et Store détectés. Push cloud non configuré.</string>
+    <string name="gms_unavailable">Services Google Play ou Store indisponibles. Les rappels locaux restent actifs.</string>
+    <string name="boot_alert_title">Rappel de quota en attente</string>
+    <string name="boot_alert_body">Déverrouillez votre appareil pour synchroniser les détails.</string>
 </resources>
