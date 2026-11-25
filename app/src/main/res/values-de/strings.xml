@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Google Play-Dienste oder Store nicht verfügbar. Lokale Erinnerungen bleiben aktiv.</string>
     <string name="boot_alert_title">Ausstehende Kontingent-Erinnerung</string>
     <string name="boot_alert_body">Entsperre das Gerät, um Details zu synchronisieren.</string>
+    <string name="clock_mode">Systemwecker-Erinnerungen</string>
+    <string name="clock_mode_hint">Nur aktive Kontingent-Erinnerungen werden als sichtbare Wecker geplant. Ein Symbol und höherer Verbrauch sind möglich. Stille Zyklen bleiben unverändert.</string>
+    <string name="vendor_push">Hersteller-Push-Kanal</string>
+    <string name="vendor_none">Kein unterstützter Hersteller erkannt. Lokale Alarme bleiben aktiv.</string>
+    <string name="vendor_pending">%1$s erkannt. Herstellerregistrierung nicht konfiguriert; lokale Alarme aktiv.</string>
+    <string name="probe_title">60-Sekunden-Hintergrundtest</string>
+    <string name="probe_instructions">Ein Alarm wird für 60 s geplant. Schalte die Dauermeldung aus, entferne die App aus der Übersicht und sperre das Gerät. Öffne sie erst nach Ablauf.</string>
+    <string name="probe_start">Test starten</string>
+    <string name="probe_idle">Antippen, um einen Hintergrundtest zu planen.</string>
+    <string name="probe_failed">Das System konnte den Test nicht planen.</string>
+    <string name="probe_mode_clock">Systemwecker</string>
+    <string name="probe_mode_exact">Exakter Alarm</string>
+    <string name="probe_mode_inexact">Ungenauer Alarm</string>
+    <string name="probe_scheduled">Noch %1$d s · %2$s</string>
+    <string name="probe_overdue">%1$d s überfällig · Keine Systemantwort · %2$s</string>
+    <string name="probe_success">%1$s · Verzögerung %2$d s · Benachrichtigung gesendet · %3$s</string>
+    <string name="probe_blocked">%1$s · Verzögerung %2$d s · Benachrichtigung blockiert · %3$s</string>
+    <string name="probe_delivered_title">Hintergrundtest-Erinnerung</string>
+    <string name="probe_message">Geplant: %1$s\nEmpfangen: %2$s</string>
+    <string name="last_alarm_title">Letzte Kontingent-Alarmantwort</string>
+    <string name="last_alarm_none">Keine gültige Alarmantwort erfasst.</string>
+    <string name="last_alarm_result">%1$s · Verzögerung %2$d s</string>
 </resources>

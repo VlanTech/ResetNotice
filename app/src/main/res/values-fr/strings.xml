@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Services Google Play ou Store indisponibles. Les rappels locaux restent actifs.</string>
     <string name="boot_alert_title">Rappel de quota en attente</string>
     <string name="boot_alert_body">Déverrouillez votre appareil pour synchroniser les détails.</string>
+    <string name="clock_mode">Alertes du réveil système</string>
+    <string name="clock_mode_hint">Seuls les rappels de quota activés deviennent des alarmes visibles. Une icône et une consommation accrue sont possibles. Les cycles silencieux restent normaux.</string>
+    <string name="vendor_push">Canal push du fabricant</string>
+    <string name="vendor_none">Aucun fabricant compatible détecté. Alarmes locales actives.</string>
+    <string name="vendor_pending">%1$s détecté. Inscription fabricant non configurée ; alarmes locales utilisées.</string>
+    <string name="probe_title">Test en arrière-plan de 60 s</string>
+    <string name="probe_instructions">Un rappel sera programmé dans 60 s. Désactivez la notification permanente, retirez l’appli des récents et verrouillez l’appareil. Ne le rouvrez pas avant l’heure.</string>
+    <string name="probe_start">Lancer le test</string>
+    <string name="probe_idle">Touchez pour programmer un test en arrière-plan.</string>
+    <string name="probe_failed">Le système n’a pas pu programmer le test.</string>
+    <string name="probe_mode_clock">Réveil système</string>
+    <string name="probe_mode_exact">Alarme exacte</string>
+    <string name="probe_mode_inexact">Alarme inexacte</string>
+    <string name="probe_scheduled">%1$d s restantes · %2$s</string>
+    <string name="probe_overdue">Retard %1$d s · Aucune réponse système · %2$s</string>
+    <string name="probe_success">%1$s · Retard %2$d s · Notification envoyée · %3$s</string>
+    <string name="probe_blocked">%1$s · Retard %2$d s · Notification bloquée · %3$s</string>
+    <string name="probe_delivered_title">Rappel de test en arrière-plan</string>
+    <string name="probe_message">Prévu : %1$s\nReçu : %2$s</string>
+    <string name="last_alarm_title">Dernier retour d’alarme de quota</string>
+    <string name="last_alarm_none">Aucun retour d’alarme valide.</string>
+    <string name="last_alarm_result">%1$s · Retard %2$d s</string>
 </resources>

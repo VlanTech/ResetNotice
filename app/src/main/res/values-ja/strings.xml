@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Google Play サービスまたはストアが利用できません。ローカル通知は有効です。</string>
     <string name="boot_alert_title">同期待ちの利用枠通知</string>
     <string name="boot_alert_body">端末のロックを解除して詳細を同期してください。</string>
+    <string name="clock_mode">システムアラームによる通知強化</string>
+    <string name="clock_mode_hint">有効な利用枠通知のみ、表示されるアラームとして登録します。アイコンや電池消費が増える場合があります。</string>
+    <string name="vendor_push">メーカーのプッシュ経路</string>
+    <string name="vendor_none">対応メーカーを検出できません。ローカルアラームを使用します。</string>
+    <string name="vendor_pending">%1$s を検出。メーカーの登録は未設定です。ローカルアラームを使用します。</string>
+    <string name="probe_title">60 秒バックグラウンドテスト</string>
+    <string name="probe_instructions">60 秒後に一度だけ通知します。常駐通知をオフにし、履歴からアプリを消して画面をロックしてください。時間まで開かないでください。</string>
+    <string name="probe_start">テスト開始</string>
+    <string name="probe_idle">タップしてバックグラウンドテストを予約します。</string>
+    <string name="probe_failed">システムがテストを予約できませんでした。</string>
+    <string name="probe_mode_clock">システムアラーム</string>
+    <string name="probe_mode_exact">正確なアラーム</string>
+    <string name="probe_mode_inexact">不正確なアラーム</string>
+    <string name="probe_scheduled">残り %1$d 秒 · %2$s</string>
+    <string name="probe_overdue">%1$d 秒超過 · コールバックなし · %2$s</string>
+    <string name="probe_success">%1$s · 遅延 %2$d 秒 · 通知送信済み · %3$s</string>
+    <string name="probe_blocked">%1$s · 遅延 %2$d 秒 · 通知が制限 · %3$s</string>
+    <string name="probe_delivered_title">バックグラウンドテスト通知</string>
+    <string name="probe_message">予定：%1$s\n受信：%2$s</string>
+    <string name="last_alarm_title">前回の利用枠アラーム</string>
+    <string name="last_alarm_none">有効なコールバックの記録がありません。</string>
+    <string name="last_alarm_result">%1$s · 遅延 %2$d 秒</string>
 </resources>

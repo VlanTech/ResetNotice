@@ -24,6 +24,10 @@ final class AppPreferences {
     static void setOrder(Context c, String order) { prefs(c).edit().putString("order", order).apply(); }
     static boolean haptics(Context c) { return prefs(c).getBoolean("haptics", true); }
     static boolean ongoingNotification(Context c) { return prefs(c).getBoolean("ongoing_notification", true); }
+    static boolean clockAlarmMode(Context c) { return prefs(c).getBoolean("clock_alarm_mode", false); }
+    static void setClockAlarmMode(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean("clock_alarm_mode", enabled).commit();
+    }
     static void setOngoingNotification(Context c, boolean enabled) {
         prefs(c).edit().putBoolean("ongoing_notification", enabled).commit();
     }

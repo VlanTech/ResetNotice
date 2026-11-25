@@ -143,6 +143,7 @@ public final class ProfileStoreTest {
         require(!alarmIds.contains(100) && !alarmIds.contains(199), "legacy/test IDs are disjoint");
         require(!alarmIds.contains(198), "foreground timer notification ID disjoint");
         require(!alarmIds.contains(200), "Direct Boot reminder notification ID disjoint");
+        require(!alarmIds.contains(201), "one-shot background probe ID disjoint");
 
         FakeContext background = new FakeContext();
         require(TimerSnapshot.read(background, now).count == 0, "no profile needs no foreground service");
@@ -174,9 +175,19 @@ public final class ProfileStoreTest {
         require(snap.nextVisibleAlert == bgShort.target - 15 * ResetMath.MINUTE, "silent rollovers are not mirrored notifications");
         ReminderStore.markDelivered(background, bg.id, ReminderStore.SHORT, true);
         require(TimerSnapshot.read(background, now).nextVisibleAlert == Long.MAX_VALUE, "delivered early and disabled at do not create boot alert");
+        require(AlarmPolicy.visible(bgShort, true, now), "enabled early alert can use alarm clock");
+        require(!AlarmPolicy.visible(bgShort, false, now), "disabled at-time notification remains a silent rollover");
+        require(!AlarmPolicy.visible(ReminderStore.load(background, bg.id, ReminderStore.SHORT), true, now),
+                "delivered early alert cannot become visible alarm clock");
+        require(AlarmPolicy.mode(false, true, true, true) == AlarmPolicy.EXACT, "clock mode opt-in only");
+        require(AlarmPolicy.mode(true, true, true, true) == AlarmPolicy.CLOCK, "explicit visible alert uses system clock");
+        require(AlarmPolicy.mode(true, false, true, true) == AlarmPolicy.EXACT, "silent rollover stays ordinary exact");
+        require(AlarmPolicy.mode(true, true, false, true) == AlarmPolicy.EXACT, "blocked notifications stay ordinary exact");
+        require(AlarmPolicy.mode(true, true, true, false) == AlarmPolicy.INEXACT, "alarm permission fallback");
         bgWeek.at = true;
         ReminderStore.save(background, bgWeek);
         require(TimerSnapshot.read(background, now).nextVisibleAlert == bgWeek.target, "enabled at-time reminder mirrored");
+        require(AlarmPolicy.visible(bgWeek, false, now), "enabled weekly alert is visible");
         bgWeek.at = false;
         ReminderStore.save(background, bgWeek);
         require(TimerSnapshot.read(background, bgWeek.target + 1).count == 2, "overdue recurring timer remains active after process restart");
@@ -191,6 +202,14 @@ public final class ProfileStoreTest {
         require(!TimerSnapshot.read(background, now).shouldRunService(true), "clearing final timer stops ongoing service even if enabled");
         ReminderStore.delete(background, bg.id);
         require(TimerSnapshot.read(background, now).count == 0, "deleting account does not keep stale timers");
+        String[][] manufacturers = {{"OPPO","OPPO","OPPO"}, {"OnePlus","OnePlus","OPPO"},{"realme","realme","OPPO"},
+                {"vivo","iQOO","VIVO"},{"Xiaomi","Redmi","XIAOMI"},{"Xiaomi","POCO","XIAOMI"},
+                {"Huawei","HONOR","HONOR"},{"HONOR","HONOR","HONOR"},{"HUAWEI","HUAWEI","HUAWEI"},
+                {"Meizu","MEIZU","MEIZU"},{"Google","Pixel","NONE"},{"unknown","unknown","NONE"}};
+        for (String[] manufacturer : manufacturers)
+            require(PushVendor.detect(manufacturer[0], manufacturer[1]).name().equals(manufacturer[2]),
+                    "preferred OEM channel: " + manufacturer[0] + "/" + manufacturer[1]);
+        require(PushVendor.detect(null, null) == PushVendor.NONE, "unknown OEM falls back to local alarms");
         String[][] brands = {{"ChatGPT Plus","openai"},{"GPT-6.2 Sol","openai"},{"OpenAI","openai"},{"Codex","openai"},{"Claude Pro","claude"},
                 {"Anthropic","claude"},{"Google Gemini","gemini"},{"Grok 4","grok"},{"xAI","grok"},{"DeepSeek V4","deepseek"},
                 {"通义千问","qwen"},{"Qwen","qwen"},{"Perplexity Pro","perplexity"},{"Microsoft Copilot","copilot"},{"Kimi","kimi"},

@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Servicios de Google Play o tienda no disponibles. Los avisos locales siguen activos.</string>
     <string name="boot_alert_title">Aviso de cuota pendiente</string>
     <string name="boot_alert_body">Desbloquea el dispositivo para sincronizar los detalles.</string>
+    <string name="clock_mode">Avisos de alarma del sistema</string>
+    <string name="clock_mode_hint">Registra solo los avisos de cuota activos como alarmas visibles. Puede mostrar un icono y consumir más batería. Los ciclos silenciosos siguen normales.</string>
+    <string name="vendor_push">Canal push del fabricante</string>
+    <string name="vendor_none">No se detectó un fabricante compatible. Se usan alarmas locales.</string>
+    <string name="vendor_pending">%1$s detectado. Registro del fabricante sin configurar; se usan alarmas locales.</string>
+    <string name="probe_title">Prueba en segundo plano de 60 s</string>
+    <string name="probe_instructions">Se programará un aviso en 60 s. Desactiva la notificación permanente, quita la app de Recientes y bloquea el dispositivo. No la abras antes de tiempo.</string>
+    <string name="probe_start">Iniciar prueba</string>
+    <string name="probe_idle">Toca para programar una prueba en segundo plano.</string>
+    <string name="probe_failed">El sistema no pudo programar la prueba.</string>
+    <string name="probe_mode_clock">Alarma del reloj</string>
+    <string name="probe_mode_exact">Alarma exacta</string>
+    <string name="probe_mode_inexact">Alarma inexacta</string>
+    <string name="probe_scheduled">Quedan %1$d s · %2$s</string>
+    <string name="probe_overdue">%1$d s de retraso · Sin respuesta del sistema · %2$s</string>
+    <string name="probe_success">%1$s · Retraso %2$d s · Notificación enviada · %3$s</string>
+    <string name="probe_blocked">%1$s · Retraso %2$d s · Notificación bloqueada · %3$s</string>
+    <string name="probe_delivered_title">Aviso de prueba en segundo plano</string>
+    <string name="probe_message">Previsto: %1$s\nRecibido: %2$s</string>
+    <string name="last_alarm_title">Última respuesta de alarma de cuota</string>
+    <string name="last_alarm_none">No hay respuestas de alarma válidas.</string>
+    <string name="last_alarm_result">%1$s · Retraso %2$d s</string>
 </resources>

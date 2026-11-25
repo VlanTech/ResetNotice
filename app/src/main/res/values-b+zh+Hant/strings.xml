@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Google Play 服務或商店無法使用，本機提醒仍有效。</string>
     <string name="boot_alert_title">有待同步的額度提醒</string>
     <string name="boot_alert_body">解鎖裝置後同步詳細額度提醒。</string>
+    <string name="clock_mode">系統鬧鐘增強提醒</string>
+    <string name="clock_mode_hint">僅為已開啟的額度提醒登記可見的系統鬧鐘，可能顯示鬧鐘圖示並增加耗電。靜默續排使用普通鬧鐘。</string>
+    <string name="vendor_push">廠商推播通道</string>
+    <string name="vendor_none">未識別到支援的廠商；繼續使用本機鬧鐘。</string>
+    <string name="vendor_pending">已識別 %1$s；尚未取得廠商推播授權，目前使用本機鬧鐘。</string>
+    <string name="probe_title">60 秒背景送達測試</string>
+    <string name="probe_instructions">將安排一次 60 秒後的提醒。建議先關閉常駐通知，開始後移除最近任務並鎖定裝置，等到時間後再開啟。</string>
+    <string name="probe_start">開始測試</string>
+    <string name="probe_idle">點擊安排一次背景測試。</string>
+    <string name="probe_failed">系統無法登記該測試。</string>
+    <string name="probe_mode_clock">系統鬧鐘</string>
+    <string name="probe_mode_exact">精確提醒</string>
+    <string name="probe_mode_inexact">非精確提醒</string>
+    <string name="probe_scheduled">剩餘 %1$d 秒 · %2$s</string>
+    <string name="probe_overdue">已超時 %1$d 秒 · 尚無系統回呼 · %2$s</string>
+    <string name="probe_success">%1$s · 回呼延遲 %2$d 秒 · 已提交通知 · %3$s</string>
+    <string name="probe_blocked">%1$s · 回呼延遲 %2$d 秒 · 通知受限 · %3$s</string>
+    <string name="probe_delivered_title">背景測試提醒</string>
+    <string name="probe_message">計畫：%1$s\n接收：%2$s</string>
+    <string name="last_alarm_title">最近額度鬧鐘回呼</string>
+    <string name="last_alarm_none">尚無有效的額度鬧鐘回呼記錄。</string>
+    <string name="last_alarm_result">%1$s · 延遲 %2$d 秒</string>
 </resources>

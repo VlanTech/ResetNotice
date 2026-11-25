@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Google Play Services o Store non disponibili. I promemoria locali restano attivi.</string>
     <string name="boot_alert_title">Promemoria quota in attesa</string>
     <string name="boot_alert_body">Sblocca il dispositivo per sincronizzare i dettagli.</string>
+    <string name="clock_mode">Avvisi della sveglia di sistema</string>
+    <string name="clock_mode_hint">Registra solo gli avvisi di quota attivi come sveglie visibili. Può mostrare un’icona e consumare più batteria. I cicli silenziosi restano normali.</string>
+    <string name="vendor_push">Canale push del produttore</string>
+    <string name="vendor_none">Nessun produttore supportato rilevato. Allarmi locali attivi.</string>
+    <string name="vendor_pending">%1$s rilevato. Registrazione produttore non configurata; allarmi locali attivi.</string>
+    <string name="probe_title">Test in background di 60 s</string>
+    <string name="probe_instructions">Verrà programmato un avviso tra 60 s. Disattiva la notifica permanente, rimuovi l’app dalle recenti e blocca il dispositivo. Non riaprirlo prima.</string>
+    <string name="probe_start">Avvia test</string>
+    <string name="probe_idle">Tocca per programmare un test in background.</string>
+    <string name="probe_failed">Il sistema non ha programmato il test.</string>
+    <string name="probe_mode_clock">Sveglia di sistema</string>
+    <string name="probe_mode_exact">Allarme esatto</string>
+    <string name="probe_mode_inexact">Allarme inesatto</string>
+    <string name="probe_scheduled">Restano %1$d s · %2$s</string>
+    <string name="probe_overdue">Ritardo %1$d s · Nessuna risposta di sistema · %2$s</string>
+    <string name="probe_success">%1$s · Ritardo %2$d s · Notifica inviata · %3$s</string>
+    <string name="probe_blocked">%1$s · Ritardo %2$d s · Notifica bloccata · %3$s</string>
+    <string name="probe_delivered_title">Avviso di test in background</string>
+    <string name="probe_message">Previsto: %1$s\nRicevuto: %2$s</string>
+    <string name="last_alarm_title">Ultima risposta allarme quota</string>
+    <string name="last_alarm_none">Nessuna risposta valida registrata.</string>
+    <string name="last_alarm_result">%1$s · Ritardo %2$d s</string>
 </resources>

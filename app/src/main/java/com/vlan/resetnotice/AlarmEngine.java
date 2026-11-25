@@ -14,6 +14,8 @@ import android.os.Build;
 final class AlarmEngine {
     static final String CHANNEL = "quota_reset";
     static final String ACTION = "com.vlan.resetnotice.REMIND";
+    static final String PROBE_ACTION = "com.vlan.resetnotice.BACKGROUND_TEST";
+    private static final int PROBE_ID = 201;
 
     static void createChannel(Context context) {
         if (Build.VERSION.SDK_INT >= 26) {
@@ -108,16 +110,63 @@ final class AlarmEngine {
                 .putExtra("minutes", s.earlyMinutes);
         PendingIntent pi = PendingIntent.getBroadcast(context, request, delivery,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        scheduleSystemAlarm(context, when, pi, AlarmPolicy.visible(s, early, now), request, s.profileId);
+    }
+
+    /** Every user-visible alarm can opt into Android's actual alarm-clock API;
+     * never use it for silent rollover, a keepalive heartbeat or background start. */
+    private static int scheduleSystemAlarm(Context context, long when, PendingIntent pi,
+                                           boolean visible, int request, int profileId) {
         AlarmManager manager = context.getSystemService(AlarmManager.class);
+        int mode = AlarmPolicy.mode(AppPreferences.clockAlarmMode(context), visible,
+                notificationsAllowed(context), exactAllowed(context));
         // Setting the same PendingIntent replaces the prior alarm. Do not cancel
         // a valid alarm first: the process could be reclaimed between the two calls.
-        if (exactAllowed(context)) {
+        if (mode == AlarmPolicy.CLOCK) {
+            try {
+                Intent open = new Intent(context, MainActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        .putExtra("open_profile", profileId);
+                PendingIntent show = PendingIntent.getActivity(context, request, open,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                manager.setAlarmClock(new AlarmManager.AlarmClockInfo(when, show), pi);
+                return AlarmPolicy.CLOCK;
+            } catch (SecurityException ignored) { /* Permission can change. Fall back to ordinary alarm. */ }
+        }
+        if (mode != AlarmPolicy.INEXACT) {
             try {
                 manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
-                return;
+                return AlarmPolicy.EXACT;
             } catch (SecurityException ignored) { /* Permission may change while scheduling. */ }
         }
         manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
+        return AlarmPolicy.INEXACT;
+    }
+
+    static void startProbe(Context context) {
+        createChannel(context);
+        long expected = System.currentTimeMillis() + AlarmDiagnostics.PROBE_DELAY;
+        AlarmDiagnostics.startProbe(context, expected);
+        armProbe(context, expected);
+    }
+
+    static void armProbe(Context context, long expected) {
+        Intent probe = new Intent(context, ProbeReceiver.class).setAction(PROBE_ACTION).putExtra("expected", expected);
+        PendingIntent pi = PendingIntent.getBroadcast(context, PROBE_ID, probe,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        try {
+            AlarmDiagnostics.probeMode(context, scheduleSystemAlarm(context,
+                    Math.max(System.currentTimeMillis() + 500, expected), pi, true, PROBE_ID, -1));
+        } catch (RuntimeException e) {
+            AlarmDiagnostics.probeMode(context, -1);
+        }
+    }
+
+    static boolean sendProbeNotification(Context context, long expected, long actual) {
+        createChannel(context);
+        Context localized = AppPreferences.localized(context);
+        return notify(context, PROBE_ID, -1, localized.getString(R.string.probe_delivered_title),
+                localized.getString(R.string.probe_message, timeLabel(expected), timeLabel(actual)));
     }
 
     static String timeLabel(long target) {
@@ -142,6 +191,7 @@ final class AlarmEngine {
         long intended = early ? s.target - s.earlyMinutes * ResetMath.MINUTE : s.target;
         if (now < intended) { schedule(context, s, early); return; }
 
+        AlarmDiagnostics.alarmReceived(context, intended, now);
         createChannel(context);
         reconcileDue(context, now);
     }

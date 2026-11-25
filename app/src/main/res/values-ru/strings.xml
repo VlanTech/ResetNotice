@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Сервисы Google Play или магазин недоступны. Локальные напоминания работают.</string>
     <string name="boot_alert_title">Ожидающее напоминание о квоте</string>
     <string name="boot_alert_body">Разблокируйте устройство для синхронизации подробностей.</string>
+    <string name="clock_mode">Усиленные напоминания будильника</string>
+    <string name="clock_mode_hint">Только активные напоминания о квотах становятся видимыми будильниками. Может появиться значок и увеличиться расход батареи. Тихие циклы не меняются.</string>
+    <string name="vendor_push">Push-канал производителя</string>
+    <string name="vendor_none">Поддерживаемый производитель не найден. Локальные будильники активны.</string>
+    <string name="vendor_pending">Обнаружен %1$s. Регистрация производителя не настроена; используются локальные будильники.</string>
+    <string name="probe_title">Фоновый тест на 60 секунд</string>
+    <string name="probe_instructions">Напоминание будет через 60 с. Отключите постоянное уведомление, уберите приложение из недавних и заблокируйте устройство. Не открывайте до истечения срока.</string>
+    <string name="probe_start">Начать тест</string>
+    <string name="probe_idle">Нажмите для запуска фонового теста.</string>
+    <string name="probe_failed">Система не смогла запланировать тест.</string>
+    <string name="probe_mode_clock">Системный будильник</string>
+    <string name="probe_mode_exact">Точный будильник</string>
+    <string name="probe_mode_inexact">Неточный будильник</string>
+    <string name="probe_scheduled">Осталось %1$d с · %2$s</string>
+    <string name="probe_overdue">Просрочено %1$d с · Нет ответа системы · %2$s</string>
+    <string name="probe_success">%1$s · Задержка %2$d с · Уведомление отправлено · %3$s</string>
+    <string name="probe_blocked">%1$s · Задержка %2$d с · Уведомление заблокировано · %3$s</string>
+    <string name="probe_delivered_title">Фоновое тестовое напоминание</string>
+    <string name="probe_message">Запланировано: %1$s\nПолучено: %2$s</string>
+    <string name="last_alarm_title">Последний ответ будильника квоты</string>
+    <string name="last_alarm_none">Нет записи о действительном ответе.</string>
+    <string name="last_alarm_result">%1$s · Задержка %2$d с</string>
 </resources>

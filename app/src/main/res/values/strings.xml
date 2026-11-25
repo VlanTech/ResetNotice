@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Google Play services or Play Store unavailable. Local reminders still work.</string>
     <string name="boot_alert_title">Quota reminder pending</string>
     <string name="boot_alert_body">Unlock your device to synchronize detailed quota reminders.</string>
+    <string name="clock_mode">System alarm clock alerts</string>
+    <string name="clock_mode_hint">Optional high-priority, user-visible alarm clocks for enabled quota notifications. May show an alarm icon and use more battery. Silent rollovers remain ordinary alarms.</string>
+    <string name="vendor_push">Manufacturer push channel</string>
+    <string name="vendor_none">No supported manufacturer detected. Local alarms remain active.</string>
+    <string name="vendor_pending">%1$s identified. Vendor enrollment is not configured; using local alarms.</string>
+    <string name="probe_title">60-second background test</string>
+    <string name="probe_instructions">A single test alarm will ring in 60 seconds. Turn off the ongoing countdown notification, remove the app from Recents and lock the device. Do not reopen until the minute has passed.</string>
+    <string name="probe_start">Start test</string>
+    <string name="probe_idle">Tap to schedule a real background alarm.</string>
+    <string name="probe_failed">The system could not schedule this test.</string>
+    <string name="probe_mode_clock">Alarm clock</string>
+    <string name="probe_mode_exact">Exact alarm</string>
+    <string name="probe_mode_inexact">Inexact alarm</string>
+    <string name="probe_scheduled">%1$d s remaining · %2$s</string>
+    <string name="probe_overdue">%1$d s overdue · No system callback yet · %2$s</string>
+    <string name="probe_success">%1$s · Callback +%2$d s · Notification posted · %3$s</string>
+    <string name="probe_blocked">%1$s · Callback +%2$d s · Notification blocked · %3$s</string>
+    <string name="probe_delivered_title">Background test alarm</string>
+    <string name="probe_message">Expected: %1$s\nReceived: %2$s</string>
+    <string name="last_alarm_title">Last quota alarm callback</string>
+    <string name="last_alarm_none">No valid quota alarm callback recorded.</string>
+    <string name="last_alarm_result">%1$s · Delay %2$d s</string>
 </resources>

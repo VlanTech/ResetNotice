@@ -4,13 +4,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.Gravity;
@@ -29,7 +31,22 @@ public final class SettingsActivity extends Activity {
     private int page, card, text, sub, line, accent;
     private TextView batteryValue;
     private TextView bootValue;
-    private TextView gmsValue;
+    private TextView probeValue;
+    private TextView lastAlarmValue;
+    private final Handler diagnosticHandler = new Handler(Looper.getMainLooper());
+    private final Runnable refreshDiagnostics = new Runnable() {
+        @Override public void run() {
+            if (probeValue != null) {
+                String status = probeStatus();
+                if (!status.contentEquals(probeValue.getText())) probeValue.setText(status);
+            }
+            if (lastAlarmValue != null) {
+                String status = lastAlarmStatus();
+                if (!status.contentEquals(lastAlarmValue.getText())) lastAlarmValue.setText(status);
+            }
+            diagnosticHandler.postDelayed(this, 1000L);
+        }
+    };
     @Override protected void attachBaseContext(Context base) { super.attachBaseContext(AppPreferences.wrap(base)); }
 
     @Override public void onCreate(Bundle state) {
@@ -101,6 +118,25 @@ public final class SettingsActivity extends Activity {
         ongoingRow.addView(ongoingSwitch);
         add(background, ongoingRow, 0);
         divider(background);
+        LinearLayout clockRow = row(); clockRow.setPadding(dp(16), dp(15), dp(14), dp(15));
+        LinearLayout clockLabels = column();
+        add(clockLabels, label(getString(R.string.clock_mode), 16, text, true), 0);
+        add(clockLabels, label(getString(R.string.clock_mode_hint), 13, sub, false), 3);
+        clockRow.addView(clockLabels, new LinearLayout.LayoutParams(0, -2, 1));
+        Switch clockSwitch = new Switch(this);
+        clockSwitch.setContentDescription(getString(R.string.clock_mode));
+        clockSwitch.setChecked(AppPreferences.clockAlarmMode(this));
+        Haptics.configure(clockSwitch);
+        clockSwitch.setOnCheckedChangeListener((b, checked) -> {
+            Haptics.tap(b);
+            AppPreferences.setClockAlarmMode(this, checked);
+            AlarmEngine.rescheduleAll(this);
+            if (checked && !AlarmEngine.exactAllowed(this))
+                Toast.makeText(this, R.string.exact_permission_hint, Toast.LENGTH_LONG).show();
+        });
+        clockRow.addView(clockSwitch);
+        add(background, clockRow, 0);
+        divider(background);
         add(background, item(getString(R.string.background_settings), getString(R.string.background_hint), v -> appDetails()), 0);
         divider(background);
         LinearLayout battery = item(getString(R.string.battery_settings), batteryStatus(), v -> batterySettings());
@@ -111,9 +147,24 @@ public final class SettingsActivity extends Activity {
         bootValue = (TextView)((LinearLayout)boot.getChildAt(0)).getChildAt(1);
         add(background, boot, 0);
         divider(background);
-        LinearLayout gms = item(getString(R.string.gms_status), gmsStatus(), null);
-        gmsValue = (TextView)((LinearLayout)gms.getChildAt(0)).getChildAt(1);
-        add(background, gms, 0);
+        PushVendor vendor = PushVendor.detect(Build.MANUFACTURER, Build.BRAND);
+        add(background, item(getString(R.string.vendor_push),
+                vendor == PushVendor.NONE ? getString(R.string.vendor_none) :
+                        getString(R.string.vendor_pending, vendor.displayName), null), 0);
+        divider(background);
+        LinearLayout probe = item(getString(R.string.probe_title), probeStatus(), v -> {
+            new AlertDialog.Builder(this).setTitle(R.string.probe_title).setMessage(R.string.probe_instructions)
+                    .setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.probe_start, (dialog, which) -> {
+                        AlarmEngine.startProbe(this);
+                        probeValue.setText(probeStatus());
+                    }).show();
+        });
+        probeValue = (TextView)((LinearLayout)probe.getChildAt(0)).getChildAt(1);
+        add(background, probe, 0);
+        divider(background);
+        LinearLayout lastAlarm = item(getString(R.string.last_alarm_title), lastAlarmStatus(), null);
+        lastAlarmValue = (TextView)((LinearLayout)lastAlarm.getChildAt(0)).getChildAt(1);
+        add(background, lastAlarm, 0);
         add(content, background, 9);
         TextView help = label(getString(R.string.background_help), 12, sub, false);
         help.setPadding(dp(5), dp(3), dp(5), 0);
@@ -123,7 +174,7 @@ public final class SettingsActivity extends Activity {
         LinearLayout about = panel();
         add(about, item(getString(R.string.developer), "Vlan_Tech", null), 0);
         divider(about);
-        add(about, item(getString(R.string.version), "1.6.0", null), 0);
+        add(about, item(getString(R.string.version), "1.7.0", null), 0);
         divider(about);
         add(about, item(getString(R.string.source_code), "GitHub · ResetNotice", v -> {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VlanTech/ResetNotice"))); }
@@ -138,9 +189,14 @@ public final class SettingsActivity extends Activity {
         super.onResume();
         if (batteryValue != null) batteryValue.setText(batteryStatus());
         if (bootValue != null) bootValue.setText(bootStatus());
-        if (gmsValue != null) gmsValue.setText(gmsStatus());
+        diagnosticHandler.removeCallbacks(refreshDiagnostics);
+        diagnosticHandler.post(refreshDiagnostics);
     }
 
+    @Override protected void onPause() {
+        diagnosticHandler.removeCallbacks(refreshDiagnostics);
+        super.onPause();
+    }
     private String bootStatus() {
         long time = BootState.recoveryTime(this);
         if (time <= 0) return getString(R.string.boot_never);
@@ -150,13 +206,26 @@ public final class SettingsActivity extends Activity {
         return getString(BootState.recoveryExact(this) ? R.string.boot_exact : R.string.boot_approximate, date, count);
     }
 
-    private boolean packageEnabled(String name) {
-        try { return getPackageManager().getApplicationInfo(name, 0).enabled; }
-        catch (PackageManager.NameNotFoundException e) { return false; }
+    private String probeStatus() {
+        long expected = AlarmDiagnostics.expected(this), actual = AlarmDiagnostics.received(this);
+        if (expected <= 0) return getString(R.string.probe_idle);
+        int mode = AlarmDiagnostics.mode(this);
+        if (mode <= 0) return getString(R.string.probe_failed);
+        String modeLabel = getString(mode == AlarmPolicy.CLOCK ? R.string.probe_mode_clock :
+                mode == AlarmPolicy.EXACT ? R.string.probe_mode_exact : R.string.probe_mode_inexact);
+        long now = System.currentTimeMillis();
+        if (actual > 0) {
+            return getString(AlarmDiagnostics.notified(this) ? R.string.probe_success : R.string.probe_blocked,
+                    ResetMath.displayDateTime(actual, now), Math.max(0L, (actual - expected) / 1000L), modeLabel);
+        }
+        if (expected > now) return getString(R.string.probe_scheduled, (expected - now + 999L) / 1000L, modeLabel);
+        return getString(R.string.probe_overdue, Math.max(0L, (now - expected) / 1000L), modeLabel);
     }
-    private String gmsStatus() {
-        return getString(packageEnabled("com.google.android.gms") && packageEnabled("com.android.vending")
-                ? R.string.gms_detected : R.string.gms_unavailable);
+    private String lastAlarmStatus() {
+        long actual = AlarmDiagnostics.lastReceived(this);
+        if (actual <= 0) return getString(R.string.last_alarm_none);
+        return getString(R.string.last_alarm_result, ResetMath.displayDateTime(actual, System.currentTimeMillis()),
+                Math.max(0L, (actual - AlarmDiagnostics.lastExpected(this)) / 1000L));
     }
 
     private String batteryStatus() {

@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Serviços do Google Play ou loja indisponíveis. Os lembretes locais continuam ativos.</string>
     <string name="boot_alert_title">Lembrete de cota pendente</string>
     <string name="boot_alert_body">Desbloqueie o dispositivo para sincronizar os detalhes.</string>
+    <string name="clock_mode">Alertas do relógio do sistema</string>
+    <string name="clock_mode_hint">Registra apenas lembretes de cota ativos como alarmes visíveis. Pode exibir um ícone e consumir mais bateria. Ciclos silenciosos continuam normais.</string>
+    <string name="vendor_push">Canal push do fabricante</string>
+    <string name="vendor_none">Nenhum fabricante compatível detectado. Alarmes locais ativos.</string>
+    <string name="vendor_pending">%1$s detectado. Registro do fabricante não configurado; usando alarmes locais.</string>
+    <string name="probe_title">Teste em segundo plano de 60 s</string>
+    <string name="probe_instructions">Um aviso será agendado para 60 s. Desative a notificação permanente, remova o app dos Recentes e bloqueie o dispositivo. Não abra antes da hora.</string>
+    <string name="probe_start">Iniciar teste</string>
+    <string name="probe_idle">Toque para agendar o teste em segundo plano.</string>
+    <string name="probe_failed">O sistema não conseguiu agendar o teste.</string>
+    <string name="probe_mode_clock">Alarme do relógio</string>
+    <string name="probe_mode_exact">Alarme exato</string>
+    <string name="probe_mode_inexact">Alarme inexato</string>
+    <string name="probe_scheduled">Restam %1$d s · %2$s</string>
+    <string name="probe_overdue">%1$d s de atraso · Sem resposta do sistema · %2$s</string>
+    <string name="probe_success">%1$s · Atraso %2$d s · Notificação enviada · %3$s</string>
+    <string name="probe_blocked">%1$s · Atraso %2$d s · Notificação bloqueada · %3$s</string>
+    <string name="probe_delivered_title">Aviso de teste em segundo plano</string>
+    <string name="probe_message">Previsto: %1$s\nRecebido: %2$s</string>
+    <string name="last_alarm_title">Último retorno de alarme de cota</string>
+    <string name="last_alarm_none">Nenhum retorno de alarme válido.</string>
+    <string name="last_alarm_result">%1$s · Atraso %2$d s</string>
 </resources>

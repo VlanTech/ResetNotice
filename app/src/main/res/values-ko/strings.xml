@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Google Play 서비스 또는 스토어를 사용할 수 없습니다. 로컬 알림은 유지됩니다.</string>
     <string name="boot_alert_title">동기화 대기 중인 한도 알림</string>
     <string name="boot_alert_body">잠금을 해제하면 상세 한도 알림을 동기화합니다.</string>
+    <string name="clock_mode">시스템 알람 시계 알림 강화</string>
+    <string name="clock_mode_hint">활성화된 한도 알림만 표시되는 알람으로 등록합니다. 알람 아이콘과 배터리 사용량이 증가할 수 있습니다.</string>
+    <string name="vendor_push">제조사 푸시 채널</string>
+    <string name="vendor_none">지원 제조사를 찾지 못했습니다. 로컬 알람을 사용합니다.</string>
+    <string name="vendor_pending">%1$s 감지됨. 제조사 등록이 설정되지 않아 로컬 알람을 사용합니다.</string>
+    <string name="probe_title">60초 백그라운드 테스트</string>
+    <string name="probe_instructions">60초 후 한 번 알림을 예약합니다. 상시 알림을 끄고 최근 앱에서 제거한 뒤 기기를 잠그세요. 시간이 지나기 전에 다시 열지 마세요.</string>
+    <string name="probe_start">테스트 시작</string>
+    <string name="probe_idle">탭하여 백그라운드 테스트를 예약합니다.</string>
+    <string name="probe_failed">시스템이 테스트를 예약하지 못했습니다.</string>
+    <string name="probe_mode_clock">시스템 알람 시계</string>
+    <string name="probe_mode_exact">정확한 알람</string>
+    <string name="probe_mode_inexact">부정확한 알람</string>
+    <string name="probe_scheduled">%1$d초 남음 · %2$s</string>
+    <string name="probe_overdue">%1$d초 초과 · 시스템 콜백 없음 · %2$s</string>
+    <string name="probe_success">%1$s · %2$d초 지연 · 알림 제출 · %3$s</string>
+    <string name="probe_blocked">%1$s · %2$d초 지연 · 알림 차단 · %3$s</string>
+    <string name="probe_delivered_title">백그라운드 테스트 알림</string>
+    <string name="probe_message">예정: %1$s\n수신: %2$s</string>
+    <string name="last_alarm_title">최근 한도 알람 콜백</string>
+    <string name="last_alarm_none">유효한 콜백 기록이 없습니다.</string>
+    <string name="last_alarm_result">%1$s · %2$d초 지연</string>
 </resources>

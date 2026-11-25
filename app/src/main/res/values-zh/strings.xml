@@ -151,4 +151,26 @@
     <string name="gms_unavailable">Google Play 服务或商店不可用，本地提醒仍有效。</string>
     <string name="boot_alert_title">有待同步的额度提醒</string>
     <string name="boot_alert_body">解锁设备后同步具体额度提醒。</string>
+    <string name="clock_mode">系统闹钟增强提醒</string>
+    <string name="clock_mode_hint">仅为已开启的额度提醒登记可见的系统闹钟，可能显示闹钟图标并增加耗电。静默续排仍使用普通闹钟。</string>
+    <string name="vendor_push">厂商推送通道</string>
+    <string name="vendor_none">未识别到支持的厂商；继续使用本地闹钟。</string>
+    <string name="vendor_pending">已识别 %1$s；尚未取得厂商推送授权，当前使用本地闹钟。</string>
+    <string name="probe_title">60 秒后台送达测试</string>
+    <string name="probe_instructions">将安排一次 60 秒后的真实提醒。建议先关闭常驻通知，开始测试后划掉最近任务并锁屏，等待到点再打开软件。</string>
+    <string name="probe_start">开始测试</string>
+    <string name="probe_idle">点击安排一次后台测试。</string>
+    <string name="probe_failed">系统未能登记该测试。</string>
+    <string name="probe_mode_clock">系统闹钟</string>
+    <string name="probe_mode_exact">精确提醒</string>
+    <string name="probe_mode_inexact">非精确提醒</string>
+    <string name="probe_scheduled">剩余 %1$d 秒 · %2$s</string>
+    <string name="probe_overdue">已超时 %1$d 秒 · 尚无系统回调 · %2$s</string>
+    <string name="probe_success">%1$s · 回调延迟 %2$d 秒 · 已提交通知 · %3$s</string>
+    <string name="probe_blocked">%1$s · 回调延迟 %2$d 秒 · 通知受限 · %3$s</string>
+    <string name="probe_delivered_title">后台测试提醒</string>
+    <string name="probe_message">计划：%1$s\n接收：%2$s</string>
+    <string name="last_alarm_title">最近额度闹钟回调</string>
+    <string name="last_alarm_none">尚无有效的额度闹钟回调记录。</string>
+    <string name="last_alarm_result">%1$s · 延迟 %2$d 秒</string>
 </resources>
