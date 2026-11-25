@@ -220,4 +220,9 @@
     <string name="widget_stack_add">Aggiungi pila di account</string>
     <string name="widget_stack_hint">Scorri verso l’alto o il basso per cambiare account in un widget.</string>
     <string name="widget_stack_manual">Se l’aggiunta dall’app non è disponibile, tieni premuta la home e scegli la pila di account ResetNotice nei Widget.</string>
+    <string name="widget_blur_title">Sfocatura del materiale</string>
+    <string name="widget_blur_hint">Sfuma il materiale della scheda; non legge né sfoca lo sfondo della home.</string>
+    <string name="widget_blur_value">Sfocatura %1$d%%</string>
+    <string name="widget_glass_preview">Anteprima scheda</string>
+    <string name="widget_deck_loading">Caricamento schede…</string>
 </resources>

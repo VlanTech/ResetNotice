@@ -220,4 +220,9 @@
     <string name="widget_stack_add">Kontenstapel hinzufügen</string>
     <string name="widget_stack_hint">Wische nach oben oder unten, um im Widget zwischen Konten zu wechseln.</string>
     <string name="widget_stack_manual">Falls das Hinzufügen aus der App nicht möglich ist, halte den Startbildschirm gedrückt und wähle den ResetNotice-Kontenstapel unter Widgets.</string>
+    <string name="widget_blur_title">Milchglas-Unschärfe</string>
+    <string name="widget_blur_hint">Weichzeichnet nur das Kartenmaterial; das Hintergrundbild wird nicht gelesen oder verwischt.</string>
+    <string name="widget_blur_value">Unschärfe %1$d%%</string>
+    <string name="widget_glass_preview">Kartenvorschau</string>
+    <string name="widget_deck_loading">Kontenkarten werden geladen…</string>
 </resources>

@@ -220,4 +220,9 @@
     <string name="widget_stack_add">Add all-account card stack</string>
     <string name="widget_stack_hint">Swipe up or down through all AI accounts in one desktop widget.</string>
     <string name="widget_stack_manual">If in-app pinning is unavailable, long-press the home screen and add ResetNotice’s all-account card stack from Widgets.</string>
+    <string name="widget_blur_title">Frosted material blur</string>
+    <string name="widget_blur_hint">Soften the card’s own decorative material; does not blur or read the home screen wallpaper.</string>
+    <string name="widget_blur_value">Blur strength %1$d%%</string>
+    <string name="widget_glass_preview">Card appearance preview</string>
+    <string name="widget_deck_loading">Loading account cards…</string>
 </resources>

@@ -220,4 +220,9 @@
     <string name="widget_stack_add">Ajouter la pile de comptes</string>
     <string name="widget_stack_hint">Balayez vers le haut ou le bas pour changer de compte dans un widget.</string>
     <string name="widget_stack_manual">Si l’ajout depuis l’appli échoue, appuyez longuement sur l’accueil et choisissez la pile de comptes de ResetNotice dans Widgets.</string>
+    <string name="widget_blur_title">Flou du matériau</string>
+    <string name="widget_blur_hint">Adoucit le matériau de la carte ; ne lit ni ne floute le fond d’écran.</string>
+    <string name="widget_blur_value">Intensité du flou %1$d%%</string>
+    <string name="widget_glass_preview">Aperçu de la carte</string>
+    <string name="widget_deck_loading">Chargement des cartes…</string>
 </resources>

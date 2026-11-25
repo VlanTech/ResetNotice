@@ -220,4 +220,9 @@
     <string name="widget_stack_add">新增全部帳戶疊卡</string>
     <string name="widget_stack_hint">在一張桌面卡片中上下滑動切換各 AI 帳戶。</string>
     <string name="widget_stack_manual">若桌面不支援應用程式內新增，請長按桌面，在小工具中選擇重置通知的全部帳戶疊卡。</string>
+    <string name="widget_blur_title">毛玻璃模糊度</string>
+    <string name="widget_blur_hint">調整卡片材質的弥散模糊強度，不讀取或即時模糊桌面桌布。</string>
+    <string name="widget_blur_value">模糊度 %1$d%%</string>
+    <string name="widget_glass_preview">卡片外觀預覽</string>
+    <string name="widget_deck_loading">正在同步帳戶卡片…</string>
 </resources>

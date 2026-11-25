@@ -220,4 +220,9 @@
     <string name="widget_stack_add">Adicionar pilha de contas</string>
     <string name="widget_stack_hint">Deslize para cima ou para baixo para alternar contas no widget.</string>
     <string name="widget_stack_manual">Se não puder adicionar pelo app, pressione a tela inicial e selecione a pilha de contas do ResetNotice nos Widgets.</string>
+    <string name="widget_blur_title">Desfoque do material</string>
+    <string name="widget_blur_hint">Suaviza o material do cartão; não lê nem desfoca o papel de parede.</string>
+    <string name="widget_blur_value">Desfoque %1$d%%</string>
+    <string name="widget_glass_preview">Prévia do cartão</string>
+    <string name="widget_deck_loading">Carregando cartões…</string>
 </resources>

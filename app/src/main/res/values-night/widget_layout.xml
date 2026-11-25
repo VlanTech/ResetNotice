@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item type="layout" name="widget_account">@layout/widget_account_dark</item>
+    <item type="layout" name="widget_deck_card">@layout/widget_deck_card_dark</item>
+    <item type="drawable" name="widget_bg_auto">@drawable/widget_bg_dark</item>
 </resources>

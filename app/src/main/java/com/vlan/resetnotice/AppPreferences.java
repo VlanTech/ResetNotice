@@ -29,6 +29,10 @@ final class AppPreferences {
     static void setWidgetTransparency(Context c, int value) {
         prefs(c).edit().putInt("widget_transparency", Math.max(0, Math.min(100, value))).apply();
     }
+    static int widgetBlur(Context c) { return Math.max(0, Math.min(100, prefs(c).getInt("widget_blur", 0))); }
+    static void setWidgetBlur(Context c, int value) {
+        prefs(c).edit().putInt("widget_blur", Math.max(0, Math.min(100, value))).apply();
+    }
     static void setClockAlarmMode(Context c, boolean enabled) {
         prefs(c).edit().putBoolean("clock_alarm_mode", enabled).commit();
     }

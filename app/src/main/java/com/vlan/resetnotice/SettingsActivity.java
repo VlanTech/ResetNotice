@@ -68,22 +68,64 @@ public final class SettingsActivity extends Activity {
         SeekBar slider = new SeekBar(this);
         slider.setMax(100); slider.setProgress(AppPreferences.widgetTransparency(this));
         slider.setProgressTintList(ColorStateList.valueOf(accent)); slider.setThumbTintList(ColorStateList.valueOf(accent));
-        slider.setContentDescription(getString(R.string.widget_glass_title));
+        slider.setContentDescription(getString(R.string.widget_glass_value, AppPreferences.widgetTransparency(this)));
+        FrameLayout preview = new FrameLayout(this);
+        GradientDrawable previewWall = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{getColor(R.color.accent_soft), accent, page});
+        previewWall.setCornerRadius(dp(17)); preview.setBackground(previewWall); preview.setClipToOutline(true);
+        ImageView previewImage = new ImageView(this);
+        previewImage.setScaleType(ImageView.ScaleType.FIT_XY);
+        previewImage.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        preview.addView(previewImage, new FrameLayout.LayoutParams(-1, -1));
+        LinearLayout previewLabels = column(); previewLabels.setGravity(Gravity.CENTER_VERTICAL);
+        previewLabels.setPadding(dp(14), dp(10), dp(14), dp(10));
+        add(previewLabels, label(getString(R.string.widget_glass_preview), 12, text, true), 0);
+        TextView sampleTimer = label("08:32:16", 24, text, true);
+        sampleTimer.setFontFeatureSettings("tnum"); add(previewLabels, sampleTimer, 3);
+        preview.addView(previewLabels, new FrameLayout.LayoutParams(-1, -1));
+        WidgetGlass.preview(previewImage, this);
         final Runnable refreshWidgets = () -> QuotaWidgetProvider.updateAll(this);
         slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
                 opacity.setText(getString(R.string.widget_glass_value, progress));
                 if (fromUser) {
                     AppPreferences.setWidgetTransparency(SettingsActivity.this, progress);
-                    bar.removeCallbacks(refreshWidgets); bar.postDelayed(refreshWidgets, 220L);
+                    WidgetGlass.preview(previewImage, SettingsActivity.this);
+                    glass.removeCallbacks(refreshWidgets); glass.postDelayed(refreshWidgets, 220L);
                 }
             }
             @Override public void onStartTrackingTouch(SeekBar bar) { Haptics.tap(bar); }
             @Override public void onStopTrackingTouch(SeekBar bar) {
-                bar.removeCallbacks(refreshWidgets); refreshWidgets.run();
+                glass.removeCallbacks(refreshWidgets); refreshWidgets.run();
             }
         });
-        add(glass, slider, 4); add(appearance, glass, 0);
+        add(glass, slider, 4);
+        add(glass, label(getString(R.string.widget_blur_title), 15, text, true), 12);
+        add(glass, label(getString(R.string.widget_blur_hint), 12, sub, false), 4);
+        TextView blurValue = label(getString(R.string.widget_blur_value, AppPreferences.widgetBlur(this)), 13, accent, true);
+        add(glass, blurValue, 6);
+        SeekBar blur = new SeekBar(this);
+        blur.setMax(100); blur.setProgress(AppPreferences.widgetBlur(this));
+        blur.setProgressTintList(ColorStateList.valueOf(accent)); blur.setThumbTintList(ColorStateList.valueOf(accent));
+        blur.setContentDescription(getString(R.string.widget_blur_title));
+        blur.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+                blurValue.setText(getString(R.string.widget_blur_value, progress));
+                if (fromUser) {
+                    AppPreferences.setWidgetBlur(SettingsActivity.this, progress);
+                    WidgetGlass.preview(previewImage, SettingsActivity.this);
+                    glass.removeCallbacks(refreshWidgets); glass.postDelayed(refreshWidgets, 220L);
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar bar) { Haptics.tap(bar); }
+            @Override public void onStopTrackingTouch(SeekBar bar) {
+                glass.removeCallbacks(refreshWidgets); refreshWidgets.run();
+            }
+        });
+        add(glass, blur, 4);
+        LinearLayout.LayoutParams previewParams = new LinearLayout.LayoutParams(-1, dp(86));
+        previewParams.topMargin = dp(12); glass.addView(preview, previewParams);
+        add(appearance, glass, 0);
         divider(appearance);
         add(appearance, item(getString(R.string.widget_stack_add), getString(R.string.widget_stack_hint), v -> {
             if (AllAccountsWidgetProvider.requestPin(this)) Toast.makeText(this, R.string.widget_confirm, Toast.LENGTH_SHORT).show();
@@ -173,7 +215,7 @@ public final class SettingsActivity extends Activity {
         LinearLayout about = panel();
         add(about, item(getString(R.string.developer), "Vlan_Tech", null), 0);
         divider(about);
-        add(about, item(getString(R.string.version), "1.10.0", null), 0);
+        add(about, item(getString(R.string.version), "1.11.0", null), 0);
         divider(about);
         add(about, item(getString(R.string.source_code), "GitHub · ResetNotice", v -> {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VlanTech/ResetNotice"))); }

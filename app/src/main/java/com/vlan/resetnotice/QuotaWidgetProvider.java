@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
 import java.util.UUID;
@@ -69,21 +70,26 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
     static void updateOne(Context context, AppWidgetManager manager, int id) {
         if (!BootState.unlocked(context)) return;
         try {
-            manager.updateAppWidget(id, render(context, id, WidgetBindingStore.profile(context, id), false));
+            manager.updateAppWidget(id, render(context, id, WidgetBindingStore.profile(context, id), false, 0));
         } catch (RuntimeException e) { Log.w(TAG, "Widget refresh failed", e); }
     }
 
-    static RemoteViews renderStackItem(Context context, int profileId) {
-        return render(context, -1, profileId, true);
+    static RemoteViews renderStackItem(Context context, int profileId, int height) {
+        return render(context, -1, profileId, true, height);
     }
 
-    private static RemoteViews render(Context context, int id, int profileId, boolean collection) {
+    private static RemoteViews render(Context context, int id, int profileId, boolean collection, int height) {
         Context c = AppPreferences.localized(context);
         String theme = AppPreferences.theme(context);
-        int layout = AppPreferences.LIGHT.equals(theme) ? R.layout.widget_account_light :
-                AppPreferences.DARK.equals(theme) ? R.layout.widget_account_dark : R.layout.widget_account;
+        int layout = collection
+                ? (AppPreferences.LIGHT.equals(theme) ? R.layout.widget_deck_card_light :
+                AppPreferences.DARK.equals(theme) ? R.layout.widget_deck_card_dark : R.layout.widget_deck_card)
+                : (AppPreferences.LIGHT.equals(theme) ? R.layout.widget_account_light :
+                AppPreferences.DARK.equals(theme) ? R.layout.widget_account_dark : R.layout.widget_account);
         RemoteViews v = new RemoteViews(context.getPackageName(), layout);
-        v.setInt(R.id.widget_glass, "setImageAlpha", WidgetMath.glassAlpha(AppPreferences.widgetTransparency(context)));
+        if (collection && Build.VERSION.SDK_INT >= 31)
+            v.setViewLayoutHeight(R.id.deck_card_body, height, TypedValue.COMPLEX_UNIT_DIP);
+        WidgetGlass.applyRemote(v, context, c);
         ReminderStore.Profile profile = ReminderStore.profile(context, profileId);
         v.setViewVisibility(R.id.widget_short, View.GONE);
         v.setViewVisibility(R.id.widget_week, View.GONE);
@@ -94,7 +100,7 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
             v.setViewVisibility(R.id.widget_empty, View.VISIBLE);
             v.setImageViewResource(R.id.widget_logo, R.drawable.portrait);
             if (collection) {
-                v.setOnClickFillInIntent(R.id.widget_root, new Intent());
+                v.setOnClickFillInIntent(R.id.deck_card_root, new Intent());
                 return v;
             }
             Intent intent = new Intent(context, WidgetConfigActivity.class)
@@ -119,7 +125,7 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
         v.setTextViewText(R.id.widget_empty, c.getString(R.string.widget_empty));
         v.setViewVisibility(R.id.widget_empty, shortShown || weekShown ? View.GONE : View.VISIBLE);
         if (collection) {
-            v.setOnClickFillInIntent(R.id.widget_root, new Intent().putExtra("open_profile", profile.id));
+            v.setOnClickFillInIntent(R.id.deck_card_root, new Intent().putExtra("open_profile", profile.id));
             return v;
         }
         Intent open = new Intent(context, MainActivity.class)

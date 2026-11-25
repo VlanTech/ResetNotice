@@ -220,4 +220,9 @@
     <string name="widget_stack_add">添加全部账户叠卡</string>
     <string name="widget_stack_hint">在一张桌面卡片中上下滑动切换各 AI 账户。</string>
     <string name="widget_stack_manual">若桌面不支持应用内添加，请长按桌面，在小组件中选择重置通知的全部账户叠卡。</string>
+    <string name="widget_blur_title">毛玻璃模糊度</string>
+    <string name="widget_blur_hint">调节卡片自身材质的弥散模糊强度，桌面壁纸不会被读取或实时模糊。</string>
+    <string name="widget_blur_value">模糊度 %1$d%%</string>
+    <string name="widget_glass_preview">卡片外观预览</string>
+    <string name="widget_deck_loading">正在同步账户卡片…</string>
 </resources>

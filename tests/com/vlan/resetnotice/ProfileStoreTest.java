@@ -298,6 +298,33 @@ public final class ProfileStoreTest {
         require(WidgetMath.chronometerBase(12345L, now - 5000L, now) == 12345L, "widget base never starts expired");
         require(WidgetMath.glassAlpha(0) == 255 && WidgetMath.glassAlpha(100) == 0 &&
                 WidgetMath.glassAlpha(50) == 128, "widget glass transparency maps to image alpha");
+        require(WidgetDeckMath.rowHeight(0,0,false) == WidgetDeckMath.DEFAULT_HEIGHT, "missing launcher size uses fallback");
+        require(WidgetDeckMath.rowHeight(180,240,false) == 240 && WidgetDeckMath.rowHeight(180,240,true) == 180,
+                "full-height vertical rows respect launcher orientation");
+        require(WidgetDeckMath.rowHeight(120,120,false) == WidgetDeckMath.MIN_HEIGHT, "do not squeeze rows below readable content");
+        require(WidgetDeckMath.rowHeight(230,0,false) == 230, "single launcher size is accepted");
+        require(WidgetDeckMath.direct(31,6) && !WidgetDeckMath.direct(30,6) && !WidgetDeckMath.direct(31,7),
+                "direct collections are bounded for host compatibility");
+        FakeContext deck = new FakeContext();
+        int deckSignature = WidgetDeckMath.signature(true,240);
+        require(!WidgetDeckState.installed(deck,801,deckSignature), "old diagonal stack requires full migration");
+        WidgetDeckState.mark(deck,801,deckSignature);
+        require(WidgetDeckState.installed(deck,801,deckSignature), "same layout uses partial refresh");
+        require(!WidgetDeckState.installed(deck,801,WidgetDeckMath.signature(true,250)), "resize requires full rebuild");
+        require(!WidgetDeckState.installed(deck,801,WidgetDeckMath.signature(false,240)), "adapter mode change requires full rebuild");
+        require(!WidgetDeckState.installed(deck,802,deckSignature), "widget instances keep independent install state");
+        WidgetDeckState.clear(deck,801);
+        require(!WidgetDeckState.installed(deck,801,deckSignature), "removed and restored widget can initialize again");
+        require(GlassMath.blurRadius(0) == 0 && GlassMath.blurRadius(100) > GlassMath.blurRadius(25), "independent blur slider maps monotonically to filter radius");
+        require(GlassMath.bucket(0) == 0 && GlassMath.bucket(1) == 5 && GlassMath.bucket(99) == 100, "blur cache has valid bounds");
+        int[] pixels = {0xff000000, 0xffffffff, 0xff000000};
+        int[] clean = GlassMath.blur(pixels,3,1,0);
+        int[] diffused = GlassMath.blur(pixels,3,1,1);
+        require(java.util.Arrays.equals(clean,pixels) && clean != pixels, "zero blur preserves source pixels");
+        require((diffused[0]&255) > 0 && (diffused[1]&255) < 255 && pixels[1] == 0xffffffff,
+                "blur actually diffuses local texture without mutating source");
+        require((diffused[0]>>>24) == 255 && WidgetMath.glassAlpha(35) == 166,
+                "blur keeps material opacity separate from user alpha");
         long weekDisplay = now + 4 * ResetMath.DAY + 3 * ResetMath.HOUR + 20 * ResetMath.MINUTE;
         WidgetMath.WeekParts parts = WidgetMath.weekParts(weekDisplay, now);
         require(parts.days == 4 && parts.clockTarget - now == 3 * ResetMath.HOUR + 20 * ResetMath.MINUTE,

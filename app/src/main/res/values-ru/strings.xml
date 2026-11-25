@@ -220,4 +220,9 @@
     <string name="widget_stack_add">Добавить стопку аккаунтов</string>
     <string name="widget_stack_hint">Листайте вверх или вниз для смены аккаунта в одном виджете.</string>
     <string name="widget_stack_manual">Если добавление из приложения недоступно, нажмите и удерживайте главный экран и выберите стопку аккаунтов ResetNotice в виджетах.</string>
+    <string name="widget_blur_title">Размытие материала</string>
+    <string name="widget_blur_hint">Смягчает материал самой карточки; обои не считываются и не размываются.</string>
+    <string name="widget_blur_value">Размытие %1$d%%</string>
+    <string name="widget_glass_preview">Предпросмотр карточки</string>
+    <string name="widget_deck_loading">Загрузка карточек…</string>
 </resources>

@@ -220,4 +220,9 @@
     <string name="widget_stack_add">Añadir pila de cuentas</string>
     <string name="widget_stack_hint">Desliza arriba o abajo para cambiar entre cuentas en un widget.</string>
     <string name="widget_stack_manual">Si no puedes añadir desde la app, mantén pulsada la pantalla de inicio y selecciona la pila de cuentas de ResetNotice en Widgets.</string>
+    <string name="widget_blur_title">Desenfoque del material</string>
+    <string name="widget_blur_hint">Suaviza el material de la tarjeta; no lee ni desenfoca el fondo de pantalla.</string>
+    <string name="widget_blur_value">Desenfoque %1$d%%</string>
+    <string name="widget_glass_preview">Vista previa de la tarjeta</string>
+    <string name="widget_deck_loading">Cargando tarjetas…</string>
 </resources>
