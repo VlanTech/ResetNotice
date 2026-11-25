@@ -8,6 +8,8 @@ final class TimerSnapshot {
     long nextReset = Long.MAX_VALUE;
     long nextEvent = Long.MAX_VALUE;
     String nextLabel = "";
+    String nextProfileLabel = "";
+    int nextSlotId;
 
     static TimerSnapshot read(Context context, long now) {
         TimerSnapshot snapshot = new TimerSnapshot();
@@ -20,6 +22,8 @@ final class TimerSnapshot {
                 if (s.target < snapshot.nextReset) {
                     snapshot.nextReset = s.target;
                     snapshot.nextLabel = p.label() + " · " + s.title();
+                    snapshot.nextProfileLabel = p.label();
+                    snapshot.nextSlotId = s.id;
                 }
                 snapshot.nextEvent = Math.min(snapshot.nextEvent, s.target);
                 if (s.early && !s.earlyDelivered) {

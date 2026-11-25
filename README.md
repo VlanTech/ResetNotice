@@ -2,7 +2,7 @@
   <img src="app/src/main/res/drawable-nodpi/portrait.png" alt="ResetNotice" width="112" />
   <h1>重置通知 · ResetNotice</h1>
   <p>多平台 AI 额度重置提醒 · 离线 · 自动续排</p>
-  <p><a href="releases/ResetNotice-v1.3.0.apk">下载 v1.3.0 APK</a> · <a href="https://github.com/VlanTech/ResetNotice/releases">Releases</a> · <a href="CHANGELOG.md">版本记录</a> · <a href="LICENSE">MIT</a></p>
+  <p><a href="releases/ResetNotice-v1.4.0.apk">下载 v1.4.0 APK</a> · <a href="https://github.com/VlanTech/ResetNotice/releases">Releases</a> · <a href="CHANGELOG.md">版本记录</a> · <a href="LICENSE">MIT</a></p>
 </div>
 
 ## 简介
@@ -19,22 +19,23 @@ ResetNotice 是一款轻量级原生 Android 应用，将多个 AI 平台、多�
 - **通知管理**：提前提醒、到点提醒独立开关，提前时间可自定义；关闭通知不影响计时器续排。
 - **后台计时**：有效计时器自动启动可见的前台服务与常驻状态通知，划掉最近任务后保持运行，同时保留精确闹钟；清除全部计时器自动停止服务。
 - **原生体验**：日夜间主题、平滑折叠动画、账户内局部更新，无需联网。
+- **界面与语言**：18 种主要 AI 厂商标识自动匹配，简洁的齿轮与展开图标；独立设置页支持跟随系统、日间、夜间主题及 11 种语言（简体中文、繁體中文、English、日本語、한국어、Español、Português、Français、Italiano、Deutsch、Русский）。
 
 ## 安装与使用
 
-1. 下载 [ResetNotice-v1.3.0.apk](releases/ResetNotice-v1.3.0.apk) 或从 [Releases](https://github.com/VlanTech/ResetNotice/releases) 获取最新签名 APK，允许系统安装应用。
+1. 下载 [ResetNotice-v1.4.0.apk](releases/ResetNotice-v1.4.0.apk) 或从 [Releases](https://github.com/VlanTech/ResetNotice/releases) 获取最新签名 APK，允许系统安装应用。
 2. 打开应用，授权通知与精确提醒（Android 系统中的「闹钟和提醒」）。
 3. 点击首页「＋ 新增」，填写 AI 名称和账户备注；不需要短时额度时可将其关闭。
 4. 展开账户，选择具体重置日期时间，或输入剩余天数、小时、分钟。短时周期可独立修改。
 5. 按需开启提前提醒和到点提醒。到期后自动顺延，无需反复录入。
 
-覆盖安装本仓库发布的 APK 可保留现有配置。首次打开升级后的应用，检查首页「后台计时：运行中」及通知栏常驻状态。ColorOS 等系统可能限制后台服务及精确闹钟，可点击「后台运行设置」进入应用详情，允许后台活动和自启动，并在最近任务中锁定应用（如系统提供该选项）。前台服务在系统回收时请求恢复；若系统设置中强行停止，则需重新打开应用，之后补算下一次重置时间。
+覆盖安装本仓库发布的 APK 可保留现有配置。首次打开升级后的应用，检查首页后台运行状态及通知栏常驻状态。ColorOS 等系统可能限制后台服务及精确闹钟，可点击首页右上角齿轮，在设置页选择「后台运行设置」进入应用详情，允许后台活动和自启动，并在最近任务中锁定应用（如系统提供该选项）。前台服务在系统回收时请求恢复；若系统设置中强行停止，则需重新打开应用，之后补算下一次重置时间。
 
 ## 技术信息
 
 | 项目 | 规格 |
 |---|---|
-| 当前版本 | v1.3.0 |
+| 当前版本 | v1.4.0 |
 | applicationId | `com.vlan.resetnotice` |
 | 最低系统 | Android 6.0（API 23） |
 | 目标 SDK / 编译 SDK | API 34 / API 35 |
@@ -51,7 +52,7 @@ bash fetch-toolchain.sh
 bash build-apk.sh
 ```
 
-构建脚本会校验工具链下载文件、编译资源和 Java、执行计时及账户数据测试，然后自动签名并检查 APK。未指定正式签名时输出 `deliverables/ResetNotice-v1.3.0-local.apk`，仅供本地测试，签名与正式发行版不同，不能覆盖安装正式发行版。
+构建脚本会校验工具链下载文件、编译资源和 Java、执行计时及账户数据测试，然后自动签名并检查 APK。未指定正式签名时输出 `deliverables/ResetNotice-v1.4.0-local.apk`，仅供本地测试，签名与正式发行版不同，不能覆盖安装正式发行版。
 
 正式发布时须使用项目原有的发布签名密钥，并在本机安全设置下列环境变量：
 
@@ -75,6 +76,6 @@ bash build-apk.sh
 
 ## 项目说明
 
-本项目由 Vlan 维护，用于个人 AI 使用额度管理。应用内时间为本地设置的计划时间，平台实际可用额度仍以各平台自身状态为准。
+本项目由 Vlan_Tech 维护，用于个人 AI 使用额度管理。应用内时间为本地设置的计划时间，平台实际可用额度仍以各平台自身状态为准。
 
-项目源码与文档采用 [MIT License](LICENSE) 开源。角色头像及应用图标等图像素材不在该许可证的授权范围内，素材权利归其原权利人所有。
+项目源码与文档采用 [MIT License](LICENSE) 开源。角色头像及应用图标等图像素材不在该许可证的授权范围内，素材权利归其原权利人所有。厂商标识来自 Lobe Icons，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。

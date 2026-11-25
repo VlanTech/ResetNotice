@@ -25,6 +25,7 @@ public final class TimerService extends Service {
     private int lastCount = -1;
     private long lastReset = Long.MIN_VALUE;
     private String lastLabel = "";
+    private String lastLocale = "";
 
     /** Called on the main thread by the activity and authorized alarm/system receivers. */
     static void refresh(Context context) {
@@ -53,9 +54,14 @@ public final class TimerService extends Service {
 
     @Override public void onCreate() {
         super.onCreate();
+        createChannel();
+    }
+
+    private void createChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL, "后台计时", NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription("有有效额度计时器时显示常驻运行状态");
+            Context localized = AppPreferences.localized(this);
+            NotificationChannel channel = new NotificationChannel(CHANNEL, localized.getString(R.string.channel_bg), NotificationManager.IMPORTANCE_LOW);
+            channel.setDescription(localized.getString(R.string.channel_bg_desc));
             channel.setShowBadge(false);
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
@@ -95,7 +101,9 @@ public final class TimerService extends Service {
         AlarmEngine.reconcileDue(this, now);
         TimerSnapshot snapshot = TimerSnapshot.read(this, now);
         if (snapshot.count == 0) { stopWhenEmpty(); return; }
-        if (snapshot.count != lastCount || snapshot.nextReset != lastReset || !snapshot.nextLabel.equals(lastLabel)) {
+        String locale = AppPreferences.localized(this).getResources().getConfiguration().locale.toLanguageTag();
+        if (snapshot.count != lastCount || snapshot.nextReset != lastReset || !snapshot.nextLabel.equals(lastLabel) || !locale.equals(lastLocale)) {
+            createChannel();
             // Notification permission can change while the service is running.
             try { getSystemService(NotificationManager.class).notify(NOTIFICATION_ID, notification(snapshot)); }
             catch (SecurityException ignored) { }
@@ -110,14 +118,17 @@ public final class TimerService extends Service {
         lastCount = snapshot.count;
         lastReset = snapshot.nextReset;
         lastLabel = snapshot.nextLabel;
+        lastLocale = AppPreferences.localized(this).getResources().getConfiguration().locale.toLanguageTag();
     }
 
     private Notification notification(TimerSnapshot snapshot) {
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
         Intent launch = new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent open = PendingIntent.getActivity(this, NOTIFICATION_ID, launch, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        String detail = snapshot.count == 0 ? "正在结束后台计时" : "下一次：" + snapshot.nextLabel + " · " + ResetMath.dateTime(snapshot.nextReset);
-        b.setSmallIcon(R.drawable.ic_notification).setContentTitle("重置通知 · " + snapshot.count + " 个额度计时中")
+        Context localized = AppPreferences.localized(this);
+        String detail = snapshot.count == 0 ? localized.getString(R.string.bg_ending) : localized.getString(R.string.next_reset,
+                snapshot.nextProfileLabel + " · " + I18n.slot(localized, snapshot.nextSlotId), ResetMath.displayDateTime(snapshot.nextReset, System.currentTimeMillis()));
+        b.setSmallIcon(R.drawable.ic_notification).setContentTitle(localized.getString(R.string.fg_title, snapshot.count))
                 .setContentText(detail).setStyle(new Notification.BigTextStyle().bigText(detail)).setContentIntent(open)
                 .setOngoing(true).setOnlyAlertOnce(true).setVisibility(Notification.VISIBILITY_PRIVATE)
                 .setCategory(Notification.CATEGORY_SERVICE).setPriority(Notification.PRIORITY_LOW).setShowWhen(false);

@@ -1,6 +1,7 @@
 package com.vlan.resetnotice;
 
 import java.util.TimeZone;
+import java.util.Calendar;
 
 final class ResetMathTest {
     private static int assertions;
@@ -76,6 +77,15 @@ final class ResetMathTest {
             eq("1970-01-01 08:00:00", ResetMath.dateTime(0L));
             TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
             eq("1970-01-01 00:00:00", ResetMath.dateTime(0L));
+            Calendar date = Calendar.getInstance(); date.clear();
+            date.set(2026, Calendar.NOVEMBER, 25, 16, 30, 0);
+            long today = date.getTimeInMillis();
+            date.set(2026, Calendar.DECEMBER, 2, 16, 30, 0);
+            eq("12-02 16:30:00", ResetMath.displayDateTime(date.getTimeInMillis(), today));
+            date.set(2027, Calendar.JANUARY, 2, 16, 30, 0);
+            eq("2027-01-02 16:30:00", ResetMath.displayDateTime(date.getTimeInMillis(), today));
+            eq("1d 01:00:00", ResetMath.countdown(25 * ResetMath.HOUR, "d"));
+            eq("1j 2h 15min", ResetMath.periodLabel(1575, "j", "h", "min", " "));
         } finally { TimeZone.setDefault(original); }
         System.out.println(assertions + " time/scheduling assertions passed");
     }

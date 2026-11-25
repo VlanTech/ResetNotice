@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
@@ -26,6 +27,7 @@ import android.view.animation.PathInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.ScrollView;
@@ -46,6 +48,7 @@ public final class MainActivity extends Activity {
     private LinearLayout content, groupList, readiness;
     private TextView groupCount, emptyState, backgroundStatus;
     private boolean notifyReady, exactReady, readinessInitialized;
+    private String uiSignature;
     private int page, card, text, sub, accent, onAccent, accentSoft, line, positive, positiveSoft, warning, warningSoft;
     private final Runnable ticker = new Runnable() {
         @Override public void run() {
@@ -59,11 +62,17 @@ public final class MainActivity extends Activity {
         ReminderStore.Profile profile;
         LinearLayout root, body, summary, shortBlock;
         FrameLayout bodyClip;
-        TextView platform, account, shortSummary, shortDate, weekSummary, weekDate, expandButton;
+        TextView platform, account, shortSummary, shortDate, weekSummary, weekDate;
+        ImageView logo;
+        ImageButton expandButton, manageButton;
         SlotViews shortView, weekView;
         boolean expanded;
         ValueAnimator animator;
     }
+
+    @Override protected void attachBaseContext(Context base) { super.attachBaseContext(AppPreferences.wrap(base)); }
+
+    private String tr(int resource, Object... args) { return args.length == 0 ? getString(resource) : getString(resource, args); }
 
     static final class SlotViews {
         LinearLayout root;
@@ -74,6 +83,7 @@ public final class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        uiSignature = AppPreferences.signature(this);
         AlarmEngine.createChannel(this);
         buildPage(savedInstanceState);
         if (savedInstanceState != null) {
@@ -84,6 +94,7 @@ public final class MainActivity extends Activity {
 
     @Override public void onResume() {
         super.onResume();
+        if (!AppPreferences.signature(this).equals(uiSignature)) { recreate(); return; }
         AlarmEngine.rescheduleAll(this);
         TimerService.refresh(this);
         refreshReadiness();
@@ -205,6 +216,18 @@ public final class MainActivity extends Activity {
         return v;
     }
 
+    private ImageButton iconButton(int icon, String description, View.OnClickListener listener) {
+        ImageButton v = new ImageButton(this);
+        v.setImageResource(icon);
+        v.setColorFilter(sub);
+        v.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        v.setPadding(dp(11), dp(11), dp(11), dp(11));
+        v.setBackground(new RippleDrawable(ColorStateList.valueOf(0x226855A5), rounded(0x00000000, 24), rounded(0xFFFFFFFF, 24)));
+        v.setContentDescription(description);
+        v.setOnClickListener(listener);
+        return v;
+    }
+
     private LinearLayout panel() {
         LinearLayout p = column();
         p.setBackground(bordered(card, 24));
@@ -239,16 +262,16 @@ public final class MainActivity extends Activity {
         portrait.setScaleType(ImageView.ScaleType.CENTER_CROP);
         portrait.setBackground(rounded(card, 19));
         portrait.setClipToOutline(true);
-        portrait.setContentDescription("应用角色头像");
+        portrait.setContentDescription(tr(R.string.portrait));
         hero.addView(portrait, new LinearLayout.LayoutParams(dp(62), dp(62)));
         LinearLayout title = column();
         LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(0, -2, 1);
         tp.leftMargin = dp(13);
         hero.addView(title, tp);
-        add(title, label("重置通知", 28, text, true), 0);
-        add(title, label("多平台 · 统一额度提醒", 13, sub, false), 6);
+        add(title, label(tr(R.string.app_name), 26, text, true), 0);
+        add(title, label(tr(R.string.subtitle), 13, sub, false), 6);
+        hero.addView(iconButton(R.drawable.ic_settings, tr(R.string.settings), v -> startActivity(new Intent(this, SettingsActivity.class))), new LinearLayout.LayoutParams(dp(48), dp(48)));
         add(content, hero, 0);
-        add(content, label("把各个 AI 账户的重置时间集中管理。", 14, sub, false), 16);
 
         readiness = panel();
         add(content, readiness, 18);
@@ -256,17 +279,17 @@ public final class MainActivity extends Activity {
 
         LinearLayout section = row();
         LinearLayout heading = column();
-        add(heading, label("AI 与账户", 19, text, true), 0);
-        groupCount = label("0 个账户", 12, sub, false);
+        add(heading, label(tr(R.string.accounts), 19, text, true), 0);
+        groupCount = label(tr(R.string.count_accounts, 0), 12, sub, false);
         add(heading, groupCount, 5);
         section.addView(heading, new LinearLayout.LayoutParams(0, -2, 1));
-        TextView create = button("＋ 新增", true, v -> editProfile(null));
+        TextView create = button(tr(R.string.add_account), true, v -> editProfile(null));
         create.setMinWidth(dp(100));
         section.addView(create, new LinearLayout.LayoutParams(-2, -2));
         add(content, section, 22);
         groupList = column();
         add(content, groupList, 12);
-        emptyState = label("还没有 AI 账户。点击「＋ 新增」添加第一个提醒账户。", 14, sub, false);
+        emptyState = label(tr(R.string.empty_accounts), 14, sub, false);
         emptyState.setGravity(Gravity.CENTER);
         emptyState.setPadding(dp(16), dp(28), dp(16), dp(28));
         emptyState.setBackground(bordered(card, 22));
@@ -280,12 +303,6 @@ public final class MainActivity extends Activity {
         }
         updateGroupCount();
 
-        TextView foot = label("首次录入重置时间后会按周期自动续排；重启手机或重新打开应用时也会接续下一次提醒。", 12, sub, false);
-        foot.setGravity(Gravity.CENTER);
-        add(content, foot, 22);
-        TextView version = label("重置通知 1.3.0  ·  数据仅保存在本机", 11, sub, false);
-        version.setGravity(Gravity.CENTER);
-        add(content, version, 10);
         updateCountdowns();
     }
 
@@ -295,36 +312,34 @@ public final class MainActivity extends Activity {
         notifyReady = notifyOk; exactReady = exactOk; readinessInitialized = true;
         readiness.removeAllViews();
         LinearLayout header = row();
-        header.addView(label("提醒状态", 15, text, true), new LinearLayout.LayoutParams(0, -2, 1));
-        header.addView(badge(notifyOk && exactOk ? "已就绪" : "待授权", notifyOk && exactOk ? positive : warning,
+        header.addView(label(tr(R.string.reminder_status), 15, text, true), new LinearLayout.LayoutParams(0, -2, 1));
+        header.addView(badge(notifyOk && exactOk ? tr(R.string.ready) : tr(R.string.auth_pending), notifyOk && exactOk ? positive : warning,
                 notifyOk && exactOk ? positiveSoft : warningSoft));
         add(readiness, header, 0);
         if (!notifyOk || !exactOk) {
-            add(readiness, label(!notifyOk ? "请允许通知，才能在后台收到额度重置提醒。" : "请允许精确提醒，减少锁屏时的提醒延迟。", 13, sub, false), 9);
-            if (!notifyOk) add(readiness, button("开启通知权限", true, v -> openNotificationPermission()), 12);
-            if (!exactOk) add(readiness, button("授权精确提醒", notifyOk, v -> openExactPermission()), 8);
+            add(readiness, label(!notifyOk ? tr(R.string.notify_permission_hint) : tr(R.string.exact_permission_hint), 13, sub, false), 9);
+            if (!notifyOk) add(readiness, button(tr(R.string.enable_notifications), true, v -> openNotificationPermission()), 12);
+            if (!exactOk) add(readiness, button(tr(R.string.authorize_exact), notifyOk, v -> openExactPermission()), 8);
         } else {
-            add(readiness, button("发送测试通知", false, v -> {
-                if (AlarmEngine.sendTest(this)) toast("已发送测试通知");
+            add(readiness, button(tr(R.string.test_notification), false, v -> {
+                if (AlarmEngine.sendTest(this)) toast(tr(R.string.test_sent));
                 else openNotificationPermission();
             }), 10);
         }
         backgroundStatus = label("", 13, sub, false);
         add(readiness, backgroundStatus, 12);
-        add(readiness, button("后台运行设置", false, v -> openAppDetails()), 8);
         updateBackgroundStatus();
     }
 
     private void updateBackgroundStatus() {
         if (backgroundStatus == null) return;
         int activeCount = TimerSnapshot.read(this, System.currentTimeMillis()).count;
-        setText(backgroundStatus, activeCount == 0 ? "后台计时：暂无有效计时器" :
-                TimerService.isRunning() ? "后台计时：运行中 · " + activeCount + " 个额度" :
-                        "后台计时：等待服务启动；系统闹钟仍负责提醒");
+        setText(backgroundStatus, activeCount == 0 ? tr(R.string.bg_idle) :
+                TimerService.isRunning() ? tr(R.string.bg_running, activeCount) : tr(R.string.bg_wait));
     }
 
     private void updateGroupCount() {
-        setText(groupCount, groups.size() + " 个账户");
+        setText(groupCount, tr(R.string.count_accounts, groups.size()));
         emptyState.setVisibility(groups.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
@@ -334,9 +349,11 @@ public final class MainActivity extends Activity {
         g.root = panel();
         g.root.setPadding(dp(14), dp(16), dp(14), dp(13));
         LinearLayout header = row();
-        TextView marker = badge("AI", accent, accentSoft);
-        marker.setPadding(dp(12), dp(10), dp(12), dp(10));
-        header.addView(marker);
+        g.logo = new ImageView(this);
+        g.logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        g.logo.setPadding(dp(5), dp(5), dp(5), dp(5));
+        BrandIcons.show(g.logo, profile.platform, text);
+        header.addView(g.logo, new LinearLayout.LayoutParams(dp(42), dp(42)));
         LinearLayout names = column();
         LinearLayout.LayoutParams np = new LinearLayout.LayoutParams(0, -2, 1);
         np.leftMargin = dp(11); np.rightMargin = dp(8);
@@ -345,9 +362,8 @@ public final class MainActivity extends Activity {
         add(names, g.platform, 0);
         add(names, g.account, 6);
         header.addView(names, np);
-        TextView edit = button("管理", false, v -> editProfile(g.profile));
-        edit.setContentDescription("管理 " + profile.label());
-        header.addView(edit, new LinearLayout.LayoutParams(-2, -2));
+        g.manageButton = iconButton(R.drawable.ic_settings, tr(R.string.manage_profile, profile.label()), v -> editProfile(g.profile));
+        header.addView(g.manageButton, new LinearLayout.LayoutParams(dp(46), dp(46)));
         add(g.root, header, 0);
 
         LinearLayout summaryRow = row();
@@ -367,9 +383,8 @@ public final class MainActivity extends Activity {
         add(g.summary, g.weekSummary, 11);
         add(g.summary, g.weekDate, 5);
         summaryRow.addView(g.summary, new LinearLayout.LayoutParams(0, -2, 1));
-        g.expandButton = button("展开设置 ▾", false, v -> setExpanded(g, !g.expanded, true));
-        g.expandButton.setTextSize(13);
-        LinearLayout.LayoutParams expandParam = new LinearLayout.LayoutParams(dp(96), -2);
+        g.expandButton = iconButton(R.drawable.ic_chevron, tr(R.string.expand_account, profile.label()), v -> setExpanded(g, !g.expanded, true));
+        LinearLayout.LayoutParams expandParam = new LinearLayout.LayoutParams(dp(48), dp(48));
         expandParam.leftMargin = dp(8);
         summaryRow.addView(g.expandButton, expandParam);
         add(g.root, summaryRow, 17);
@@ -431,8 +446,10 @@ public final class MainActivity extends Activity {
         float startAlpha = visible ? g.body.getAlpha() : 0f;
         cancelExpansion(g); // Keep the current geometry if the user reverses mid-animation.
         g.expanded = expanded;
-        setText(g.expandButton, expanded ? "收起设置 ▴" : "展开设置 ▾");
-        g.expandButton.setContentDescription((expanded ? "收起" : "展开") + g.profile.label() + "额度设置");
+        g.expandButton.setContentDescription(tr(expanded ? R.string.collapse_account : R.string.expand_account, g.profile.label()));
+        g.expandButton.animate().cancel();
+        if (animate) g.expandButton.animate().rotation(expanded ? 180f : 0f).setDuration(220L).start();
+        else g.expandButton.setRotation(expanded ? 180f : 0f);
         int width = g.root.getWidth() - g.root.getPaddingLeft() - g.root.getPaddingRight();
         if (!animate || width <= 0 || !g.root.isLaidOut()
                 || (Build.VERSION.SDK_INT >= 26 && !ValueAnimator.areAnimatorsEnabled())) {
@@ -503,38 +520,38 @@ public final class MainActivity extends Activity {
         boolean creating = previous == null;
         LinearLayout fields = column();
         fields.setPadding(dp(21), dp(12), dp(21), dp(8));
-        add(fields, label("AI 平台名称", 13, sub, true), 0);
-        EditText platform = input("例如 ChatGPT、Claude、Gemini", creating ? "" : previous.platform, 40);
+        add(fields, label(tr(R.string.platform_name), 13, sub, true), 0);
+        EditText platform = input(tr(R.string.platform_hint), creating ? "" : previous.platform, 40);
         add(fields, platform, 6);
-        add(fields, label("账户备注", 13, sub, true), 15);
-        EditText account = input("例如 主账号、Plus、备用账号", creating ? "" : previous.account, 48);
+        add(fields, label(tr(R.string.account_name), 13, sub, true), 15);
+        EditText account = input(tr(R.string.account_hint), creating ? "" : previous.account, 48);
         add(fields, account, 6);
         LinearLayout shortRow = row();
         LinearLayout descriptions = column();
-        add(descriptions, label("管理短时限额", 15, text, true), 0);
-        add(descriptions, label("关闭后仅管理周限额", 12, sub, false), 5);
+        add(descriptions, label(tr(R.string.enable_short), 15, text, true), 0);
+        add(descriptions, label(tr(R.string.only_week), 12, sub, false), 5);
         shortRow.addView(descriptions, new LinearLayout.LayoutParams(0, -2, 1));
         Switch shortSwitch = new Switch(this);
-        shortSwitch.setContentDescription("管理短时限额");
+        shortSwitch.setContentDescription(tr(R.string.enable_short));
         shortSwitch.setChecked(creating || previous.shortEnabled);
         shortRow.addView(shortSwitch);
         add(fields, shortRow, 19);
-        if (!creating) add(fields, label("关闭短时限额会清除该账户的短时重置时间。", 12, sub, false), 10);
-        else add(fields, label("账户备注用于区分多个账号，填写自定义名称即可。", 12, sub, false), 10);
+        if (!creating) add(fields, label(tr(R.string.disable_short_hint), 12, sub, false), 10);
+        else add(fields, label(tr(R.string.account_alias_hint), 12, sub, false), 10);
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle(creating ? "新增 AI 账户" : "管理 AI 账户")
-                .setView(fields).setNegativeButton("取消", null).setPositiveButton("保存", null);
-        if (!creating) builder.setNeutralButton("删除账户", (d, w) -> confirmDelete(previous));
+                .setTitle(creating ? tr(R.string.new_profile) : tr(R.string.edit_profile))
+                .setView(fields).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.save), null);
+        if (!creating) builder.setNeutralButton(tr(R.string.delete_profile), (d, w) -> confirmDelete(previous));
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String ai = platform.getText().toString().trim();
             String name = account.getText().toString().trim();
-            if (ai.isEmpty()) { platform.setError("请输入 AI 平台名称"); return; }
-            if (name.isEmpty()) name = "默认账户";
+            if (ai.isEmpty()) { platform.setError(tr(R.string.required_platform)); return; }
+            if (name.isEmpty()) name = tr(R.string.default_account);
             if (ReminderStore.duplicate(this, creating ? -1 : previous.id, ai, name)) {
-                account.setError("该 AI 和账户组合已存在"); return;
+                account.setError(tr(R.string.duplicate_account)); return;
             }
-            if (creating && groups.size() >= ReminderStore.MAX_PROFILES) { toast("已达账户数量上限"); return; }
+            if (creating && groups.size() >= ReminderStore.MAX_PROFILES) { toast(tr(R.string.account_limit)); return; }
             ReminderStore.Profile profile = creating
                     ? ReminderStore.add(this, ai, name, shortSwitch.isChecked())
                     : ReminderStore.edit(this, previous.id, ai, name, shortSwitch.isChecked());
@@ -549,6 +566,9 @@ public final class MainActivity extends Activity {
                     g.profile = profile;
                     setText(g.platform, profile.platform);
                     setText(g.account, profile.account);
+                    BrandIcons.show(g.logo, profile.platform, text);
+                    g.manageButton.setContentDescription(tr(R.string.manage_profile, profile.label()));
+                    g.expandButton.setContentDescription(tr(g.expanded ? R.string.collapse_account : R.string.expand_account, profile.label()));
                     if (changed) rebuildGroupBody(g);
                     updateGroup(g, System.currentTimeMillis());
                 }
@@ -563,9 +583,9 @@ public final class MainActivity extends Activity {
     }
 
     private void confirmDelete(ReminderStore.Profile profile) {
-        new AlertDialog.Builder(this).setTitle("删除账户？")
-                .setMessage("删除「" + profile.label() + "」及其所有限额时间、提醒设置。其他账户不受影响。")
-                .setNegativeButton("取消", null).setPositiveButton("删除", (d, w) -> {
+        new AlertDialog.Builder(this).setTitle(tr(R.string.delete_confirm))
+                .setMessage(tr(R.string.delete_message, profile.label()))
+                .setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.delete), (d, w) -> {
                     ReminderStore.delete(this, profile.id);
                     AlarmEngine.cancelProfile(this, profile.id);
                     TimerService.refresh(this);
@@ -575,7 +595,7 @@ public final class MainActivity extends Activity {
                         groupList.removeView(g.root);
                     }
                     updateGroupCount();
-                    toast("已删除账户");
+                    toast(tr(R.string.deleted));
                 }).show();
     }
 
@@ -587,30 +607,32 @@ public final class MainActivity extends Activity {
         p.setPadding(dp(14), dp(15), dp(14), dp(12));
         sv.root = p;
         LinearLayout header = row();
-        TextView marker = badge(id == ReminderStore.SHORT ? "H" : "W", accent, accentSoft);
-        header.addView(marker);
+        ImageView marker = new ImageView(this);
+        marker.setImageResource(id == ReminderStore.SHORT ? R.drawable.ic_clock : R.drawable.ic_calendar);
+        marker.setColorFilter(sub);
+        header.addView(marker, new LinearLayout.LayoutParams(dp(23), dp(23)));
         LinearLayout.LayoutParams titleParam = new LinearLayout.LayoutParams(0, -2, 1);
         titleParam.leftMargin = dp(8);
-        header.addView(label(s.title(), 17, text, true), titleParam);
-        sv.status = badge("待设置", sub, accentSoft);
+        header.addView(label(I18n.slot(this, id), 17, text, true), titleParam);
+        sv.status = badge(tr(R.string.unset), sub, accentSoft);
         header.addView(sv.status);
         add(p, header, 0);
         sv.countdown = label("--:--:--", 31, accent, true);
         sv.countdown.setFontFeatureSettings("tnum");
         add(p, sv.countdown, 14);
-        sv.target = label("尚未设置重置时间", 12, sub, false);
+        sv.target = label(tr(R.string.unset_time), 12, sub, false);
         add(p, sv.target, 8);
 
         LinearLayout buttons = row();
         LinearLayout.LayoutParams left = new LinearLayout.LayoutParams(0, -2, 1);
         left.rightMargin = dp(7);
-        buttons.addView(button("设定时间", true, v -> chooseDateTime(profileId, id)), left);
-        buttons.addView(button("按剩余时长", false, v -> chooseDuration(profileId, id)), new LinearLayout.LayoutParams(0, -2, 1));
+        buttons.addView(button(tr(R.string.set_time), true, v -> chooseDateTime(profileId, id)), left);
+        buttons.addView(button(tr(R.string.remaining), false, v -> chooseDuration(profileId, id)), new LinearLayout.LayoutParams(0, -2, 1));
         add(p, buttons, 12);
         if (id == ReminderStore.SHORT) {
             sv.cycle = button("", false, v -> chooseCycle(profileId));
         } else {
-            sv.cycle = label("每 7 天自动续排", 13, accent, true);
+            sv.cycle = label(tr(R.string.cycle, I18n.period(this, ResetMath.WEEK_MINUTES)), 13, accent, true);
             sv.cycle.setGravity(Gravity.CENTER);
             sv.cycle.setPadding(dp(6), dp(9), dp(6), dp(9));
         }
@@ -620,20 +642,20 @@ public final class MainActivity extends Activity {
         space(p, 12);
 
         LinearLayout earlyRow = row();
-        earlyRow.addView(label("提前提醒", 14, text, true), new LinearLayout.LayoutParams(0, -2, 1));
+        earlyRow.addView(label(tr(R.string.early_alert), 14, text, true), new LinearLayout.LayoutParams(0, -2, 1));
         sv.earlySwitch = new Switch(this);
-        sv.earlySwitch.setContentDescription(s.title() + "提前提醒");
+        sv.earlySwitch.setContentDescription(I18n.slot(this, id) + " · " + tr(R.string.early_alert));
         sv.earlySwitch.setChecked(s.early);
         earlyRow.addView(sv.earlySwitch);
         add(p, earlyRow, 0);
         // The advance control always occupies its place, even when disabled.
         // Toggling never removes/rebuilds the view hierarchy, so the switch animation is stable.
-        sv.advance = button("提前 " + s.earlyMinutes + " 分钟  ·  修改", false, v -> chooseAdvance(profileId, id));
+        sv.advance = button(tr(R.string.advance_edit, s.earlyMinutes), false, v -> chooseAdvance(profileId, id));
         add(p, sv.advance, 5);
         LinearLayout atRow = row();
-        atRow.addView(label("到点提醒", 14, text, true), new LinearLayout.LayoutParams(0, -2, 1));
+        atRow.addView(label(tr(R.string.at_alert), 14, text, true), new LinearLayout.LayoutParams(0, -2, 1));
         sv.atSwitch = new Switch(this);
-        sv.atSwitch.setContentDescription(s.title() + "到点提醒");
+        sv.atSwitch.setContentDescription(I18n.slot(this, id) + " · " + tr(R.string.at_alert));
         sv.atSwitch.setChecked(s.at);
         atRow.addView(sv.atSwitch);
         add(p, atRow, 10);
@@ -641,14 +663,14 @@ public final class MainActivity extends Activity {
         sv.note.setMinHeight(dp(32));
         add(p, sv.note, 11);
 
-        sv.clear = label("清除重置时间", 13, accent, true);
+        sv.clear = label(tr(R.string.clear_time), 13, accent, true);
         sv.clear.setGravity(Gravity.CENTER);
         sv.clear.setPadding(dp(8), dp(12), dp(8), dp(6));
         sv.clear.setClickable(true);
         sv.clear.setFocusable(true);
-        sv.clear.setOnClickListener(v -> new AlertDialog.Builder(this).setTitle("清除" + s.title() + "？")
-                .setMessage("清除该额度的时间并停止自动续排、取消未触发提醒。")
-                .setNegativeButton("保留", null).setPositiveButton("清除", (d, w) -> {
+        sv.clear.setOnClickListener(v -> new AlertDialog.Builder(this).setTitle(tr(R.string.clear_confirm, I18n.slot(this, id)))
+                .setMessage(tr(R.string.clear_hint))
+                .setNegativeButton(tr(R.string.keep), null).setPositiveButton(tr(R.string.clear), (d, w) -> {
                     ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
                     current.target = 0;
                     current.earlyDelivered = current.atDelivered = false;
@@ -675,9 +697,9 @@ public final class MainActivity extends Activity {
     }
 
     private String compactTime(ReminderStore.Slot s, long now) {
-        if (s.target <= 0) return "未设置";
-        if (s.target <= now) return "已到重置时间";
-        return ResetMath.countdown(s.target - now);
+        if (s.target <= 0) return tr(R.string.unset);
+        if (s.target <= now) return tr(R.string.due);
+        return I18n.countdown(this, s.target - now);
     }
 
     private void updateCountdowns() {
@@ -692,13 +714,13 @@ public final class MainActivity extends Activity {
     private void updateGroup(GroupViews g, long now) {
         if (g.profile.shortEnabled) {
             ReminderStore.Slot s = ReminderStore.load(this, g.profile.id, ReminderStore.SHORT);
-            setText(g.shortSummary, "短时限额 · " + compactTime(s, now));
-            setText(g.shortDate, s.target > 0 ? "重置 " + ResetMath.dateTime(s.target) : "尚未设定重置时间");
+            setText(g.shortSummary, tr(R.string.short_quota) + " · " + compactTime(s, now));
+            setText(g.shortDate, s.target > 0 ? ResetMath.displayDateTime(s.target, now) : tr(R.string.unset_time));
             if (g.shortView != null) updateSlot(g.shortView, s, now);
         }
         ReminderStore.Slot week = ReminderStore.load(this, g.profile.id, ReminderStore.WEEK);
-        setText(g.weekSummary, "周限额 · " + compactTime(week, now));
-        setText(g.weekDate, week.target > 0 ? "重置 " + ResetMath.dateTime(week.target) : "尚未设定重置时间");
+        setText(g.weekSummary, tr(R.string.week_quota) + " · " + compactTime(week, now));
+        setText(g.weekDate, week.target > 0 ? ResetMath.displayDateTime(week.target, now) : tr(R.string.unset_time));
         if (g.weekView != null) updateSlot(g.weekView, week, now);
     }
 
@@ -708,23 +730,23 @@ public final class MainActivity extends Activity {
         boolean hasTarget = s.target > 0;
         if (!hasTarget) {
             countdown = "--:--:--";
-            target = "尚未设置重置时间";
-            status = "待设置"; fg = sub; bg = accentSoft;
-            note = "设定时间后，所选提醒将自动生效。";
+            target = tr(R.string.unset_time);
+            status = tr(R.string.unset); fg = sub; bg = accentSoft;
+            note = tr(R.string.setup_hint);
         } else if (s.target <= now) {
             countdown = "00:00:00";
-            target = "计划重置 · " + AlarmEngine.timeLabel(s.target);
-            status = "已到点"; fg = positive; bg = positiveSoft;
-            note = "正在顺延下一次重置时间。";
+            target = tr(R.string.planned, ResetMath.displayDateTime(s.target, now));
+            status = tr(R.string.due_state); fg = positive; bg = positiveSoft;
+            note = tr(R.string.rolling);
         } else {
-            countdown = ResetMath.countdown(s.target - now);
-            target = "计划重置 · " + AlarmEngine.timeLabel(s.target);
-            status = "计时中"; fg = accent; bg = accentSoft;
-            if (!s.early && !s.at) note = "提醒均已关闭，计时仍会自动续排。";
-            else if (!notifyReady) note = "通知未授权，暂时无法弹出提醒。";
-            else if (s.early && s.earlyDelivered) note = s.at ? "提前提醒已发送，将等待到点提醒。" : "提前提醒已发送。";
-            else if (s.early && s.target - s.earlyMinutes * ResetMath.MINUTE <= now) note = "已进入提前提醒时间。";
-            else note = (s.early ? "提前 " + s.earlyMinutes + " 分钟" : "") + (s.early && s.at ? " · " : "") + (s.at ? "到点提醒" : "") + " 已启用";
+            countdown = I18n.countdown(this, s.target - now);
+            target = tr(R.string.planned, ResetMath.displayDateTime(s.target, now));
+            status = tr(R.string.timer_running); fg = accent; bg = accentSoft;
+            if (!s.early && !s.at) note = tr(R.string.reminders_off);
+            else if (!notifyReady) note = tr(R.string.permission_missing);
+            else if (s.early && s.earlyDelivered) note = s.at ? tr(R.string.early_sent_wait) : tr(R.string.early_sent);
+            else if (s.early && s.target - s.earlyMinutes * ResetMath.MINUTE <= now) note = tr(R.string.early_window);
+            else note = tr(R.string.enabled);
         }
         // Only change text that actually changed; no repeated backgrounds/layout resets per second.
         setText(v.countdown, countdown); setText(v.target, target); setText(v.note, note);
@@ -734,9 +756,8 @@ public final class MainActivity extends Activity {
             v.status.setTextColor(fg);
             v.status.setBackground(rounded(bg, 24));
         }
-        setText(v.advance, "提前 " + s.earlyMinutes + " 分钟  ·  修改");
-        setText(v.cycle, "每 " + ResetMath.periodLabel(s.periodMinutes) + " 自动续排" +
-                (s.id == ReminderStore.SHORT ? " · 修改周期" : ""));
+        setText(v.advance, tr(R.string.advance_edit, s.earlyMinutes));
+        setText(v.cycle, tr(s.id == ReminderStore.SHORT ? R.string.cycle_edit : R.string.cycle, I18n.period(this, s.periodMinutes)));
         float alpha = s.early ? 1f : 0.48f;
         if (v.advance.getAlpha() != alpha) v.advance.setAlpha(alpha);
         if (v.advance.isEnabled() != s.early) v.advance.setEnabled(s.early);
@@ -756,7 +777,7 @@ public final class MainActivity extends Activity {
 
     private void setTarget(int profileId, int id, long target) {
         target = ResetMath.minuteBoundary(target);
-        if (target <= System.currentTimeMillis()) { toast("请选择未来的重置时间"); return; }
+        if (target <= System.currentTimeMillis()) { toast(tr(R.string.time_future)); return; }
         ReminderStore.Profile profile = ReminderStore.profile(this, profileId);
         if (profile == null || !profile.allows(id)) return;
         ReminderStore.Slot s = ReminderStore.load(this, profileId, id);
@@ -765,7 +786,7 @@ public final class MainActivity extends Activity {
         // Clear any delivered notification from the previous quota cycle.
         AlarmEngine.cancelSlot(this, profileId, id, true);
         save(s);
-        toast("已保存 " + profile.label() + " · " + s.title());
+        toast(tr(R.string.saved_timer, profile.label() + " · " + I18n.slot(this, id)));
     }
 
     private void chooseDateTime(int profileId, int id) {
@@ -784,11 +805,11 @@ public final class MainActivity extends Activity {
                 selected.set(Calendar.MILLISECOND, 0);
                 setTarget(profileId, id, selected.getTimeInMillis());
             }, selected.get(Calendar.HOUR_OF_DAY), selected.get(Calendar.MINUTE), true);
-            time.setTitle("选择重置时间");
+            time.setTitle(tr(R.string.choose_time));
             time.show();
         }, selected.get(Calendar.YEAR), selected.get(Calendar.MONTH), selected.get(Calendar.DAY_OF_MONTH));
         date.getDatePicker().setMinDate(System.currentTimeMillis());
-        date.setTitle("选择重置日期");
+        date.setTitle(tr(R.string.choose_date));
         date.show();
     }
 
@@ -821,20 +842,20 @@ public final class MainActivity extends Activity {
         NumberPicker minutes = picker(0, 59, (int)(mins % 60));
         LinearLayout pickers = row();
         pickers.setPadding(dp(14), dp(12), dp(14), dp(8));
-        pickerColumn(pickers, "天", days);
-        pickerColumn(pickers, "小时", hours);
-        pickerColumn(pickers, "分钟", minutes);
+        pickerColumn(pickers, tr(R.string.day), days);
+        pickerColumn(pickers, tr(R.string.hour), hours);
+        pickerColumn(pickers, tr(R.string.minute), minutes);
         LinearLayout durationFields = column();
-        TextView durationHint = label("以手机当前分钟为基准，重置时间的秒数固定为 00。", 12, sub, false);
+        TextView durationHint = label(tr(R.string.duration_hint), 12, sub, false);
         durationHint.setPadding(dp(20), dp(12), dp(20), 0);
         add(durationFields, durationHint, 0);
         add(durationFields, pickers, 0);
-        AlertDialog d = new AlertDialog.Builder(this).setTitle(s.title() + " · 剩余时长")
-                .setView(durationFields).setNegativeButton("取消", null).setPositiveButton("设定", null).create();
+        AlertDialog d = new AlertDialog.Builder(this).setTitle(I18n.slot(this, id) + " · " + tr(R.string.remaining))
+                .setView(durationFields).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.set), null).create();
         d.setOnShowListener(dialog -> d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             days.clearFocus(); hours.clearFocus(); minutes.clearFocus();
             long duration = ResetMath.duration(days.getValue(), hours.getValue(), minutes.getValue());
-            if (duration <= 0) { toast("剩余时长至少为 1 分钟"); return; }
+            if (duration <= 0) { toast(tr(R.string.duration_min)); return; }
             setTarget(profileId, id, ResetMath.relativeTarget(System.currentTimeMillis(), duration));
             d.dismiss();
         }));
@@ -847,17 +868,17 @@ public final class MainActivity extends Activity {
         NumberPicker minutes = picker(0, 59, s.periodMinutes % 60);
         LinearLayout fields = column();
         fields.setPadding(dp(16), dp(12), dp(16), dp(8));
-        add(fields, label("每次重置后按此固定周期续排。修改周期不会改变当前这一次的重置时间。", 13, sub, false), 0);
+        add(fields, label(tr(R.string.cycle_hint), 13, sub, false), 0);
         LinearLayout picks = row();
-        pickerColumn(picks, "小时", hours);
-        pickerColumn(picks, "分钟", minutes);
+        pickerColumn(picks, tr(R.string.hour), hours);
+        pickerColumn(picks, tr(R.string.minute), minutes);
         add(fields, picks, 10);
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("短时限额 · 循环周期")
-                .setView(fields).setNegativeButton("取消", null).setPositiveButton("保存", null).create();
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(tr(R.string.cycle_title))
+                .setView(fields).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.save), null).create();
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             hours.clearFocus(); minutes.clearFocus();
             int period = hours.getValue() * 60 + minutes.getValue();
-            if (period < 1 || period > ResetMath.WEEK_MINUTES) { toast("循环周期须为 1 分钟至 7 天"); return; }
+            if (period < 1 || period > ResetMath.WEEK_MINUTES) { toast(tr(R.string.cycle_limit)); return; }
             // Reconcile any elapsed cycle using its old period before changing future cycles.
             AlarmEngine.reconcileDue(this, System.currentTimeMillis());
             ReminderStore.Slot current = ReminderStore.load(this, profileId, ReminderStore.SHORT);
@@ -874,10 +895,10 @@ public final class MainActivity extends Activity {
         LinearLayout body = column();
         body.setGravity(Gravity.CENTER);
         body.setPadding(dp(22), dp(14), dp(22), dp(14));
-        add(body, label("选择提前分钟数（1–10080）", 13, sub, false), 0);
+        add(body, label(tr(R.string.advance_select), 13, sub, false), 0);
         body.addView(p, new LinearLayout.LayoutParams(dp(170), -2));
-        AlertDialog d = new AlertDialog.Builder(this).setTitle("提前提醒")
-                .setView(body).setNegativeButton("取消", null).setPositiveButton("保存", null).create();
+        AlertDialog d = new AlertDialog.Builder(this).setTitle(tr(R.string.early_alert))
+                .setView(body).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.save), null).create();
         d.setOnShowListener(dialog -> d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             p.clearFocus();
             ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
@@ -917,7 +938,7 @@ public final class MainActivity extends Activity {
 
     private void openAppDetails() {
         try { startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()))); }
-        catch (Exception ignored) { toast("请在系统设置中手动授权"); }
+        catch (Exception ignored) { toast(tr(R.string.system_auth)); }
     }
 
     private void toast(String message) { Toast.makeText(this, message, Toast.LENGTH_SHORT).show(); }

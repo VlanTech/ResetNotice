@@ -10,9 +10,6 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 final class AlarmEngine {
     static final String CHANNEL = "quota_reset";
@@ -21,9 +18,10 @@ final class AlarmEngine {
     static void createChannel(Context context) {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager manager = context.getSystemService(NotificationManager.class);
-            NotificationChannel channel = new NotificationChannel(CHANNEL, "额度重置提醒",
+            Context localized = AppPreferences.localized(context);
+            NotificationChannel channel = new NotificationChannel(CHANNEL, localized.getString(R.string.channel_reset),
                     NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("不同 AI 平台与账户的额度提前和到点提醒");
+            channel.setDescription(localized.getString(R.string.channel_reset_desc));
             channel.enableVibration(true);
             manager.createNotificationChannel(channel);
         }
@@ -118,7 +116,7 @@ final class AlarmEngine {
     }
 
     static String timeLabel(long target) {
-        return new SimpleDateFormat("yyyy年M月d日 HH:mm:ss", Locale.CHINA).format(new Date(target));
+        return ResetMath.displayDateTime(target, System.currentTimeMillis());
     }
 
     static void deliver(Context context, Intent intent) {
@@ -159,10 +157,11 @@ final class AlarmEngine {
                     // Never emit many old notifications or repeat the same delivered cycle.
                     if (current.at && !(due == current.target && current.atDelivered)
                             && due >= now - ResetMath.DAY && notificationsAllowed(context)) {
-                        String label = p.label() + " · " + current.title();
+                        Context localized = AppPreferences.localized(context);
+                        String label = p.label() + " · " + I18n.slot(localized, current.id);
                         notify(context, AlarmIdentity.id(p.id, current.id, false), p.id,
-                                label + "已到重置时间", p.label() + "：" + timeLabel(due)
-                                        + " 已到。下一次重置：" + timeLabel(next) + "。");
+                                localized.getString(R.string.alert_due, label),
+                                localized.getString(R.string.due_message, p.label(), timeLabel(due), timeLabel(next)));
                     }
                     rolled = ReminderStore.rollForward(context, current, now);
                 }
@@ -176,11 +175,13 @@ final class AlarmEngine {
     private static boolean deliverEarly(Context context, ReminderStore.Profile profile, ReminderStore.Slot s, long now) {
         if (s.target <= 0 || !s.early || s.earlyDelivered || now >= s.target
                 || now < s.target - s.earlyMinutes * ResetMath.MINUTE || !notificationsAllowed(context)) return false;
-        String label = profile.label() + " · " + s.title();
+        Context localized = AppPreferences.localized(context);
+        String slotName = I18n.slot(localized, s.id);
+        String label = profile.label() + " · " + slotName;
         long minutesLeft = Math.max(1L, (s.target - now + ResetMath.MINUTE - 1) / ResetMath.MINUTE);
-        String remaining = minutesLeft >= 60 ? (minutesLeft / 60) + "小时" + (minutesLeft % 60 == 0 ? "" : (minutesLeft % 60) + "分钟") : minutesLeft + "分钟";
-        String content = profile.label() + "：距离" + s.title() + "重置还有约 " + remaining + "。计划时间：" + timeLabel(s.target);
-        if (!notify(context, AlarmIdentity.id(profile.id, s.id, true), profile.id, label + "即将重置", content)) return false;
+        String remaining = I18n.period(localized, (int)Math.min(Integer.MAX_VALUE, minutesLeft));
+        String content = localized.getString(R.string.early_message, profile.label(), slotName, remaining, timeLabel(s.target));
+        if (!notify(context, AlarmIdentity.id(profile.id, s.id, true), profile.id, localized.getString(R.string.early_title, label), content)) return false;
         s.earlyDelivered = true;
         ReminderStore.markDelivered(context, profile.id, s.id, true);
         return true;
@@ -188,7 +189,8 @@ final class AlarmEngine {
 
     static boolean sendTest(Context context) {
         createChannel(context);
-        return notify(context, 199, -1, "重置通知 · 测试提醒", "通知已正常发出。各 AI 与账户的提醒会单独送达。");
+        Context localized = AppPreferences.localized(context);
+        return notify(context, 199, -1, localized.getString(R.string.test_title), localized.getString(R.string.test_message));
     }
 
     private static boolean notify(Context context, int notificationId, int profileId, String title, String message) {

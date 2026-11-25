@@ -176,6 +176,13 @@ public final class ProfileStoreTest {
         require(TimerSnapshot.read(background, now).count == 0, "clearing final timer ends foreground service");
         ReminderStore.delete(background, bg.id);
         require(TimerSnapshot.read(background, now).count == 0, "deleting account does not keep stale timers");
+        String[][] brands = {{"ChatGPT Plus","openai"},{"GPT-6.2 Sol","openai"},{"OpenAI","openai"},{"Codex","openai"},{"Claude Pro","claude"},
+                {"Anthropic","claude"},{"Google Gemini","gemini"},{"Grok 4","grok"},{"xAI","grok"},{"DeepSeek V4","deepseek"},
+                {"通义千问","qwen"},{"Qwen","qwen"},{"Perplexity Pro","perplexity"},{"Microsoft Copilot","copilot"},{"Kimi","kimi"},
+                {"月之暗面","kimi"},{"Mistral","mistral"},{"豆包","doubao"},{"智譜 GLM","zhipu"},{"文心一言","wenxin"},
+                {"MiniMax","minimax"},{"Llama","meta"},{"Poe","poe"},{"Ollama","ollama"},{"Hugging Face","huggingface"},{"My own system","unknown"}};
+        for (String[] entry : brands) require(BrandMatcher.match(entry[0]).equals(entry[1]), "brand mapping: " + entry[0]);
+        require(BrandMatcher.match(null).equals("unknown"), "null vendor fallback");
         System.out.println(assertions + " profile isolation, migration and alarm identity assertions passed");
     }
 }

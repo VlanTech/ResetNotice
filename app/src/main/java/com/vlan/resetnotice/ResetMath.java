@@ -1,6 +1,7 @@
 package com.vlan.resetnotice;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -36,6 +37,13 @@ final class ResetMath {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT).format(new Date(target));
     }
 
+    static String displayDateTime(long target, long now) {
+        Calendar date = Calendar.getInstance(), current = Calendar.getInstance();
+        date.setTimeInMillis(target); current.setTimeInMillis(now);
+        boolean sameYear = date.get(Calendar.YEAR) == current.get(Calendar.YEAR);
+        return new SimpleDateFormat(sameYear ? "MM-dd HH:mm:ss" : "yyyy-MM-dd HH:mm:ss", Locale.ROOT).format(new Date(target));
+    }
+
     static int validPeriod(int minutes) {
         return Math.max(1, Math.min(WEEK_MINUTES, minutes));
     }
@@ -58,11 +66,15 @@ final class ResetMath {
     }
 
     static String periodLabel(int minutes) {
+        return periodLabel(minutes, "天", "小时", "分钟", "");
+    }
+
+    static String periodLabel(int minutes, String day, String hour, String minute, String separator) {
         int days = minutes / 1440, hours = minutes / 60 % 24, rest = minutes % 60;
         StringBuilder result = new StringBuilder();
-        if (days > 0) result.append(days).append("天");
-        if (hours > 0) result.append(hours).append("小时");
-        if (rest > 0) result.append(rest).append("分钟");
+        if (days > 0) result.append(days).append(day);
+        if (hours > 0) { if (result.length() > 0) result.append(separator); result.append(hours).append(hour); }
+        if (rest > 0) { if (result.length() > 0) result.append(separator); result.append(rest).append(minute); }
         return result.toString();
     }
 
@@ -80,12 +92,16 @@ final class ResetMath {
     }
 
     static String countdown(long millis) {
+        return countdown(millis, "天");
+    }
+
+    static String countdown(long millis, String daySuffix) {
         long seconds = Math.max(0L, (millis + 999L) / 1000L);
         long days = seconds / 86400;
         long hours = (seconds / 3600) % 24;
         long minutes = (seconds / 60) % 60;
         long secs = seconds % 60;
-        return (days > 0 ? days + "天 " : "") +
+        return (days > 0 ? days + daySuffix + " " : "") +
                 String.format(Locale.ROOT, "%02d:%02d:%02d", hours, minutes, secs);
     }
 }
