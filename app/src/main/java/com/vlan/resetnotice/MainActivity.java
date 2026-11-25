@@ -44,7 +44,7 @@ public final class MainActivity extends Activity {
     private final LinkedHashMap<Integer, GroupViews> groups = new LinkedHashMap<>();
     private ScrollView scroll;
     private LinearLayout content, groupList, readiness;
-    private TextView groupCount, emptyState;
+    private TextView groupCount, emptyState, backgroundStatus;
     private boolean notifyReady, exactReady, readinessInitialized;
     private int page, card, text, sub, accent, onAccent, accentSoft, line, positive, positiveSoft, warning, warningSoft;
     private final Runnable ticker = new Runnable() {
@@ -85,6 +85,7 @@ public final class MainActivity extends Activity {
     @Override public void onResume() {
         super.onResume();
         AlarmEngine.rescheduleAll(this);
+        TimerService.refresh(this);
         refreshReadiness();
         updateCountdowns();
         handler.removeCallbacks(ticker);
@@ -120,6 +121,7 @@ public final class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, results);
         if (requestCode == NOTIFICATION_REQUEST) {
             AlarmEngine.rescheduleAll(this);
+            TimerService.refresh(this);
             refreshReadiness();
             updateCountdowns();
         }
@@ -281,7 +283,7 @@ public final class MainActivity extends Activity {
         TextView foot = label("首次录入重置时间后会按周期自动续排；重启手机或重新打开应用时也会接续下一次提醒。", 12, sub, false);
         foot.setGravity(Gravity.CENTER);
         add(content, foot, 22);
-        TextView version = label("重置通知 1.2.0  ·  数据仅保存在本机", 11, sub, false);
+        TextView version = label("重置通知 1.3.0  ·  数据仅保存在本机", 11, sub, false);
         version.setGravity(Gravity.CENTER);
         add(content, version, 10);
         updateCountdowns();
@@ -307,6 +309,18 @@ public final class MainActivity extends Activity {
                 else openNotificationPermission();
             }), 10);
         }
+        backgroundStatus = label("", 13, sub, false);
+        add(readiness, backgroundStatus, 12);
+        add(readiness, button("后台运行设置", false, v -> openAppDetails()), 8);
+        updateBackgroundStatus();
+    }
+
+    private void updateBackgroundStatus() {
+        if (backgroundStatus == null) return;
+        int activeCount = TimerSnapshot.read(this, System.currentTimeMillis()).count;
+        setText(backgroundStatus, activeCount == 0 ? "后台计时：暂无有效计时器" :
+                TimerService.isRunning() ? "后台计时：运行中 · " + activeCount + " 个额度" :
+                        "后台计时：等待服务启动；系统闹钟仍负责提醒");
     }
 
     private void updateGroupCount() {
@@ -541,6 +555,7 @@ public final class MainActivity extends Activity {
                 // Renaming keeps the existing scheduled times; delivery uses current labels.
                 if (!profile.shortEnabled) AlarmEngine.cancelSlot(this, profile.id, ReminderStore.SHORT, true);
             }
+            TimerService.refresh(this);
             dialog.dismiss();
             if (creating) focusProfile(profile.id);
         }));
@@ -553,6 +568,7 @@ public final class MainActivity extends Activity {
                 .setNegativeButton("取消", null).setPositiveButton("删除", (d, w) -> {
                     ReminderStore.delete(this, profile.id);
                     AlarmEngine.cancelProfile(this, profile.id);
+                    TimerService.refresh(this);
                     GroupViews g = groups.remove(profile.id);
                     if (g != null) {
                         cancelExpansion(g);
@@ -670,6 +686,7 @@ public final class MainActivity extends Activity {
         // visible timer advances at the actual system-clock boundary.
         AlarmEngine.reconcileDue(this, now);
         for (GroupViews g : groups.values()) updateGroup(g, now);
+        updateBackgroundStatus();
     }
 
     private void updateGroup(GroupViews g, long now) {
@@ -731,6 +748,7 @@ public final class MainActivity extends Activity {
     private void save(ReminderStore.Slot s) {
         ReminderStore.save(this, s);
         AlarmEngine.rescheduleSlot(this, s.profileId, s.id);
+        TimerService.refresh(this);
         // Update only the affected account. Native Switch objects and scrolling remain untouched.
         GroupViews g = groups.get(s.profileId);
         if (g != null) updateGroup(g, System.currentTimeMillis());

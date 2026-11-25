@@ -141,6 +141,41 @@ public final class ProfileStoreTest {
                 for (boolean early : new boolean[]{true, false})
                     require(alarmIds.add(AlarmIdentity.id(profile, slot, early)), "alarm identity collision");
         require(!alarmIds.contains(100) && !alarmIds.contains(199), "legacy/test IDs are disjoint");
+        require(!alarmIds.contains(198), "foreground timer notification ID disjoint");
+
+        FakeContext background = new FakeContext();
+        require(TimerSnapshot.read(background, now).count == 0, "no profile needs no foreground service");
+        ReminderStore.Profile bg = ReminderStore.add(background, "ChatGPT", "主账号", true);
+        require(TimerSnapshot.read(background, now).count == 0, "unset profile needs no foreground service");
+        ReminderStore.Slot bgShort = ReminderStore.load(background, bg.id, ReminderStore.SHORT);
+        bgShort.target = now + 2 * ResetMath.HOUR;
+        bgShort.early = true;
+        bgShort.earlyMinutes = 15;
+        bgShort.at = false;
+        ReminderStore.save(background, bgShort);
+        TimerSnapshot snap = TimerSnapshot.read(background, now);
+        require(snap.count == 1 && snap.nextReset == bgShort.target, "active even with at-time notification disabled");
+        require(snap.nextLabel.equals("ChatGPT · 主账号 · 短时限额"), "notification names active timer");
+        require(snap.nextEvent == bgShort.target - 15 * ResetMath.MINUTE, "early event is next check");
+        require(snap.nextCheckDelay(now) == 60_000L, "background checks are bounded and not per-second");
+        require(snap.nextCheckDelay(snap.nextEvent - 10_000L) == 10_000L, "check aligns with early event");
+        ReminderStore.Slot bgWeek = ReminderStore.load(background, bg.id, ReminderStore.WEEK);
+        bgWeek.target = now + ResetMath.HOUR;
+        bgWeek.early = false; bgWeek.at = false;
+        ReminderStore.save(background, bgWeek);
+        snap = TimerSnapshot.read(background, now);
+        require(snap.count == 2 && snap.nextReset == bgWeek.target, "weekly timer selected even with both reminders disabled");
+        require(snap.nextEvent == bgWeek.target, "next event selects earliest rollover");
+        require(TimerSnapshot.read(background, bgWeek.target + 1).count == 2, "overdue recurring timer remains active after process restart");
+        ReminderStore.rollForward(background, bgWeek, bgWeek.target + 1);
+        require(TimerSnapshot.read(background, now).nextReset == bgShort.target, "snapshot updates after rollover");
+        ReminderStore.edit(background, bg.id, "ChatGPT", "主账号", false);
+        require(TimerSnapshot.read(background, now).count == 1, "disabled short excluded from service");
+        bgWeek.target = 0;
+        ReminderStore.save(background, bgWeek);
+        require(TimerSnapshot.read(background, now).count == 0, "clearing final timer ends foreground service");
+        ReminderStore.delete(background, bg.id);
+        require(TimerSnapshot.read(background, now).count == 0, "deleting account does not keep stale timers");
         System.out.println(assertions + " profile isolation, migration and alarm identity assertions passed");
     }
 }

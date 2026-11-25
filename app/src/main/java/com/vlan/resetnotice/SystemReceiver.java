@@ -11,6 +11,7 @@ public final class SystemReceiver extends BroadcastReceiver {
                 || Intent.ACTION_TIME_CHANGED.equals(action) || Intent.ACTION_TIMEZONE_CHANGED.equals(action)
                 || "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED".equals(action)) {
             AlarmEngine.rescheduleAll(context);
+            TimerService.refresh(context);
         }
     }
 }
