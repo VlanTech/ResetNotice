@@ -213,16 +213,19 @@
     <string name="history_reason_missed">経過周期を復元</string>
     <string name="history_reason_manual">手動変更</string>
     <string name="history_reason_failed">通知送信失敗</string>
-    <string name="widget_glass_title">ホームカードのすりガラス</string>
-    <string name="widget_glass_hint" formatted="false">半透明のグラデーションを調整します。0% は不透明、100% は透明。</string>
+    <string name="widget_glass_title">ウィジェットの透明度</string>
+    <string name="widget_glass_hint" formatted="false">背景の透明度を調整します。0% は不透明、100% は完全に透明です。壁紙のぼかしはランチャーが制御します。</string>
     <string name="widget_glass_value">透明度 %1$d%%</string>
-    <string name="widget_stack_name">全アカウントカード</string>
+    <string name="widget_stack_name">全アカウントのページカード</string>
     <string name="widget_stack_add">全アカウントカードを追加</string>
-    <string name="widget_stack_hint">1つのウィジェットで上下にスワイプしてアカウントを切り替えます。</string>
-    <string name="widget_stack_manual">ホーム画面を長押しし、ウィジェットからリセット通知の全アカウントカードを追加してください。</string>
-    <string name="widget_blur_title">すりガラスのぼかし</string>
-    <string name="widget_blur_hint">カード自体の素材をぼかします。ホーム画面の壁紙は読み取ったりぼかしたりしません。</string>
-    <string name="widget_blur_value">ぼかし強度 %1$d%%</string>
+    <string name="widget_stack_hint">上下の矢印でアカウントを1枚ずつ切り替えます。</string>
+    <string name="widget_stack_manual">アプリから追加できない場合は、ホーム画面を長押ししてウィジェットから全アカウントカードを追加します。</string>
     <string name="widget_glass_preview">カード外観プレビュー</string>
-    <string name="widget_deck_loading">カードを読み込み中…</string>
+    <string name="widget_page_previous">前のアカウント</string>
+    <string name="widget_page_next">次のアカウント</string>
+    <string name="widget_native_title">システム標準のウィジェットスタック</string>
+    <string name="widget_native_hint">ColorOS 推奨：縦スワイプとページ切り替えをランチャーに任せます。</string>
+    <string name="widget_native_steps">スタック対応のホーム画面で各アカウントのカードを個別に追加し、同じサイズにします。長押しして別のカードに重ねてください。上下スワイプで切り替えます。アニメーションや壁紙のぼかしはランチャーに依存します。</string>
+    <string name="widget_native_add">アカウントカードを追加</string>
+    <string name="widget_native_manual">ホーム画面のウィジェット一覧から個別のカードを追加し、対応端末で同じサイズのカードを重ねてください。</string>
 </resources>

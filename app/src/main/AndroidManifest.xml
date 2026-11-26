@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.vlan.resetnotice" android:versionCode="12" android:versionName="1.11.0">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.vlan.resetnotice" android:versionCode="13" android:versionName="1.12.0">
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="34" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
@@ -32,7 +32,7 @@
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/quota_widget_stack_info" />
         </receiver>
-        <service android:name=".WidgetStackService" android:exported="false" android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <receiver android:name=".WidgetPageReceiver" android:exported="false" />
         <receiver android:name=".ReminderReceiver" android:exported="false" />
         <receiver android:name=".ProbeReceiver" android:exported="false" />
         <receiver android:name=".BootReceiver" android:exported="false" android:directBootAware="true">

@@ -213,16 +213,19 @@
     <string name="history_reason_missed">Ciclo decorrido recuperado</string>
     <string name="history_reason_manual">Alteração manual</string>
     <string name="history_reason_failed">Falha no aviso</string>
-    <string name="widget_glass_title">Vidro fosco do widget</string>
-    <string name="widget_glass_hint" formatted="false">Ajuste a transparência do degradê de fundo. 0% opaco, 100% transparente.</string>
+    <string name="widget_glass_title">Transparência dos cartões</string>
+    <string name="widget_glass_hint" formatted="false">Ajuste o fundo do cartão. 0% é opaco e 100% é transparente. O desfoque real do papel de parede depende do launcher.</string>
     <string name="widget_glass_value">Transparência %1$d%%</string>
-    <string name="widget_stack_name">Pilha de todas as contas</string>
-    <string name="widget_stack_add">Adicionar pilha de contas</string>
-    <string name="widget_stack_hint">Deslize para cima ou para baixo para alternar contas no widget.</string>
-    <string name="widget_stack_manual">Se não puder adicionar pelo app, pressione a tela inicial e selecione a pilha de contas do ResetNotice nos Widgets.</string>
-    <string name="widget_blur_title">Desfoque do material</string>
-    <string name="widget_blur_hint">Suaviza o material do cartão; não lê nem desfoca o papel de parede.</string>
-    <string name="widget_blur_value">Desfoque %1$d%%</string>
+    <string name="widget_stack_name">Cartão paginado de todas as contas</string>
+    <string name="widget_stack_add">Adicionar cartão de todas as contas</string>
+    <string name="widget_stack_hint">Use as setas para alternar uma conta de cada vez.</string>
+    <string name="widget_stack_manual">Se não puder adicionar pelo app, pressione a tela inicial e selecione o cartão nos widgets do ResetNotice.</string>
     <string name="widget_glass_preview">Prévia do cartão</string>
-    <string name="widget_deck_loading">Carregando cartões…</string>
+    <string name="widget_page_previous">Conta anterior</string>
+    <string name="widget_page_next">Próxima conta</string>
+    <string name="widget_native_title">Pilha nativa de widgets</string>
+    <string name="widget_native_hint">Recomendado no ColorOS: o launcher controla o gesto vertical e a mudança de página.</string>
+    <string name="widget_native_steps">Em um launcher compatível, adicione um cartão por conta, todos do mesmo tamanho. Pressione um cartão e arraste-o sobre outro. Deslize verticalmente para alternar. O launcher controla as animações e o desfoque do fundo.</string>
+    <string name="widget_native_add">Adicionar cartão de conta</string>
+    <string name="widget_native_manual">Adicione cartões individuais no seletor de widgets e sobreponha os do mesmo tamanho se o launcher permitir.</string>
 </resources>

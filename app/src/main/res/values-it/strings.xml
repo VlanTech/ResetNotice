@@ -213,16 +213,19 @@
     <string name="history_reason_missed">Ciclo trascorso recuperato</string>
     <string name="history_reason_manual">Modifica manuale</string>
     <string name="history_reason_failed">Errore di invio</string>
-    <string name="widget_glass_title">Vetro satinato del widget</string>
-    <string name="widget_glass_hint" formatted="false">Regola la trasparenza dello sfondo sfumato. 0% opaco, 100% trasparente.</string>
+    <string name="widget_glass_title">Trasparenza delle schede</string>
+    <string name="widget_glass_hint" formatted="false">Regola lo sfondo della scheda. 0% è opaco e 100% è trasparente. La sfocatura reale dipende dal launcher.</string>
     <string name="widget_glass_value">Trasparenza %1$d%%</string>
-    <string name="widget_stack_name">Pila di tutti gli account</string>
-    <string name="widget_stack_add">Aggiungi pila di account</string>
-    <string name="widget_stack_hint">Scorri verso l’alto o il basso per cambiare account in un widget.</string>
-    <string name="widget_stack_manual">Se l’aggiunta dall’app non è disponibile, tieni premuta la home e scegli la pila di account ResetNotice nei Widget.</string>
-    <string name="widget_blur_title">Sfocatura del materiale</string>
-    <string name="widget_blur_hint">Sfuma il materiale della scheda; non legge né sfoca lo sfondo della home.</string>
-    <string name="widget_blur_value">Sfocatura %1$d%%</string>
+    <string name="widget_stack_name">Scheda a pagine di tutti gli account</string>
+    <string name="widget_stack_add">Aggiungi scheda di tutti gli account</string>
+    <string name="widget_stack_hint">Usa le frecce per cambiare account, una pagina alla volta.</string>
+    <string name="widget_stack_manual">Se non puoi aggiungerla dall’app, tieni premuta la schermata iniziale e seleziona la scheda nei widget ResetNotice.</string>
     <string name="widget_glass_preview">Anteprima scheda</string>
-    <string name="widget_deck_loading">Caricamento schede…</string>
+    <string name="widget_page_previous">Account precedente</string>
+    <string name="widget_page_next">Account successivo</string>
+    <string name="widget_native_title">Pila widget nativa</string>
+    <string name="widget_native_hint">Consigliato su ColorOS: il launcher gestisce lo scorrimento verticale e il cambio pagina.</string>
+    <string name="widget_native_steps">Su un launcher compatibile, aggiungi una scheda per account, tutte della stessa dimensione. Tienine premuta una e trascinala sopra un’altra. Scorri verticalmente per cambiare account. Il launcher gestisce animazioni e sfocatura.</string>
+    <string name="widget_native_add">Aggiungi scheda account</string>
+    <string name="widget_native_manual">Aggiungi le singole schede dai widget della home e sovrapponi quelle di uguali dimensioni se supportato.</string>
 </resources>

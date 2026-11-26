@@ -100,32 +100,11 @@ public final class SettingsActivity extends Activity {
             }
         });
         add(glass, slider, 4);
-        add(glass, label(getString(R.string.widget_blur_title), 15, text, true), 12);
-        add(glass, label(getString(R.string.widget_blur_hint), 12, sub, false), 4);
-        TextView blurValue = label(getString(R.string.widget_blur_value, AppPreferences.widgetBlur(this)), 13, accent, true);
-        add(glass, blurValue, 6);
-        SeekBar blur = new SeekBar(this);
-        blur.setMax(100); blur.setProgress(AppPreferences.widgetBlur(this));
-        blur.setProgressTintList(ColorStateList.valueOf(accent)); blur.setThumbTintList(ColorStateList.valueOf(accent));
-        blur.setContentDescription(getString(R.string.widget_blur_title));
-        blur.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
-                blurValue.setText(getString(R.string.widget_blur_value, progress));
-                if (fromUser) {
-                    AppPreferences.setWidgetBlur(SettingsActivity.this, progress);
-                    WidgetGlass.preview(previewImage, SettingsActivity.this);
-                    glass.removeCallbacks(refreshWidgets); glass.postDelayed(refreshWidgets, 220L);
-                }
-            }
-            @Override public void onStartTrackingTouch(SeekBar bar) { Haptics.tap(bar); }
-            @Override public void onStopTrackingTouch(SeekBar bar) {
-                glass.removeCallbacks(refreshWidgets); refreshWidgets.run();
-            }
-        });
-        add(glass, blur, 4);
         LinearLayout.LayoutParams previewParams = new LinearLayout.LayoutParams(-1, dp(86));
         previewParams.topMargin = dp(12); glass.addView(preview, previewParams);
         add(appearance, glass, 0);
+        divider(appearance);
+        add(appearance, item(getString(R.string.widget_native_title), getString(R.string.widget_native_hint), v -> nativeStack()), 0);
         divider(appearance);
         add(appearance, item(getString(R.string.widget_stack_add), getString(R.string.widget_stack_hint), v -> {
             if (AllAccountsWidgetProvider.requestPin(this)) Toast.makeText(this, R.string.widget_confirm, Toast.LENGTH_SHORT).show();
@@ -215,7 +194,7 @@ public final class SettingsActivity extends Activity {
         LinearLayout about = panel();
         add(about, item(getString(R.string.developer), "Vlan_Tech", null), 0);
         divider(about);
-        add(about, item(getString(R.string.version), "1.11.0", null), 0);
+        add(about, item(getString(R.string.version), "1.12.0", null), 0);
         divider(about);
         add(about, item(getString(R.string.source_code), "GitHub · ResetNotice", v -> {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VlanTech/ResetNotice"))); }
@@ -229,6 +208,31 @@ public final class SettingsActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         if (batteryValue != null) batteryValue.setText(batteryStatus());
+    }
+
+    private void nativeStack() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.widget_native_title)
+                .setMessage(R.string.widget_native_steps)
+                .setPositiveButton(R.string.widget_native_add, (dialog, which) -> chooseWidgetAccount())
+                .setNegativeButton(android.R.string.cancel, null).show();
+    }
+
+    private void chooseWidgetAccount() {
+        java.util.List<ReminderStore.Profile> profiles = ReminderStore.profiles(this);
+        if (profiles.isEmpty()) {
+            Toast.makeText(this, R.string.widget_no_accounts, Toast.LENGTH_LONG).show();
+            return;
+        }
+        String[] names = new String[profiles.size()];
+        for (int i = 0; i < names.length; i++)
+            names[i] = profiles.get(i).platform + " · " + profiles.get(i).account;
+        new AlertDialog.Builder(this).setTitle(R.string.widget_choose).setItems(names, (dialog, which) -> {
+            if (QuotaWidgetProvider.requestPin(this, profiles.get(which).id))
+                Toast.makeText(this, R.string.widget_confirm, Toast.LENGTH_SHORT).show();
+            else new AlertDialog.Builder(this).setTitle(R.string.widget_native_title)
+                    .setMessage(R.string.widget_native_manual).setPositiveButton(android.R.string.ok, null).show();
+        }).setNegativeButton(android.R.string.cancel, null).show();
     }
 
     private String batteryStatus() {

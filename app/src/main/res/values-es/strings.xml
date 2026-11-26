@@ -213,16 +213,19 @@
     <string name="history_reason_missed">Ciclo transcurrido recuperado</string>
     <string name="history_reason_manual">Cambio manual</string>
     <string name="history_reason_failed">Error de aviso</string>
-    <string name="widget_glass_title">Cristal esmerilado del widget</string>
-    <string name="widget_glass_hint" formatted="false">Ajusta la transparencia del fondo degradado. 0% opaco, 100% transparente.</string>
+    <string name="widget_glass_title">Transparencia de tarjetas</string>
+    <string name="widget_glass_hint" formatted="false">Ajusta el fondo de la tarjeta. 0% es opaco y 100% es transparente. El desenfoque real del fondo depende del lanzador.</string>
     <string name="widget_glass_value">Transparencia %1$d%%</string>
-    <string name="widget_stack_name">Pila de todas las cuentas</string>
-    <string name="widget_stack_add">Añadir pila de cuentas</string>
-    <string name="widget_stack_hint">Desliza arriba o abajo para cambiar entre cuentas en un widget.</string>
-    <string name="widget_stack_manual">Si no puedes añadir desde la app, mantén pulsada la pantalla de inicio y selecciona la pila de cuentas de ResetNotice en Widgets.</string>
-    <string name="widget_blur_title">Desenfoque del material</string>
-    <string name="widget_blur_hint">Suaviza el material de la tarjeta; no lee ni desenfoca el fondo de pantalla.</string>
-    <string name="widget_blur_value">Desenfoque %1$d%%</string>
+    <string name="widget_stack_name">Tarjeta paginada de todas las cuentas</string>
+    <string name="widget_stack_add">Añadir tarjeta de todas las cuentas</string>
+    <string name="widget_stack_hint">Usa las flechas para cambiar de cuenta, una página cada vez.</string>
+    <string name="widget_stack_manual">Si no puedes añadirla desde la aplicación, mantén pulsada la pantalla de inicio y elige la tarjeta en los widgets de ResetNotice.</string>
     <string name="widget_glass_preview">Vista previa de la tarjeta</string>
-    <string name="widget_deck_loading">Cargando tarjetas…</string>
+    <string name="widget_page_previous">Cuenta anterior</string>
+    <string name="widget_page_next">Cuenta siguiente</string>
+    <string name="widget_native_title">Pila nativa de widgets</string>
+    <string name="widget_native_hint">Recomendado en ColorOS: el lanzador controla el deslizamiento vertical y el ajuste de página.</string>
+    <string name="widget_native_steps">En un lanzador compatible, añade una tarjeta por cuenta, del mismo tamaño. Mantén pulsada una tarjeta y arrástrala sobre otra. Desliza verticalmente para cambiar de cuenta. El lanzador gestiona las animaciones y el desenfoque.</string>
+    <string name="widget_native_add">Añadir tarjeta de cuenta</string>
+    <string name="widget_native_manual">Añade tarjetas individuales desde los widgets de inicio y apila las del mismo tamaño si tu lanzador lo admite.</string>
 </resources>

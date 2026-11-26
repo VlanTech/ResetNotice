@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
 import java.util.UUID;
@@ -70,26 +69,45 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
     static void updateOne(Context context, AppWidgetManager manager, int id) {
         if (!BootState.unlocked(context)) return;
         try {
-            manager.updateAppWidget(id, render(context, id, WidgetBindingStore.profile(context, id), false, 0));
+            manager.updateAppWidget(id, render(context, id, WidgetBindingStore.profile(context, id)));
         } catch (RuntimeException e) { Log.w(TAG, "Widget refresh failed", e); }
     }
 
-    static RemoteViews renderStackItem(Context context, int profileId, int height) {
-        return render(context, -1, profileId, true, height);
+    static RemoteViews renderPagedItem(Context context, int id, int profileId, int index, int total) {
+        RemoteViews views = render(context, id, profileId);
+        Context c = AppPreferences.localized(context);
+        if (index < 0) {
+            views.setTextViewText(R.id.widget_ai, c.getString(R.string.widget_stack_name));
+            views.setTextViewText(R.id.widget_account_name, "");
+            views.setTextViewText(R.id.widget_empty, c.getString(R.string.widget_no_accounts));
+            Intent open = new Intent(context, MainActivity.class)
+                    .setData(Uri.parse("resetnotice://widget/empty/" + id))
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(context, id, open,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        }
+        if (total > 1 && index >= 0) {
+            views.setViewVisibility(R.id.widget_page_controls, View.VISIBLE);
+            views.setTextViewText(R.id.widget_page_index, (index + 1) + "/" + total);
+            views.setContentDescription(R.id.widget_page_prev, c.getString(R.string.widget_page_previous));
+            views.setContentDescription(R.id.widget_page_next, c.getString(R.string.widget_page_next));
+            views.setInt(R.id.widget_page_prev, "setImageAlpha", index > 0 ? 255 : 65);
+            views.setInt(R.id.widget_page_next, "setImageAlpha", index + 1 < total ? 255 : 65);
+            // Even stale clicks at either endpoint are clamped by WidgetPageMath.
+            views.setOnClickPendingIntent(R.id.widget_page_prev, AllAccountsWidgetProvider.pageIntent(context, id, -1));
+            views.setOnClickPendingIntent(R.id.widget_page_next, AllAccountsWidgetProvider.pageIntent(context, id, 1));
+        }
+        return views;
     }
 
-    private static RemoteViews render(Context context, int id, int profileId, boolean collection, int height) {
+    private static RemoteViews render(Context context, int id, int profileId) {
         Context c = AppPreferences.localized(context);
         String theme = AppPreferences.theme(context);
-        int layout = collection
-                ? (AppPreferences.LIGHT.equals(theme) ? R.layout.widget_deck_card_light :
-                AppPreferences.DARK.equals(theme) ? R.layout.widget_deck_card_dark : R.layout.widget_deck_card)
-                : (AppPreferences.LIGHT.equals(theme) ? R.layout.widget_account_light :
-                AppPreferences.DARK.equals(theme) ? R.layout.widget_account_dark : R.layout.widget_account);
+        int layout = AppPreferences.LIGHT.equals(theme) ? R.layout.widget_account_light :
+                AppPreferences.DARK.equals(theme) ? R.layout.widget_account_dark : R.layout.widget_account;
         RemoteViews v = new RemoteViews(context.getPackageName(), layout);
-        if (collection && Build.VERSION.SDK_INT >= 31)
-            v.setViewLayoutHeight(R.id.deck_card_body, height, TypedValue.COMPLEX_UNIT_DIP);
-        WidgetGlass.applyRemote(v, context, c);
+        WidgetGlass.applyRemote(v, context);
+        v.setViewVisibility(R.id.widget_page_controls, View.GONE);
         ReminderStore.Profile profile = ReminderStore.profile(context, profileId);
         v.setViewVisibility(R.id.widget_short, View.GONE);
         v.setViewVisibility(R.id.widget_week, View.GONE);
@@ -99,10 +117,6 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
             v.setTextViewText(R.id.widget_empty, c.getString(profileId > 0 ? R.string.widget_missing : R.string.widget_description));
             v.setViewVisibility(R.id.widget_empty, View.VISIBLE);
             v.setImageViewResource(R.id.widget_logo, R.drawable.portrait);
-            if (collection) {
-                v.setOnClickFillInIntent(R.id.deck_card_root, new Intent());
-                return v;
-            }
             Intent intent = new Intent(context, WidgetConfigActivity.class)
                     .setAction(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
                     .setData(Uri.parse("resetnotice://widget/config/" + id))
@@ -124,10 +138,6 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
         boolean weekShown = renderSlot(v, c, weekSlot, true, now, elapsed, false);
         v.setTextViewText(R.id.widget_empty, c.getString(R.string.widget_empty));
         v.setViewVisibility(R.id.widget_empty, shortShown || weekShown ? View.GONE : View.VISIBLE);
-        if (collection) {
-            v.setOnClickFillInIntent(R.id.deck_card_root, new Intent().putExtra("open_profile", profile.id));
-            return v;
-        }
         Intent open = new Intent(context, MainActivity.class)
                 .setData(Uri.parse("resetnotice://widget/open/" + id))
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)

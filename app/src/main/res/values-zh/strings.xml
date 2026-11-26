@@ -213,16 +213,19 @@
     <string name="history_reason_missed">过期周期补算</string>
     <string name="history_reason_manual">手动修改</string>
     <string name="history_reason_failed">通知发送失败</string>
-    <string name="widget_glass_title">桌面卡片毛玻璃</string>
-    <string name="widget_glass_hint" formatted="false">调节卡片渐变底色的透明度。0% 为不透明，100% 为全透明。</string>
+    <string name="widget_glass_title">桌面卡片透明度</string>
+    <string name="widget_glass_hint" formatted="false">调节底色透明度。0% 为不透明，100% 为全透明；真实壁纸毛玻璃由桌面系统控制。</string>
     <string name="widget_glass_value">透明度 %1$d%%</string>
-    <string name="widget_stack_name">全部账户叠卡</string>
-    <string name="widget_stack_add">添加全部账户叠卡</string>
-    <string name="widget_stack_hint">在一张桌面卡片中上下滑动切换各 AI 账户。</string>
-    <string name="widget_stack_manual">若桌面不支持应用内添加，请长按桌面，在小组件中选择重置通知的全部账户叠卡。</string>
-    <string name="widget_blur_title">毛玻璃模糊度</string>
-    <string name="widget_blur_hint">调节卡片自身材质的弥散模糊强度，桌面壁纸不会被读取或实时模糊。</string>
-    <string name="widget_blur_value">模糊度 %1$d%%</string>
+    <string name="widget_stack_name">全部账户翻页卡片</string>
+    <string name="widget_stack_add">添加全部账户翻页卡片</string>
+    <string name="widget_stack_hint">点击上下箭头逐张切换账户，首尾限位。</string>
+    <string name="widget_stack_manual">若桌面不支持应用内添加，请长按桌面，在小组件中选择重置通知的全部账户翻页卡片。</string>
     <string name="widget_glass_preview">卡片外观预览</string>
-    <string name="widget_deck_loading">正在同步账户卡片…</string>
+    <string name="widget_page_previous">上一账户</string>
+    <string name="widget_page_next">下一账户</string>
+    <string name="widget_native_title">系统原生叠卡</string>
+    <string name="widget_native_hint">ColorOS 推荐：交由桌面负责上下滑动及整卡吸附。</string>
+    <string name="widget_native_steps">在支持堆叠的桌面上，为每个账户分别添加额度倒计时卡片，调整为相同尺寸。长按其中一张，拖到另一张上方，即可原生堆叠。上下滑动切换账户；动画及壁纸模糊由桌面系统决定。</string>
+    <string name="widget_native_add">添加账户卡片</string>
+    <string name="widget_native_manual">长按桌面，在小组件中分别添加各账户的额度倒计时卡片；若支持叠卡，拖动同尺寸卡片重合即可。</string>
 </resources>

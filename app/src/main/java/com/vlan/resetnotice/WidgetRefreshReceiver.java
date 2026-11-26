@@ -22,12 +22,18 @@ public final class WidgetRefreshReceiver extends BroadcastReceiver {
         try {
             AppWidgetManager widgets = AppWidgetManager.getInstance(c);
             int[] individual = widgets.getAppWidgetIds(QuotaWidgetProvider.component(c));
-            boolean all = widgets.getAppWidgetIds(AllAccountsWidgetProvider.component(c)).length > 0;
             Set<Integer> profiles = new HashSet<>();
-            if (all) for (ReminderStore.Profile p : ReminderStore.profiles(c)) profiles.add(p.id);
-            else for (int id : individual) {
+            for (int id : individual) {
                 int profile = WidgetBindingStore.profile(c, id);
                 if (profile > 0) profiles.add(profile);
+            }
+            int[] paged = widgets.getAppWidgetIds(AllAccountsWidgetProvider.component(c));
+            if (paged.length > 0) {
+                java.util.List<Integer> accounts = AllAccountsWidgetProvider.orderedAccounts(c);
+                for (int id : paged) {
+                    int profile = AllAccountsWidgetProvider.selection(c, id, accounts);
+                    if (profile > 0) profiles.add(profile);
+                }
             }
             long now = System.currentTimeMillis(), next = Long.MAX_VALUE;
             for (int profile : profiles) {

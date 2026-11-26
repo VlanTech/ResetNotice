@@ -298,33 +298,36 @@ public final class ProfileStoreTest {
         require(WidgetMath.chronometerBase(12345L, now - 5000L, now) == 12345L, "widget base never starts expired");
         require(WidgetMath.glassAlpha(0) == 255 && WidgetMath.glassAlpha(100) == 0 &&
                 WidgetMath.glassAlpha(50) == 128, "widget glass transparency maps to image alpha");
-        require(WidgetDeckMath.rowHeight(0,0,false) == WidgetDeckMath.DEFAULT_HEIGHT, "missing launcher size uses fallback");
-        require(WidgetDeckMath.rowHeight(180,240,false) == 240 && WidgetDeckMath.rowHeight(180,240,true) == 180,
-                "full-height vertical rows respect launcher orientation");
-        require(WidgetDeckMath.rowHeight(120,120,false) == WidgetDeckMath.MIN_HEIGHT, "do not squeeze rows below readable content");
-        require(WidgetDeckMath.rowHeight(230,0,false) == 230, "single launcher size is accepted");
-        require(WidgetDeckMath.direct(31,6) && !WidgetDeckMath.direct(30,6) && !WidgetDeckMath.direct(31,7),
-                "direct collections are bounded for host compatibility");
+        java.util.List<Integer> pages = java.util.Arrays.asList(11, 22, 33);
+        require(WidgetPageMath.selected(pages, -1) == 11, "first page on initial add");
+        require(WidgetPageMath.selected(pages, 22) == 22, "selected ID persists across refresh");
+        require(WidgetPageMath.move(pages, 11, -1) == 11, "hard first page boundary");
+        require(WidgetPageMath.move(pages, 33, 1) == 33, "hard last page boundary");
+        require(WidgetPageMath.move(pages, 11, 1) == 22, "next moves exactly one page");
+        require(WidgetPageMath.move(pages, 22, 1) == 33, "next from middle");
+        require(WidgetPageMath.move(pages, 33, -1) == 22, "previous moves exactly one page");
+        require(WidgetPageMath.move(pages, 22, -1) == 11, "previous from middle");
+        require(WidgetPageMath.move(pages, 22, 5) == 22, "reject invalid direction");
+        require(WidgetPageMath.move(pages, 22, 0) == 22, "reject no direction");
+        require(WidgetPageMath.selected(java.util.Arrays.asList(33, 11, 22), 22) == 22, "automatic sorting never changes visible account");
+        require(WidgetPageMath.move(java.util.Arrays.asList(33, 11, 22), 22, -1) == 11, "navigation follows new order");
+        require(WidgetPageMath.selected(java.util.Arrays.asList(33, 11), 22) == 33, "deleted selection falls back to first");
+        require(WidgetPageMath.selected(java.util.Collections.emptyList(), 22) == -1, "empty page has no account");
+        require(WidgetPageMath.move(java.util.Collections.emptyList(), 22, 1) == -1, "empty page cannot scroll");
+        require(WidgetPageMath.move(java.util.Collections.singletonList(22), 22, 1) == 22, "single page cannot advance");
+        require(WidgetPageMath.move(java.util.Collections.singletonList(22), 22, -1) == 22, "single page cannot reverse");
         FakeContext deck = new FakeContext();
-        int deckSignature = WidgetDeckMath.signature(true,240);
-        require(!WidgetDeckState.installed(deck,801,deckSignature), "old diagonal stack requires full migration");
-        WidgetDeckState.mark(deck,801,deckSignature);
-        require(WidgetDeckState.installed(deck,801,deckSignature), "same layout uses partial refresh");
-        require(!WidgetDeckState.installed(deck,801,WidgetDeckMath.signature(true,250)), "resize requires full rebuild");
-        require(!WidgetDeckState.installed(deck,801,WidgetDeckMath.signature(false,240)), "adapter mode change requires full rebuild");
-        require(!WidgetDeckState.installed(deck,802,deckSignature), "widget instances keep independent install state");
-        WidgetDeckState.clear(deck,801);
-        require(!WidgetDeckState.installed(deck,801,deckSignature), "removed and restored widget can initialize again");
-        require(GlassMath.blurRadius(0) == 0 && GlassMath.blurRadius(100) > GlassMath.blurRadius(25), "independent blur slider maps monotonically to filter radius");
-        require(GlassMath.bucket(0) == 0 && GlassMath.bucket(1) == 5 && GlassMath.bucket(99) == 100, "blur cache has valid bounds");
-        int[] pixels = {0xff000000, 0xffffffff, 0xff000000};
-        int[] clean = GlassMath.blur(pixels,3,1,0);
-        int[] diffused = GlassMath.blur(pixels,3,1,1);
-        require(java.util.Arrays.equals(clean,pixels) && clean != pixels, "zero blur preserves source pixels");
-        require((diffused[0]&255) > 0 && (diffused[1]&255) < 255 && pixels[1] == 0xffffffff,
-                "blur actually diffuses local texture without mutating source");
-        require((diffused[0]>>>24) == 255 && WidgetMath.glassAlpha(35) == 166,
-                "blur keeps material opacity separate from user alpha");
+        require(WidgetBindingStore.bind(deck, 801, 22), "remember visible account");
+        require(WidgetBindingStore.bind(deck, 802, 33), "independent page widget");
+        require(WidgetPageMath.selected(pages, WidgetBindingStore.profile(deck, 801)) == 22, "restore page after host reattach");
+        require(WidgetPageMath.selected(pages, WidgetBindingStore.profile(deck, 802)) == 33, "second widget independent");
+        WidgetBindingStore.restore(deck, new int[]{801,802}, new int[]{901,902});
+        require(WidgetBindingStore.profile(deck, 901) == 22, "restored widget retains page");
+        require(WidgetBindingStore.profile(deck, 902) == 33, "second restored widget retains page");
+        require(WidgetBindingStore.profile(deck, 801) == -1, "old page binding cleared");
+        WidgetBindingStore.delete(deck, 901);
+        require(WidgetBindingStore.profile(deck, 901) == -1, "removed widget forgets page");
+        require(WidgetBindingStore.profile(deck, 902) == 33, "deletion preserves other widget");
         long weekDisplay = now + 4 * ResetMath.DAY + 3 * ResetMath.HOUR + 20 * ResetMath.MINUTE;
         WidgetMath.WeekParts parts = WidgetMath.weekParts(weekDisplay, now);
         require(parts.days == 4 && parts.clockTarget - now == 3 * ResetMath.HOUR + 20 * ResetMath.MINUTE,

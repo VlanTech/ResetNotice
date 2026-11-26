@@ -213,16 +213,19 @@
     <string name="history_reason_missed">Verstrichener Zyklus nachgeholt</string>
     <string name="history_reason_manual">Manuelle Änderung</string>
     <string name="history_reason_failed">Benachrichtigung fehlgeschlagen</string>
-    <string name="widget_glass_title">Milchglas für Desktop-Karte</string>
-    <string name="widget_glass_hint" formatted="false">Transparenz des Verlaufshintergrunds einstellen. 0% undurchsichtig, 100% transparent.</string>
+    <string name="widget_glass_title">Karten-Transparenz</string>
+    <string name="widget_glass_hint" formatted="false">Hintergrund der Karte einstellen. 0% ist undurchsichtig, 100% transparent. Echte Hintergrundunschärfe steuert der Launcher.</string>
     <string name="widget_glass_value">Transparenz %1$d%%</string>
-    <string name="widget_stack_name">Stapel aller Konten</string>
-    <string name="widget_stack_add">Kontenstapel hinzufügen</string>
-    <string name="widget_stack_hint">Wische nach oben oder unten, um im Widget zwischen Konten zu wechseln.</string>
-    <string name="widget_stack_manual">Falls das Hinzufügen aus der App nicht möglich ist, halte den Startbildschirm gedrückt und wähle den ResetNotice-Kontenstapel unter Widgets.</string>
-    <string name="widget_blur_title">Milchglas-Unschärfe</string>
-    <string name="widget_blur_hint">Weichzeichnet nur das Kartenmaterial; das Hintergrundbild wird nicht gelesen oder verwischt.</string>
-    <string name="widget_blur_value">Unschärfe %1$d%%</string>
+    <string name="widget_stack_name">Seitenkarte für alle Konten</string>
+    <string name="widget_stack_add">Karte für alle Konten hinzufügen</string>
+    <string name="widget_stack_hint">Mit den Pfeilen jeweils ein Konto wechseln.</string>
+    <string name="widget_stack_manual">Falls das Hinzufügen in der App nicht möglich ist, den Startbildschirm lange drücken und die ResetNotice-Karte auswählen.</string>
     <string name="widget_glass_preview">Kartenvorschau</string>
-    <string name="widget_deck_loading">Kontenkarten werden geladen…</string>
+    <string name="widget_page_previous">Vorheriges Konto</string>
+    <string name="widget_page_next">Nächstes Konto</string>
+    <string name="widget_native_title">Nativer Widget-Stapel</string>
+    <string name="widget_native_hint">Empfohlen für ColorOS: Der Launcher steuert vertikales Wischen und Seitenwechsel.</string>
+    <string name="widget_native_steps">Auf einem kompatiblen Launcher für jedes Konto eine gleich große Karte hinzufügen. Eine Karte lange drücken und auf eine andere ziehen. Vertikal wischen, um das Konto zu wechseln. Animation und Hintergrundunschärfe steuert der Launcher.</string>
+    <string name="widget_native_add">Kontokarte hinzufügen</string>
+    <string name="widget_native_manual">Einzelne Karten über die Widget-Auswahl hinzufügen und gleich große Karten bei unterstützten Launchern stapeln.</string>
 </resources>

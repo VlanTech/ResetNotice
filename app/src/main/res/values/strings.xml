@@ -213,16 +213,19 @@
     <string name="history_reason_missed">Elapsed cycle recovered</string>
     <string name="history_reason_manual">Manual change</string>
     <string name="history_reason_failed">Notification unavailable</string>
-    <string name="widget_glass_title">Desktop card frosted glass</string>
-    <string name="widget_glass_hint" formatted="false">Adjust the translucent gradient background. 0% is opaque, 100% is transparent.</string>
+    <string name="widget_glass_title">Desktop card transparency</string>
+    <string name="widget_glass_hint" formatted="false">Adjust the card background. 0% is opaque and 100% is transparent. Real wallpaper blur is controlled by the launcher.</string>
     <string name="widget_glass_value">Transparency %1$d%%</string>
-    <string name="widget_stack_name">All-account card stack</string>
-    <string name="widget_stack_add">Add all-account card stack</string>
-    <string name="widget_stack_hint">Swipe up or down through all AI accounts in one desktop widget.</string>
-    <string name="widget_stack_manual">If in-app pinning is unavailable, long-press the home screen and add ResetNotice’s all-account card stack from Widgets.</string>
-    <string name="widget_blur_title">Frosted material blur</string>
-    <string name="widget_blur_hint">Soften the card’s own decorative material; does not blur or read the home screen wallpaper.</string>
-    <string name="widget_blur_value">Blur strength %1$d%%</string>
+    <string name="widget_stack_name">All-account paged card</string>
+    <string name="widget_stack_add">Add all-account paged card</string>
+    <string name="widget_stack_hint">Use the up and down arrows to switch one full account at a time.</string>
+    <string name="widget_stack_manual">If in-app pinning is unavailable, long-press the home screen and add the all-account paged card from ResetNotice widgets.</string>
     <string name="widget_glass_preview">Card appearance preview</string>
-    <string name="widget_deck_loading">Loading account cards…</string>
+    <string name="widget_page_previous">Previous account</string>
+    <string name="widget_page_next">Next account</string>
+    <string name="widget_native_title">Native widget stack</string>
+    <string name="widget_native_hint">Recommended on ColorOS: vertical swipe and snap, managed by the launcher.</string>
+    <string name="widget_native_steps">On a launcher that supports widget stacking, add a quota countdown card for each account. Make them the same size, then long-press and drag one onto another. Swipe vertically to switch cards. The launcher controls animations and any wallpaper blur.</string>
+    <string name="widget_native_add">Add account card</string>
+    <string name="widget_native_manual">Add individual quota countdown cards from the home screen widget picker, then drag same-size cards together if your launcher supports stacking.</string>
 </resources>

@@ -213,16 +213,19 @@
     <string name="history_reason_missed">Пропущенный цикл восстановлен</string>
     <string name="history_reason_manual">Ручное изменение</string>
     <string name="history_reason_failed">Ошибка уведомления</string>
-    <string name="widget_glass_title">Матовое стекло виджета</string>
-    <string name="widget_glass_hint" formatted="false">Настройте прозрачность градиентного фона. 0% непрозрачный, 100% прозрачный.</string>
+    <string name="widget_glass_title">Прозрачность карточек</string>
+    <string name="widget_glass_hint" formatted="false">Настройте фон карточки. 0% — непрозрачный, 100% — прозрачный. Размытие обоев зависит от лаунчера.</string>
     <string name="widget_glass_value">Прозрачность %1$d%%</string>
-    <string name="widget_stack_name">Стопка всех аккаунтов</string>
-    <string name="widget_stack_add">Добавить стопку аккаунтов</string>
-    <string name="widget_stack_hint">Листайте вверх или вниз для смены аккаунта в одном виджете.</string>
-    <string name="widget_stack_manual">Если добавление из приложения недоступно, нажмите и удерживайте главный экран и выберите стопку аккаунтов ResetNotice в виджетах.</string>
-    <string name="widget_blur_title">Размытие материала</string>
-    <string name="widget_blur_hint">Смягчает материал самой карточки; обои не считываются и не размываются.</string>
-    <string name="widget_blur_value">Размытие %1$d%%</string>
+    <string name="widget_stack_name">Карточка всех аккаунтов со страницами</string>
+    <string name="widget_stack_add">Добавить карточку всех аккаунтов</string>
+    <string name="widget_stack_hint">Переключайте аккаунты стрелками по одной странице.</string>
+    <string name="widget_stack_manual">Если добавить карточку из приложения нельзя, удерживайте главный экран и выберите карточку в виджетах ResetNotice.</string>
     <string name="widget_glass_preview">Предпросмотр карточки</string>
-    <string name="widget_deck_loading">Загрузка карточек…</string>
+    <string name="widget_page_previous">Предыдущий аккаунт</string>
+    <string name="widget_page_next">Следующий аккаунт</string>
+    <string name="widget_native_title">Системная стопка виджетов</string>
+    <string name="widget_native_hint">Рекомендуется для ColorOS: вертикальные жесты и переключение страниц выполняет лаунчер.</string>
+    <string name="widget_native_steps">В совместимом лаунчере добавьте по карточке одного размера для каждого аккаунта. Удерживайте карточку и перетащите на другую. Переключайте аккаунты вертикальным свайпом. Анимация и размытие обоев зависят от лаунчера.</string>
+    <string name="widget_native_add">Добавить карточку аккаунта</string>
+    <string name="widget_native_manual">Добавьте отдельные карточки через выбор виджетов и сложите карточки одинакового размера, если лаунчер это поддерживает.</string>
 </resources>

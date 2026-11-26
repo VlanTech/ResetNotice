@@ -213,16 +213,19 @@
     <string name="history_reason_missed">지난 주기 복원</string>
     <string name="history_reason_manual">수동 변경</string>
     <string name="history_reason_failed">알림 전송 실패</string>
-    <string name="widget_glass_title">홈 카드 반투명 효과</string>
-    <string name="widget_glass_hint" formatted="false">그라데이션 배경 투명도를 조절합니다. 0%는 불투명, 100%는 투명합니다.</string>
+    <string name="widget_glass_title">홈 화면 카드 투명도</string>
+    <string name="widget_glass_hint" formatted="false">카드 배경을 조절합니다. 0%는 불투명, 100%는 완전 투명입니다. 실제 배경 흐림은 런처가 제어합니다.</string>
     <string name="widget_glass_value">투명도 %1$d%%</string>
-    <string name="widget_stack_name">전체 계정 스택</string>
-    <string name="widget_stack_add">전체 계정 스택 추가</string>
-    <string name="widget_stack_hint">한 위젯에서 위아래로 스와이프해 계정을 전환하세요.</string>
-    <string name="widget_stack_manual">앱에서 추가할 수 없다면 홈 화면을 길게 눌러 위젯 목록에서 전체 계정 스택을 추가하세요.</string>
-    <string name="widget_blur_title">반투명 소재 흐림</string>
-    <string name="widget_blur_hint">카드 자체의 장식 소재를 흐리게 합니다. 홈 화면 배경화면은 읽거나 흐리게 하지 않습니다.</string>
-    <string name="widget_blur_value">흐림 강도 %1$d%%</string>
+    <string name="widget_stack_name">전체 계정 페이지 카드</string>
+    <string name="widget_stack_add">전체 계정 페이지 카드 추가</string>
+    <string name="widget_stack_hint">위아래 화살표로 계정을 한 장씩 전환합니다.</string>
+    <string name="widget_stack_manual">앱에서 추가할 수 없으면 홈 화면을 길게 눌러 위젯에서 전체 계정 페이지 카드를 추가하세요.</string>
     <string name="widget_glass_preview">카드 모양 미리보기</string>
-    <string name="widget_deck_loading">계정 카드를 불러오는 중…</string>
+    <string name="widget_page_previous">이전 계정</string>
+    <string name="widget_page_next">다음 계정</string>
+    <string name="widget_native_title">시스템 기본 위젯 스택</string>
+    <string name="widget_native_hint">ColorOS 권장: 런처에서 세로 스와이프와 페이지 전환을 처리합니다.</string>
+    <string name="widget_native_steps">스택을 지원하는 홈 화면에서 계정별 카드를 각각 추가하고 같은 크기로 맞추세요. 하나를 길게 눌러 다른 카드 위로 드래그하세요. 위아래로 스와이프하여 전환합니다. 애니메이션과 배경 흐림은 런처가 제어합니다.</string>
+    <string name="widget_native_add">계정 카드 추가</string>
+    <string name="widget_native_manual">홈 화면 위젯 목록에서 계정별 카드를 추가하세요. 스택을 지원하면 같은 크기의 카드를 겹쳐 놓으세요.</string>
 </resources>

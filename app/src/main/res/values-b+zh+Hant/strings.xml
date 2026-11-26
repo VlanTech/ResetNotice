@@ -213,16 +213,19 @@
     <string name="history_reason_missed">過期週期補算</string>
     <string name="history_reason_manual">手動修改</string>
     <string name="history_reason_failed">通知傳送失敗</string>
-    <string name="widget_glass_title">桌面卡片毛玻璃</string>
-    <string name="widget_glass_hint" formatted="false">調整卡片漸層底色透明度。0% 為不透明，100% 為全透明。</string>
+    <string name="widget_glass_title">桌面卡片透明度</string>
+    <string name="widget_glass_hint" formatted="false">調節底色透明度。0% 為不透明，100% 為全透明；真實桌布毛玻璃由桌面系統控制。</string>
     <string name="widget_glass_value">透明度 %1$d%%</string>
-    <string name="widget_stack_name">全部帳戶疊卡</string>
-    <string name="widget_stack_add">新增全部帳戶疊卡</string>
-    <string name="widget_stack_hint">在一張桌面卡片中上下滑動切換各 AI 帳戶。</string>
-    <string name="widget_stack_manual">若桌面不支援應用程式內新增，請長按桌面，在小工具中選擇重置通知的全部帳戶疊卡。</string>
-    <string name="widget_blur_title">毛玻璃模糊度</string>
-    <string name="widget_blur_hint">調整卡片材質的弥散模糊強度，不讀取或即時模糊桌面桌布。</string>
-    <string name="widget_blur_value">模糊度 %1$d%%</string>
+    <string name="widget_stack_name">全部帳戶翻頁卡片</string>
+    <string name="widget_stack_add">新增全部帳戶翻頁卡片</string>
+    <string name="widget_stack_hint">點擊上下箭頭逐張切換帳戶，首尾限位。</string>
+    <string name="widget_stack_manual">若桌面不支援應用程式內新增，請長按桌面，在小工具中選擇重置通知的全部帳戶翻頁卡片。</string>
     <string name="widget_glass_preview">卡片外觀預覽</string>
-    <string name="widget_deck_loading">正在同步帳戶卡片…</string>
+    <string name="widget_page_previous">上一帳戶</string>
+    <string name="widget_page_next">下一帳戶</string>
+    <string name="widget_native_title">系統原生疊卡</string>
+    <string name="widget_native_hint">ColorOS 推薦：由桌面負責上下滑動及整卡吸附。</string>
+    <string name="widget_native_steps">在支援堆疊的桌面上，為每個帳戶分別新增額度倒數卡片，調整為相同尺寸。長按其中一張，拖到另一張上方即可原生堆疊。上下滑動切換帳戶；動畫及桌布模糊由桌面系統決定。</string>
+    <string name="widget_native_add">新增帳戶卡片</string>
+    <string name="widget_native_manual">長按桌面，在小工具中分別新增各帳戶的額度倒數卡片；若支援疊卡，拖動相同尺寸卡片重合即可。</string>
 </resources>

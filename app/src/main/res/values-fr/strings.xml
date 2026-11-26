@@ -213,16 +213,19 @@
     <string name="history_reason_missed">Cycle écoulé récupéré</string>
     <string name="history_reason_manual">Modification manuelle</string>
     <string name="history_reason_failed">Échec du rappel</string>
-    <string name="widget_glass_title">Verre dépoli du widget</string>
-    <string name="widget_glass_hint" formatted="false">Réglez la transparence du dégradé. 0 % opaque, 100 % transparent.</string>
+    <string name="widget_glass_title">Transparence des cartes</string>
+    <string name="widget_glass_hint" formatted="false">Ajustez le fond de la carte. 0% est opaque et 100% est transparent. Le flou réel du fond dépend du lanceur.</string>
     <string name="widget_glass_value">Transparence %1$d%%</string>
-    <string name="widget_stack_name">Pile de tous les comptes</string>
-    <string name="widget_stack_add">Ajouter la pile de comptes</string>
-    <string name="widget_stack_hint">Balayez vers le haut ou le bas pour changer de compte dans un widget.</string>
-    <string name="widget_stack_manual">Si l’ajout depuis l’appli échoue, appuyez longuement sur l’accueil et choisissez la pile de comptes de ResetNotice dans Widgets.</string>
-    <string name="widget_blur_title">Flou du matériau</string>
-    <string name="widget_blur_hint">Adoucit le matériau de la carte ; ne lit ni ne floute le fond d’écran.</string>
-    <string name="widget_blur_value">Intensité du flou %1$d%%</string>
+    <string name="widget_stack_name">Carte paginée de tous les comptes</string>
+    <string name="widget_stack_add">Ajouter la carte de tous les comptes</string>
+    <string name="widget_stack_hint">Utilisez les flèches pour changer de compte, une page à la fois.</string>
+    <string name="widget_stack_manual">Si l’ajout depuis l’application échoue, faites un appui long sur l’écran d’accueil et sélectionnez la carte dans les widgets ResetNotice.</string>
     <string name="widget_glass_preview">Aperçu de la carte</string>
-    <string name="widget_deck_loading">Chargement des cartes…</string>
+    <string name="widget_page_previous">Compte précédent</string>
+    <string name="widget_page_next">Compte suivant</string>
+    <string name="widget_native_title">Pile native de widgets</string>
+    <string name="widget_native_hint">Recommandé sur ColorOS : le lanceur gère le balayage vertical et le changement de page.</string>
+    <string name="widget_native_steps">Sur un lanceur compatible, ajoutez une carte par compte, de même taille. Faites un appui long sur une carte et glissez-la sur une autre. Balayez verticalement pour changer de compte. Le lanceur gère les animations et le flou.</string>
+    <string name="widget_native_add">Ajouter une carte de compte</string>
+    <string name="widget_native_manual">Ajoutez les cartes individuelles depuis les widgets, puis superposez celles de même taille si le lanceur le permet.</string>
 </resources>
