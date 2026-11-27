@@ -56,15 +56,23 @@ final class ResetMath {
 
     /** The latest scheduled boundary that has arrived, regardless of wake-up delay. */
     static long latestDue(long target, int periodMinutes, long now) {
+        return latestDue(target, periodMinutes, now, false);
+    }
+
+    static long latestDue(long target, int periodMinutes, long now, boolean oneShot) {
         if (target <= 0L || now < target) return NO_ALARM;
+        if (oneShot) return target;
         long period = validPeriod(periodMinutes) * MINUTE;
         return target + (now - target) / period * period;
     }
 
     /** Advance from the original schedule, not the time the app happened to wake. */
     static long nextTarget(long target, int periodMinutes, long now) {
-        long due = latestDue(target, periodMinutes, now);
-        return due == NO_ALARM ? target : due + validPeriod(periodMinutes) * MINUTE;
+        return nextTarget(target, periodMinutes, now, false);
+    }
+    static long nextTarget(long target, int periodMinutes, long now, boolean oneShot) {
+        long due = latestDue(target, periodMinutes, now, oneShot);
+        return due == NO_ALARM ? target : oneShot ? 0L : due + validPeriod(periodMinutes) * MINUTE;
     }
 
     static long rolloverTrigger(long now, long target) {

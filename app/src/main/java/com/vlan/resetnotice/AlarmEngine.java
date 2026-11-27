@@ -100,7 +100,7 @@ final class AlarmEngine {
         long now = System.currentTimeMillis();
         // The at-time alarm is also the cycle rollover. It must run even if the
         // user disables the at-time notification (or denies notifications entirely).
-        long when = early ? ResetMath.trigger(now, s.target, true, s.earlyMinutes, s.early, s.earlyDelivered)
+        long when = early ? ResetMath.trigger(now, s.target, true, s.earlyMinutes, s.early, s.earlyDelivered || (s.oneShot && s.atDelivered))
                 : ResetMath.rolloverTrigger(now, s.target);
         if (when == ResetMath.NO_ALARM) {
             cancel(context, request, intent(context, s.profileId, s.id, early));
@@ -218,12 +218,20 @@ final class AlarmEngine {
                 if (current.target <= 0) continue;
                 boolean rolled = false;
                 if (current.target <= now) {
-                    long due = ResetMath.latestDue(current.target, current.periodMinutes, now);
-                    long next = ResetMath.nextTarget(current.target, current.periodMinutes, now);
+                    long due = current.latestDue(now);
+                    long next = current.nextTarget(now);
                     // On long offline gaps only the most recent reset is relevant.
                     // Never emit many old notifications or repeat the same delivered cycle.
                     int notificationStatus;
-                    if (!current.at) notificationStatus = HistoryStore.DISABLED;
+                    if (current.oneShot && (current.earlyDelivered || BootState.onceDelivered(context, current, true)))
+                        notificationStatus = current.earlySuppressed ? HistoryStore.QUIET : HistoryStore.EARLY_SENT;
+                    else if (current.oneShot && BootState.onceDelivered(context, current, false))
+                        notificationStatus = HistoryStore.SENT;
+                    else if (current.oneShot && !current.at && current.early)
+                        notificationStatus = due < now - ResetMath.DAY ? HistoryStore.MISSED :
+                                QuietHours.suppressed(global, p.quiet, due - current.earlyMinutes * ResetMath.MINUTE, now) ? HistoryStore.QUIET :
+                                !notificationsAllowed(context) ? HistoryStore.PERMISSION : HistoryStore.MISSED;
+                    else if (!current.at) notificationStatus = HistoryStore.DISABLED;
                     else if (due == current.target && current.atDelivered) notificationStatus = HistoryStore.SENT;
                     else if (due < now - ResetMath.DAY) notificationStatus = HistoryStore.MISSED;
                     else if (QuietHours.suppressed(global, p.quiet, due, now)) notificationStatus = HistoryStore.QUIET;
@@ -231,9 +239,16 @@ final class AlarmEngine {
                     else {
                         Context localized = AppPreferences.localized(context);
                         String label = p.account + " · " + I18n.slot(localized, current);
+                        String body = current.oneShot ?
+                                localized.getString(R.string.notify_once_done_body, label, timeLabel(due)) :
+                                localized.getString(R.string.notify_done_body, label, timeLabel(due), timeLabel(next));
                         boolean submitted = notify(context, AlarmIdentity.id(p.id, current.id, false), p.id,
                                 localized.getString(R.string.notify_due_title, p.platform),
-                                localized.getString(R.string.notify_done_body, label, timeLabel(due), timeLabel(next)));
+                                body);
+                        if (submitted && current.oneShot) {
+                            current.atDelivered = true;
+                            ReminderStore.markDelivered(context, p.id, current.id, false);
+                        }
                         notificationStatus = submitted ? HistoryStore.SENT : HistoryStore.FAILED;
                     }
                     rolled = ReminderStore.rollForward(context, current, now, notificationStatus);
@@ -250,9 +265,14 @@ final class AlarmEngine {
     }
 
     private static boolean deliverEarly(Context context, ReminderStore.Profile profile, ReminderStore.Slot s, long now, QuietHours global) {
-        if (s.target <= 0 || !s.early || s.earlyDelivered || now >= s.target
+        if (s.target <= 0 || !s.early || s.earlyDelivered || (s.oneShot && s.atDelivered) || now >= s.target
                 || now < s.target - s.earlyMinutes * ResetMath.MINUTE) return false;
         long intended = s.target - s.earlyMinutes * ResetMath.MINUTE;
+        if (BootState.onceDelivered(context, s, true)) {
+            s.earlyDelivered = true;
+            ReminderStore.markDelivered(context, s.profileId, s.id, true);
+            return true;
+        }
         if (QuietHours.suppressed(global, profile.quiet, intended, now)) {
             // Consume this cycle's early event even when no notification was sent;
             // neither a later ticker nor an unlock should replay it.

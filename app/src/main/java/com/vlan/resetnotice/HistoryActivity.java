@@ -108,11 +108,12 @@ public final class HistoryActivity extends Activity {
         if (e.manual()) {
             add(box, label(getString(R.string.history_change, date(e.previous), date(e.next)), 12, sub, false), 5);
         } else {
-            add(box, label(getString(R.string.history_next, date(e.next)), 12, sub, false), 5);
+            add(box, label(e.next > 0 ? getString(R.string.history_next, date(e.next)) :
+                    getString(R.string.once_completed_hint), 12, sub, false), 5);
             if (Math.abs(e.recorded - e.when) >= 1000L)
                 add(box, label(getString(R.string.history_recorded_at, date(e.recorded)), 12, sub, false), 4);
         }
-        String notice = e.notified() ? getString(R.string.history_notice_sent) :
+        String notice = e.notified() ? getString(e.status == HistoryStore.EARLY_SENT ? R.string.history_notice_early_sent : R.string.history_notice_sent) :
                 getString(R.string.history_notice_no, getString(reason(e.status)));
         add(box, label(notice, 13, e.notified() ? positive : e.manual() ? warning : sub, true), 7);
         return box;

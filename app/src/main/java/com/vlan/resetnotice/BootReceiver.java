@@ -55,12 +55,16 @@ public final class BootReceiver extends BroadcastReceiver {
             context.getSystemService(AlarmManager.class).cancel(pi);
             pi.cancel();
         }
-        context.getSystemService(NotificationManager.class).cancel(LOCKED_ID);
+        // A single-use reminder posted before unlock is already the chosen alert.
+        // Keep it visible until dismissed; don't immediately replace it with a second alert.
+        if (!BootState.alreadyDeliveredOnce(context, BootState.nextOnceToken(context)))
+            context.getSystemService(NotificationManager.class).cancel(LOCKED_ID);
     }
     private static void armLocked(Context context) {
         long deadline = BootState.nextAlert(context), now = System.currentTimeMillis();
         // Do not surface very old reminders or wake up for silent rollovers.
         if (deadline <= 0 || deadline < now - ResetMath.DAY) return;
+        if (BootState.alreadyDeliveredOnce(context, BootState.nextOnceToken(context))) return;
         PendingIntent pi = PendingIntent.getBroadcast(context, LOCKED_ID,
                 reminder(context).putExtra("deadline", deadline),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -76,8 +80,10 @@ public final class BootReceiver extends BroadcastReceiver {
     }
     private static void notifyLocked(Context context, long deadline) {
         long now = System.currentTimeMillis();
+        String onceToken = BootState.nextOnceToken(context);
         if (deadline <= 0 || deadline != BootState.nextAlert(context) || deadline < now - ResetMath.DAY ||
-                !AlarmEngine.notificationsAllowed(context) || BootState.quietSuppresses(context, deadline, now)) return;
+                !AlarmEngine.notificationsAllowed(context) || BootState.quietSuppresses(context, deadline, now) ||
+                BootState.alreadyDeliveredOnce(context, onceToken)) return;
         if (now < deadline) { armLocked(context); return; }
         NotificationManager manager = context.getSystemService(NotificationManager.class);
         if (Build.VERSION.SDK_INT >= 26 && manager.getNotificationChannel(AlarmEngine.CHANNEL) == null)
@@ -85,10 +91,15 @@ public final class BootReceiver extends BroadcastReceiver {
                     context.getString(R.string.channel_reset), NotificationManager.IMPORTANCE_HIGH));
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(context, AlarmEngine.CHANNEL)
                 : new Notification.Builder(context).setPriority(Notification.PRIORITY_HIGH).setDefaults(Notification.DEFAULT_ALL);
-        b.setSmallIcon(R.drawable.ic_notification).setContentTitle(context.getString(R.string.boot_alert_title))
-                .setContentText(context.getString(R.string.boot_alert_body)).setAutoCancel(true)
+        b.setSmallIcon(R.drawable.ic_notification).setContentTitle(context.getString(onceToken.isEmpty() ?
+                        R.string.boot_alert_title : R.string.boot_once_alert_title))
+                .setContentText(context.getString(onceToken.isEmpty() ? R.string.boot_alert_body : R.string.boot_once_alert_body))
+                .setAutoCancel(true).setOnlyAlertOnce(!onceToken.isEmpty())
                 .setCategory(Notification.CATEGORY_REMINDER).setVisibility(Notification.VISIBILITY_PRIVATE);
-        try { manager.notify(LOCKED_ID, b.build()); }
+        try {
+            manager.notify(LOCKED_ID, b.build());
+            BootState.markOnceDelivered(context, onceToken);
+        }
         catch (SecurityException ignored) {}
     }
 }

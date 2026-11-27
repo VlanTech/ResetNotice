@@ -404,7 +404,7 @@ public final class ProfileStoreTest {
         require(EdgeMotion.position(0, 1800, .11) > EdgeMotion.position(0, 400, .11), "faster fling travels farther, not fixed amplitude");
         require(Math.abs(EdgeMotion.position(24, 120, 1.5)) < .1f, "damped spring returns to rest");
         require(Math.abs(EdgeMotion.inverseRubber(EdgeMotion.rubber(-200, 2), 2) + 200) < .01f, "catching moving content has continuous displacement");
-        String[][] brands = {{"ChatGPT Plus","openai"},{"GPT-6.2 Sol","openai"},{"OpenAI","openai"},{"Codex","openai"},{"Claude Pro","claude"},
+        String[][] brands = {{"ChatGPT Plus","openai"},{"GPT-6.2 Sol","openai"},{"OpenAI","openai"},{"Codex","codex"},{"Claude Pro","claude"},
                 {"Anthropic","claude"},{"Google Gemini","gemini"},{"Grok 4","grok"},{"xAI","grok"},{"DeepSeek V4","deepseek"},
                 {"通义千问","qwen"},{"Qwen","qwen"},{"Perplexity Pro","perplexity"},{"Microsoft Copilot","copilot"},{"Kimi","kimi"},
                 {"月之暗面","kimi"},{"Mistral","mistral"},{"豆包","doubao"},{"智譜 GLM","zhipu"},{"文心一言","wenxin"},
@@ -415,6 +415,77 @@ public final class ProfileStoreTest {
                 {"o/","openai"},{"a/","claude"},{"克洛德","claude"},{"格罗克","grok"},{"马一龙","grok"},{"DS","deepseek"},
                 {"小鲸鱼","deepseek"},{"PPLX","perplexity"},{"豆子","doubao"},{"清言","zhipu"},{"文小言","wenxin"},{"羊驼","meta"},{"微軟","copilot"}};
         for (String[] entry : nicknames) require(BrandMatcher.match(entry[0]).equals(entry[1]), "nickname mapping: " + entry[0]);
+        String[][] harnesses = {{"Xiaomi MiMo","xiaomimimo"},{"小米MiMo","xiaomimimo"},{"MiMo-V2","xiaomimimo"},
+                {"Google Antigravity","antigravity"},{"谷歌反重力","antigravity"},{"Antigravity Claude","antigravity"},
+                {"Cursor GPT","cursor"},{"Windsurf","windsurf"},{"Codeium","windsurf"},{"Trae","trae"},{"Cline","cline"},
+                {"Roo Code","roocode"},{"OpenCode","opencode"},{"Kiro","kiro"},{"Qoder","qoder"},{"Devin","devin"},
+                {"Replit","replit"},{"Manus","manus"},{"OpenRouter","openrouter"},{"阶跃星辰","stepfun"},
+                {"腾讯元宝","hunyuan"},{"SiliconFlow","siliconcloud"},{"硅基流动","siliconcloud"},{"百川","baichuan"},
+                {"魔搭","modelscope"},{"Groq","groq"},{"Lovable","lovable"},{"Vercel v0","v0"},
+                {"OpenAI Codex","codex"},{"Claude Code","claudecode"},{"Z.ai","zhipu"}};
+        for (String[] entry : harnesses) require(BrandMatcher.match(entry[0]).equals(entry[1]), "harness/logo mapping: " + entry[0]);
+
+        FakeContext once = new FakeContext();
+        ReminderStore.Profile onceProfile = ReminderStore.add(once, "ChatGPT", "Once", true);
+        ReminderStore.Slot onceSlot = ReminderStore.load(once, onceProfile.id, ReminderStore.SHORT);
+        require(!onceSlot.oneShot && !onceSlot.completed(), "existing and new timers default to recurring");
+        onceSlot.target = now + 5 * ResetMath.HOUR;
+        onceSlot.oneShot = true;
+        onceSlot.early = onceSlot.at = true;
+        ReminderStore.saveManual(once, onceSlot, now);
+        onceSlot = ReminderStore.load(once, onceProfile.id, ReminderStore.SHORT);
+        require(onceSlot.oneShot && onceSlot.at && !onceSlot.early, "one-shot mode persists and defaults to at-time when both selected");
+        long onceTarget = onceSlot.target;
+        require(onceSlot.nextTarget(onceTarget - 1) == onceTarget && onceSlot.nextTarget(onceTarget) == 0, "one-shot expires at its original boundary");
+        require(onceSlot.latestDue(onceTarget + 9 * ResetMath.DAY) == onceTarget, "offline time never invents single-use cycles");
+        require(WidgetMath.displayTarget(true, onceTarget, 300, onceTarget - 1, true) == onceTarget, "widget shows active one-shot");
+        require(WidgetMath.displayTarget(true, onceTarget, 300, onceTarget, true) == 0, "widget never projects a future one-shot");
+        require(WidgetMath.displayTarget(true, onceTarget, 300, onceTarget, false) > onceTarget, "recurring widgets unchanged");
+        require(AccountOrder.next(once, onceProfile, onceTarget - 1) == onceTarget, "active one-shot participates in deadline sorting");
+        require(AccountOrder.next(once, onceProfile, onceTarget) == Long.MAX_VALUE, "completed one-shot cannot sort by phantom future cycle");
+        require(TimerSnapshot.read(once, now).nextAlertOnceToken.equals(onceSlot.onceToken(false)), "Direct Boot mirror identifies only this at-time event");
+        require(!ReminderStore.rollForward(once, onceSlot, onceTarget - 1), "one-shot does not expire early");
+        require(ReminderStore.rollForward(once, onceSlot, onceTarget + 9 * ResetMath.DAY, HistoryStore.MISSED), "offline one-shot completes once");
+        ReminderStore.Slot ended = ReminderStore.load(once, onceProfile.id, ReminderStore.SHORT);
+        require(ended.completed() && ended.target == 0 && ended.completedAt == onceTarget && ended.oneShot, "completion time and mode survive reload");
+        require(ResetMath.rolloverTrigger(onceTarget, ended.target) == ResetMath.NO_ALARM, "completed one-shot has no next alarm");
+        require(!ReminderStore.rollForward(once, ended, onceTarget + 20 * ResetMath.DAY), "recovery cannot repeat completed one-shot");
+        require(TimerSnapshot.read(once, onceTarget).count == 0 && !TimerSnapshot.read(once, onceTarget).shouldRunService(true),
+                "only completed one-shot stops ongoing service");
+        require(TimerSnapshot.read(once, onceTarget).nextVisibleAlert == Long.MAX_VALUE, "completed timer removes boot reminder");
+        java.util.List<HistoryStore.Entry> onceHistory = HistoryStore.entries(once, onceProfile.id);
+        require(onceHistory.size() == 2 && !onceHistory.get(0).manual() && onceHistory.get(0).when == onceTarget
+                && onceHistory.get(0).next == 0 && onceHistory.get(0).status == HistoryStore.MISSED,
+                "one manual record plus exactly one missed natural completion after long offline gap");
+        ended.target = onceTarget + 21 * ResetMath.DAY;
+        ended.early = true; ended.at = false;
+        ReminderStore.saveManual(once, ended, onceTarget + 20 * ResetMath.DAY);
+        ended = ReminderStore.load(once, onceProfile.id, ReminderStore.SHORT);
+        require(ended.oneShot && !ended.completed() && ended.completedAt == 0 && ended.target > onceTarget, "manual new target re-arms this mode");
+        require(AlarmPolicy.visible(ended, true, onceTarget) && !AlarmPolicy.visible(ended, false, onceTarget),
+                "single advance reminder uses independent silent completion alarm");
+        require(TimerSnapshot.read(once, onceTarget).nextAlertOnceToken.equals(ended.onceToken(true)), "Direct Boot identifies advance reminder");
+        ReminderStore.markDelivered(once, onceProfile.id, ReminderStore.SHORT, true);
+        ended = ReminderStore.load(once, onceProfile.id, ReminderStore.SHORT);
+        ended.early = false; ended.at = true;
+        ReminderStore.save(once, ended);
+        require(!AlarmPolicy.visible(ended, false, onceTarget), "switching after advance reminder cannot issue another alert");
+        require(TimerSnapshot.read(once, onceTarget).nextVisibleAlert == Long.MAX_VALUE, "already consumed single reminder is not mirrored again");
+        require(ReminderStore.rollForward(once, ended, ended.target, HistoryStore.EARLY_SENT), "one-shot with advance reminder still stops at reset");
+        HistoryStore.Entry earlyOnly = HistoryStore.entries(once, onceProfile.id).get(0);
+        require(earlyOnly.status == HistoryStore.EARLY_SENT && earlyOnly.notified() && earlyOnly.next == 0,
+                "history distinguishes successful advance-only reminder");
+        ReminderStore.Slot onceWeek = ReminderStore.load(once, onceProfile.id, ReminderStore.WEEK);
+        onceWeek.oneShot = true; onceWeek.target = onceTarget + ResetMath.WEEK_MINUTES * ResetMath.MINUTE;
+        ReminderStore.save(once, onceWeek);
+        require(!ReminderStore.load(once, onceProfile.id, ReminderStore.WEEK).oneShot, "weekly quota always remains recurring");
+        require(ReminderStore.rollForward(once, onceWeek, onceWeek.target), "weekly timer still advances");
+        require(onceWeek.target > onceTarget + ResetMath.WEEK_MINUTES * ResetMath.MINUTE, "weekly repeat unaffected");
+        ended = ReminderStore.load(once, onceProfile.id, ReminderStore.SHORT);
+        ended.oneShot = false;
+        ReminderStore.save(once, ended);
+        require(!ReminderStore.load(once, onceProfile.id, ReminderStore.SHORT).completed() &&
+                ReminderStore.load(once, onceProfile.id, ReminderStore.SHORT).target == 0, "changing mode never restarts a completed timer implicitly");
 
         FakeContext sort = new FakeContext();
         ReminderStore.Profile first = ReminderStore.add(sort, "GPT", "A", true);

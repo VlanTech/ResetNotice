@@ -103,6 +103,7 @@ public final class MainActivity extends Activity {
         LinearLayout root;
         TextView title, countdown, target, status, note, advance, clear, cycle;
         Switch earlySwitch, atSwitch;
+        boolean syncingSwitches;
         String statusKey = "";
     }
 
@@ -333,9 +334,10 @@ public final class MainActivity extends Activity {
 
         List<ReminderStore.Profile> profiles = ReminderStore.profiles(this);
         ArrayList<Integer> expanded = saved == null ? null : saved.getIntegerArrayList("expanded");
+        int restoredExpanded = expanded == null ? -1 : expanded.isEmpty() ? -1 : expanded.get(0);
         for (int i = 0; i < profiles.size(); i++) {
             ReminderStore.Profile profile = profiles.get(i);
-            addGroup(profile, expanded == null ? i == 0 : expanded.contains(profile.id));
+            addGroup(profile, expanded == null ? i == 0 : restoredExpanded == profile.id);
         }
         updateGroupCount();
 
@@ -687,6 +689,15 @@ public final class MainActivity extends Activity {
     }
 
     private void setExpanded(GroupViews g, boolean expanded, boolean animate) {
+        boolean replaced = false;
+        if (expanded) {
+            for (GroupViews other : groups.values()) {
+                if (other != g && (other.expanded || (!animate && other.animator != null))) {
+                    setExpanded(other, false, animate);
+                    replaced = true;
+                }
+            }
+        }
         boolean visible = g.bodyClip.getVisibility() == View.VISIBLE;
         LinearLayout.LayoutParams clipParams = (LinearLayout.LayoutParams) g.bodyClip.getLayoutParams();
         int startHeight = visible ? (clipParams.height >= 0 ? clipParams.height : g.bodyClip.getHeight()) : 0;
@@ -696,6 +707,14 @@ public final class MainActivity extends Activity {
         RailMotion weekMotion = new RailMotion(g.weekRail, !expanded && g.weekHasProgress);
         cancelExpansion(g); // Keep the current geometry if the user reverses mid-animation.
         g.expanded = expanded;
+        if (expanded && animate && replaced) {
+            // Collapsing a preceding tall card changes the target's screen position.
+            // Keep the newly selected editor anchored after the paired transition.
+            scroll.postDelayed(() -> {
+                if (!isFinishing() && !isDestroyed() && g.expanded && groups.get(g.profile.id) == g)
+                    scroll.smoothScrollTo(0, Math.max(0, content.getTop() + groupList.getTop() + g.root.getTop() - content.getPaddingTop()));
+            }, 285L);
+        }
         g.expandButton.setContentDescription(tr(expanded ? R.string.collapse_account : R.string.expand_account, g.profile.label()));
         g.expandButton.animate().cancel();
         if (animate) g.expandButton.animate().rotation(expanded ? 180f : 0f).setDuration(220L).start();
@@ -948,6 +967,7 @@ public final class MainActivity extends Activity {
                     AlarmEngine.reconcileDue(this, System.currentTimeMillis());
                     ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
                     current.target = 0;
+                    current.completedAt = 0;
                     current.earlyDelivered = current.atDelivered = current.earlySuppressed = false;
                     save(current);
                     AlarmEngine.cancelSlot(this, profileId, id, true);
@@ -955,15 +975,19 @@ public final class MainActivity extends Activity {
         add(p, sv.clear, 1);
 
         sv.earlySwitch.setOnCheckedChangeListener((b, checked) -> {
+            if (sv.syncingSwitches) return;
             Haptics.tap(b);
             ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
             current.early = checked;
+            if (checked && current.oneShot) current.at = false;
             save(current);
         });
         sv.atSwitch.setOnCheckedChangeListener((b, checked) -> {
+            if (sv.syncingSwitches) return;
             Haptics.tap(b);
             ReminderStore.Slot current = ReminderStore.load(this, profileId, id);
             current.at = checked;
+            if (checked && current.oneShot) current.early = false;
             save(current);
         });
         return sv;
@@ -974,6 +998,7 @@ public final class MainActivity extends Activity {
     }
 
     private String compactTime(ReminderStore.Slot s, long now) {
+        if (s.completed()) return tr(R.string.once_completed);
         if (s.target <= 0) return tr(R.string.unset);
         if (s.target <= now) return tr(R.string.due);
         return I18n.countdown(this, s.target - now);
@@ -1013,7 +1038,8 @@ public final class MainActivity extends Activity {
             g.shortHasProgress = s.target > 0;
             setText(g.shortSummary, I18n.slot(this, s) + " · " + compactTime(s, now));
             updateProgress(g.shortRail, s, now);
-            setText(g.shortDate, s.target > 0 ? ResetMath.displayDateTime(s.target, now) : tr(R.string.unset_time));
+            setText(g.shortDate, s.target > 0 ? ResetMath.displayDateTime(s.target, now) :
+                    s.completed() ? tr(R.string.once_completed_at, ResetMath.displayDateTime(s.completedAt, now)) : tr(R.string.unset_time));
             if (g.shortView != null) updateSlot(g.shortView, s, now, quietNow);
         }
         ReminderStore.Slot week = ReminderStore.load(this, g.profile.id, ReminderStore.WEEK);
@@ -1032,7 +1058,12 @@ public final class MainActivity extends Activity {
         String status, note, countdown, target;
         int fg, bg;
         boolean hasTarget = s.target > 0;
-        if (!hasTarget) {
+        if (s.completed()) {
+            countdown = "00:00:00";
+            target = tr(R.string.once_completed_at, ResetMath.displayDateTime(s.completedAt, now));
+            status = tr(R.string.once_completed); fg = positive; bg = positiveSoft;
+            note = tr(R.string.once_completed_hint);
+        } else if (!hasTarget) {
             countdown = "--:--:--";
             target = tr(R.string.unset_time);
             status = tr(R.string.unset); fg = sub; bg = accentSoft;
@@ -1041,12 +1072,14 @@ public final class MainActivity extends Activity {
             countdown = "00:00:00";
             target = tr(R.string.planned, ResetMath.displayDateTime(s.target, now));
             status = tr(R.string.due_state); fg = positive; bg = positiveSoft;
-            note = tr(R.string.rolling);
+            note = tr(s.oneShot ? R.string.once_completed_hint : R.string.rolling);
         } else {
             countdown = I18n.countdown(this, s.target - now);
             target = tr(R.string.planned, ResetMath.displayDateTime(s.target, now));
             status = tr(R.string.timer_running); fg = accent; bg = accentSoft;
-            if (!s.early && !s.at) note = tr(R.string.reminders_off);
+            if (s.oneShot && s.earlyDelivered)
+                note = tr(s.earlySuppressed ? R.string.quiet_early_skipped : R.string.once_reminder_consumed);
+            else if (!s.early && !s.at) note = tr(R.string.reminders_off);
             else if (quietNow) note = tr(R.string.quiet_active);
             else if (!notifyReady) note = tr(R.string.permission_missing);
             else if (s.early && s.earlySuppressed) note = tr(R.string.quiet_early_skipped);
@@ -1070,12 +1103,18 @@ public final class MainActivity extends Activity {
             v.status.setBackground(rounded(bg, 24));
         }
         setText(v.advance, tr(R.string.advance_edit, s.earlyMinutes));
-        setText(v.cycle, tr(s.id == ReminderStore.SHORT ? R.string.cycle_edit : R.string.cycle, I18n.period(this, s.periodMinutes)));
+        setText(v.cycle, tr(s.id == ReminderStore.SHORT ?
+                (s.oneShot ? R.string.once_cycle_edit : R.string.cycle_edit) : R.string.cycle, I18n.period(this, s.periodMinutes)));
+        v.syncingSwitches = true;
+        try {
+            if (v.earlySwitch.isChecked() != s.early) v.earlySwitch.setChecked(s.early);
+            if (v.atSwitch.isChecked() != s.at) v.atSwitch.setChecked(s.at);
+        } finally { v.syncingSwitches = false; }
         float alpha = s.early ? 1f : 0.48f;
         if (v.advance.getAlpha() != alpha) v.advance.setAlpha(alpha);
         if (v.advance.isEnabled() != s.early) v.advance.setEnabled(s.early);
         // INVISIBLE keeps card geometry stable while clearing/creating a target.
-        int clearVisibility = hasTarget ? View.VISIBLE : View.INVISIBLE;
+        int clearVisibility = hasTarget || s.completed() ? View.VISIBLE : View.INVISIBLE;
         if (v.clear.getVisibility() != clearVisibility) v.clear.setVisibility(clearVisibility);
     }
 
@@ -1095,7 +1134,9 @@ public final class MainActivity extends Activity {
         if (profile == null || !profile.allows(id)) return;
         AlarmEngine.reconcileDue(this, System.currentTimeMillis());
         ReminderStore.Slot s = ReminderStore.load(this, profileId, id);
+        BootState.clearOnceDelivery(this, s);
         s.target = target;
+        s.completedAt = 0L;
         s.earlyDelivered = s.atDelivered = s.earlySuppressed = false;
         // Clear any delivered notification from the previous quota cycle.
         AlarmEngine.cancelSlot(this, profileId, id, true);
@@ -1183,12 +1224,22 @@ public final class MainActivity extends Activity {
         NumberPicker minutes = picker(0, 59, s.periodMinutes % 60);
         LinearLayout fields = column();
         fields.setPadding(dp(16), dp(12), dp(16), dp(8));
-        add(fields, label(tr(R.string.cycle_hint), 13, sub, false), 0);
+        LinearLayout mode = row();
+        mode.addView(label(tr(R.string.once_mode), 15, text, true), new LinearLayout.LayoutParams(0, -2, 1));
+        Switch once = new Switch(this);
+        once.setChecked(s.oneShot);
+        once.setContentDescription(tr(R.string.once_mode));
+        Haptics.configure(once);
+        once.setOnCheckedChangeListener((b, checked) -> Haptics.tap(b));
+        mode.addView(once);
+        add(fields, mode, 0);
+        add(fields, label(tr(R.string.once_mode_hint), 13, sub, false), 6);
+        add(fields, label(tr(R.string.cycle_hint), 13, sub, false), 12);
         LinearLayout picks = row();
         pickerColumn(picks, tr(R.string.hour), hours);
         pickerColumn(picks, tr(R.string.minute), minutes);
         add(fields, picks, 10);
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(tr(R.string.cycle_title))
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(tr(R.string.timer_mode_title))
                 .setView(fields).setNegativeButton(tr(R.string.cancel), null).setPositiveButton(tr(R.string.save), null).create();
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             Haptics.tap(v);
@@ -1199,6 +1250,7 @@ public final class MainActivity extends Activity {
             AlarmEngine.reconcileDue(this, System.currentTimeMillis());
             ReminderStore.Slot current = ReminderStore.load(this, profileId, ReminderStore.SHORT);
             current.periodMinutes = period;
+            current.oneShot = once.isChecked();
             save(current);
             dialog.dismiss();
         }));

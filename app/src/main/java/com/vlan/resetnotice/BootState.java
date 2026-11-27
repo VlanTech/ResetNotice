@@ -25,9 +25,11 @@ final class BootState {
         long next = snapshot.nextVisibleAlert == Long.MAX_VALUE ? 0L : snapshot.nextVisibleAlert;
         SharedPreferences p = prefs(context);
         QuietHours global = snapshot.nextAlertGlobalQuiet, account = snapshot.nextAlertAccountQuiet;
-        if (p.getLong("next_alert", 0L) == next && global.same(readQuiet(p, "g_")) &&
+        if (p.getLong("next_alert", 0L) == next && snapshot.nextAlertOnceToken.equals(p.getString("next_once_token", ""))
+                && global.same(readQuiet(p, "g_")) &&
                 account.same(readQuiet(p, "a_")) && p.getBoolean("quiet_mirror_v1", false)) return;
-        SharedPreferences.Editor editor = p.edit().putLong("next_alert", next).putBoolean("quiet_mirror_v1", true);
+        SharedPreferences.Editor editor = p.edit().putLong("next_alert", next).putBoolean("quiet_mirror_v1", true)
+                .putString("next_once_token", snapshot.nextAlertOnceToken);
         writeQuiet(editor, "g_", global);
         writeQuiet(editor, "a_", account);
         if (!editor.commit())
@@ -49,6 +51,21 @@ final class BootState {
                 QuietHours.suppressed(readQuiet(p, "g_"), readQuiet(p, "a_"), intended, now);
     }
     static long nextAlert(Context context) { return prefs(context).getLong("next_alert", 0L); }
+    // Opaque numeric timer identity only: no account names or quota text before unlock.
+    static String nextOnceToken(Context context) { return prefs(context).getString("next_once_token", ""); }
+    static boolean alreadyDeliveredOnce(Context context, String token) {
+        return !token.isEmpty() && token.equals(prefs(context).getString("delivered_once_token", ""));
+    }
+    static boolean onceDelivered(Context context, ReminderStore.Slot slot, boolean early) {
+        return alreadyDeliveredOnce(context, slot.onceToken(early));
+    }
+    static void markOnceDelivered(Context context, String token) {
+        if (!token.isEmpty()) prefs(context).edit().putString("delivered_once_token", token).commit();
+    }
+    static void clearOnceDelivery(Context context, ReminderStore.Slot slot) {
+        if (onceDelivered(context, slot, true) || onceDelivered(context, slot, false))
+            prefs(context).edit().remove("delivered_once_token").commit();
+    }
     static void lockedBoot(Context context) {
         prefs(context).edit().putLong("locked_boot", System.currentTimeMillis()).commit();
     }

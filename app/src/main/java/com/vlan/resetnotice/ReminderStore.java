@@ -35,10 +35,25 @@ final class ReminderStore {
     static final class Slot {
         final int profileId, id;
         long target;
+        long completedAt;
+        boolean oneShot;
         boolean early, at, earlyDelivered, atDelivered, earlySuppressed;
         int earlyMinutes, periodMinutes;
         Slot(int profileId, int id) { this.profileId = profileId; this.id = id; }
         String title() { return id == WEEK ? "周限额" : "短时限额"; }
+        boolean completed() { return oneShot && target <= 0 && completedAt > 0; }
+        long nextTarget(long now) { return ResetMath.nextTarget(target, periodMinutes, now, oneShot); }
+        long latestDue(long now) { return ResetMath.latestDue(target, periodMinutes, now, oneShot); }
+        String onceToken(boolean early) {
+            return oneShot && target > 0 ? profileId + ":" + id + ":" + target + ":" + early : "";
+        }
+        void normalize() {
+            if (id != SHORT) oneShot = false;
+            if (!oneShot || target > 0) completedAt = 0L;
+            // In single-use mode only one reminder is selected. At-time is the default
+            // if an upgraded recurring timer had both reminders enabled.
+            if (oneShot && early && at) early = false;
+        }
     }
     static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences(STORE, Context.MODE_PRIVATE);
@@ -81,6 +96,9 @@ final class ReminderStore {
         s.earlyDelivered = p.getBoolean(prefix + "early_delivered", false);
         s.earlySuppressed = p.getBoolean(prefix + "early_suppressed", false);
         s.atDelivered = p.getBoolean(prefix + "at_delivered", false);
+        s.oneShot = slot == SHORT && p.getBoolean(prefix + "one_shot", false);
+        s.completedAt = p.getLong(prefix + "completed_at", 0L);
+        s.normalize();
         return s;
     }
     private static void writeSlot(SharedPreferences.Editor editor, Slot s) {
@@ -91,7 +109,9 @@ final class ReminderStore {
                 .putInt(slotKey(s.profileId, s.id, "period_minutes"), s.periodMinutes)
                 .putBoolean(slotKey(s.profileId, s.id, "early_delivered"), s.earlyDelivered)
                 .putBoolean(slotKey(s.profileId, s.id, "early_suppressed"), s.earlySuppressed)
-                .putBoolean(slotKey(s.profileId, s.id, "at_delivered"), s.atDelivered);
+                .putBoolean(slotKey(s.profileId, s.id, "at_delivered"), s.atDelivered)
+                .putBoolean(slotKey(s.profileId, s.id, "one_shot"), s.oneShot)
+                .putLong(slotKey(s.profileId, s.id, "completed_at"), s.completedAt);
     }
 
     // Upgrade atomically, retaining both independent v1 timers and delivery flags.
@@ -210,6 +230,7 @@ final class ReminderStore {
             HistoryStore.manual(p, editor, id, SHORT, shortSlot.periodMinutes,
                     shortSlot.target, 0, System.currentTimeMillis());
             shortSlot.target = 0;
+            shortSlot.completedAt = 0;
             shortSlot.earlyDelivered = shortSlot.atDelivered = shortSlot.earlySuppressed = false;
             writeSlot(editor, shortSlot);
         }
@@ -235,6 +256,7 @@ final class ReminderStore {
         if (p == null || !p.allows(s.id)) return;
         s.target = ResetMath.minuteBoundary(s.target);
         s.periodMinutes = s.id == WEEK ? ResetMath.WEEK_MINUTES : ResetMath.validPeriod(s.periodMinutes);
+        s.normalize();
         SharedPreferences.Editor e = prefs(context).edit();
         writeSlot(e, s);
         e.commit();
@@ -244,6 +266,7 @@ final class ReminderStore {
         if (p == null || !p.allows(s.id)) return;
         s.target = ResetMath.minuteBoundary(s.target);
         s.periodMinutes = s.id == WEEK ? ResetMath.WEEK_MINUTES : ResetMath.validPeriod(s.periodMinutes);
+        s.normalize();
         SharedPreferences prefs = prefs(context);
         Slot before = readSlot(prefs, s.profileId, s.id, false);
         SharedPreferences.Editor e = prefs.edit();
@@ -255,20 +278,25 @@ final class ReminderStore {
         return rollForward(context, s, now, HistoryStore.MISSED);
     }
     static synchronized boolean rollForward(Context context, Slot s, long now, int notificationStatus) {
-        long next = ResetMath.nextTarget(s.target, s.periodMinutes, now);
+        long next = s.nextTarget(now);
         if (next == s.target) return false;
         Profile p = profile(context, s.profileId);
         if (p == null || !p.allows(s.id)) return false;
         SharedPreferences prefs = prefs(context);
+        Slot saved = readSlot(prefs, s.profileId, s.id, false);
+        if (saved.target != s.target || saved.oneShot != s.oneShot) return false;
         SharedPreferences.Editor e = prefs.edit();
         HistoryStore.rollovers(prefs, e, s, now, notificationStatus);
         long previousTarget = s.target;
+        long previousCompletion = s.completedAt;
         boolean previousEarly = s.earlyDelivered, previousAt = s.atDelivered, previousSuppressed = s.earlySuppressed;
         s.target = next;
+        s.completedAt = s.oneShot ? previousTarget : 0L;
         s.earlyDelivered = s.atDelivered = s.earlySuppressed = false;
         writeSlot(e, s);
         if (e.commit()) return true;
         s.target = previousTarget;
+        s.completedAt = previousCompletion;
         s.earlyDelivered = previousEarly; s.atDelivered = previousAt; s.earlySuppressed = previousSuppressed;
         return false;
     }

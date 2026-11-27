@@ -194,7 +194,7 @@ public final class SettingsActivity extends Activity {
         LinearLayout about = panel();
         add(about, item(getString(R.string.developer), "Vlan_Tech", null), 0);
         divider(about);
-        add(about, item(getString(R.string.version), "1.12.0", null), 0);
+        add(about, item(getString(R.string.version), "1.13.0", null), 0);
         divider(about);
         add(about, item(getString(R.string.source_code), "GitHub · ResetNotice", v -> {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/VlanTech/ResetNotice"))); }

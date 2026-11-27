@@ -10,7 +10,11 @@ import android.widget.ImageView;
 final class BrandIcons {
     private static final String[] BRANDS = {"openai", "grok", "claude", "gemini", "deepseek", "qwen",
             "perplexity", "copilot", "kimi", "mistral", "doubao", "zhipu",
-            "wenxin", "minimax", "meta", "poe", "ollama", "huggingface"};
+            "wenxin", "minimax", "meta", "poe", "ollama", "huggingface",
+            "xiaomimimo", "antigravity", "cursor", "windsurf", "trae", "cline",
+            "roocode", "opencode", "kiro", "qoder", "devin", "replit",
+            "manus", "openrouter", "stepfun", "hunyuan", "siliconcloud", "baichuan",
+            "modelscope", "groq", "lovable", "v0", "codex", "claudecode"};
     private static final int TILE = 96;
     private static final Bitmap[] ATLASES = new Bitmap[2];
     private static final Bitmap[][] CACHE = new Bitmap[2][BRANDS.length];
@@ -39,7 +43,7 @@ final class BrandIcons {
                 ATLASES[theme] = BitmapFactory.decodeResource(context.getResources(), R.drawable.brand_logos, options);
             }
             Bitmap sheet = ATLASES[theme];
-            if (sheet != null && sheet.getWidth() == TILE * 6 && sheet.getHeight() == TILE * 3) {
+            if (sheet != null && sheet.getWidth() == TILE * 6 && sheet.getHeight() == TILE * ((BRANDS.length + 5) / 6)) {
                 if (CACHE[theme][index] == null) CACHE[theme][index] =
                         Bitmap.createBitmap(sheet, (index % 6) * TILE, (index / 6) * TILE, TILE, TILE);
                 return CACHE[theme][index];

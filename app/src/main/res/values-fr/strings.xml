@@ -71,7 +71,7 @@
     <string name="early_window">Période de rappel anticipé.</string>
     <string name="enabled">Alertes activées</string>
     <string name="cycle">Répéter toutes les %1$s</string>
-    <string name="cycle_edit">Toutes les %1$s · Modifier</string>
+    <string name="cycle_edit">Toutes les %1$s · Mode du minuteur</string>
     <string name="time_future">Choisissez une heure future</string>
     <string name="saved_timer">Enregistré : %1$s</string>
     <string name="choose_time">Choisir l’heure</string>
@@ -82,7 +82,7 @@
     <string name="duration_hint">Minute système actuelle ; secondes à 00.</string>
     <string name="set">Définir</string>
     <string name="duration_min">Au moins une minute</string>
-    <string name="cycle_hint">Répète à intervalle fixe sans modifier ce reset.</string>
+    <string name="cycle_hint">Définissez la durée sans modifier l’heure actuelle de réinitialisation.</string>
     <string name="cycle_title">Intervalle horaire</string>
     <string name="cycle_limit">Intervalle : de 1 min à 7 jours</string>
     <string name="advance_select">Minutes avant le reset (1–10080)</string>
@@ -228,4 +228,16 @@
     <string name="widget_native_steps">Sur un lanceur compatible, ajoutez une carte par compte, de même taille. Faites un appui long sur une carte et glissez-la sur une autre. Balayez verticalement pour changer de compte. Le lanceur gère les animations et le flou.</string>
     <string name="widget_native_add">Ajouter une carte de compte</string>
     <string name="widget_native_manual">Ajoutez les cartes individuelles depuis les widgets, puis superposez celles de même taille si le lanceur le permet.</string>
+    <string name="timer_mode_title">Quota horaire · mode du minuteur</string>
+    <string name="once_mode">Une seule fois</string>
+    <string name="once_mode_hint">Décompte uniquement jusqu’à cette réinitialisation. Choisissez une alerte anticipée ou à l’heure prévue (une seule). Configurez le cycle suivant manuellement.</string>
+    <string name="once_cycle_edit">%1$s · Une fois</string>
+    <string name="once_completed">Terminé</string>
+    <string name="once_completed_at">Terminé : %1$s</string>
+    <string name="once_completed_hint">Ce cycle est terminé. Réglez une nouvelle heure au début du prochain cycle.</string>
+    <string name="once_reminder_consumed">L’unique alerte a été envoyée. Le minuteur s’arrêtera à l’heure prévue.</string>
+    <string name="notify_once_done_body">%1$s\nRéinitialisation : %2$s\nCe cycle est terminé. Configurez le suivant manuellement.</string>
+    <string name="history_notice_early_sent">Alerte anticipée : envoyée</string>
+    <string name="boot_once_alert_title">Rappel de quota unique</string>
+    <string name="boot_once_alert_body">Déverrouillez pour consulter ce cycle.</string>
 </resources>

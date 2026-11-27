@@ -71,7 +71,7 @@
     <string name="early_window">事前通知の時間です。</string>
     <string name="enabled">通知オン</string>
     <string name="cycle">%1$s ごとに繰り返す</string>
-    <string name="cycle_edit">%1$s ごと · 編集</string>
+    <string name="cycle_edit">%1$s ごと · 計時モード</string>
     <string name="time_future">未来の時刻を選択してください</string>
     <string name="saved_timer">%1$s を保存しました</string>
     <string name="choose_time">リセット時刻を選択</string>
@@ -82,7 +82,7 @@
     <string name="duration_hint">現在の分を基準にし、秒は00です。</string>
     <string name="set">設定</string>
     <string name="duration_min">1分以上にしてください</string>
-    <string name="cycle_hint">現在のリセット時刻は変えず固定周期で繰り返します。</string>
+    <string name="cycle_hint">現在のリセット時刻を変更せず、時間枠の長さを設定します。</string>
     <string name="cycle_title">時間枠の周期</string>
     <string name="cycle_limit">周期は1分〜7日</string>
     <string name="advance_select">事前通知の分数（1–10080）</string>
@@ -228,4 +228,16 @@
     <string name="widget_native_steps">スタック対応のホーム画面で各アカウントのカードを個別に追加し、同じサイズにします。長押しして別のカードに重ねてください。上下スワイプで切り替えます。アニメーションや壁紙のぼかしはランチャーに依存します。</string>
     <string name="widget_native_add">アカウントカードを追加</string>
     <string name="widget_native_manual">ホーム画面のウィジェット一覧から個別のカードを追加し、対応端末で同じサイズのカードを重ねてください。</string>
+    <string name="timer_mode_title">時間枠 · タイマーモード</string>
+    <string name="once_mode">1回のみ実行</string>
+    <string name="once_mode_hint">今回のリセット時刻まで計時します。事前通知か時刻通知のどちらかを選びます。次回は手動で設定してください。</string>
+    <string name="once_cycle_edit">%1$s · 1回のみ</string>
+    <string name="once_completed">完了</string>
+    <string name="once_completed_at">完了：%1$s</string>
+    <string name="once_completed_hint">今回の計時が終了しました。次回の開始時に新しい時刻を設定してください。</string>
+    <string name="once_reminder_consumed">通知は送信済みです。リセット時刻で計時を終了します。</string>
+    <string name="notify_once_done_body">%1$s\nリセット：%2$s\n今回の計時は終了しました。次回は手動で設定してください。</string>
+    <string name="history_notice_early_sent">事前通知：送信済み</string>
+    <string name="boot_once_alert_title">1回限りの利用枠通知</string>
+    <string name="boot_once_alert_body">ロックを解除して今回の利用枠を確認してください。</string>
 </resources>

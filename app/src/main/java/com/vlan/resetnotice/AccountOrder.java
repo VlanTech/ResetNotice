@@ -19,7 +19,8 @@ final class AccountOrder {
         for (int slot : new int[]{ReminderStore.SHORT, ReminderStore.WEEK}) {
             if (!profile.allows(slot)) continue;
             ReminderStore.Slot timer = ReminderStore.load(context, profile.id, slot);
-            if (timer.target > 0) earliest = Math.min(earliest, ResetMath.nextTarget(timer.target, timer.periodMinutes, now));
+            long next = timer.nextTarget(now);
+            if (next > 0) earliest = Math.min(earliest, next);
         }
         return earliest;
     }

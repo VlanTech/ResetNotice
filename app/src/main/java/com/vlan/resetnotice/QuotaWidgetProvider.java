@@ -149,16 +149,27 @@ public final class QuotaWidgetProvider extends AppWidgetProvider {
 
     private static boolean renderSlot(RemoteViews v, Context c, ReminderStore.Slot s, boolean enabled,
                                       long now, long elapsed, boolean shortSlot) {
-        long target = WidgetMath.displayTarget(enabled, s.target, s.periodMinutes, now);
+        long target = WidgetMath.displayTarget(enabled, s.target, s.periodMinutes, now, s.oneShot);
+        boolean completed = enabled && s.oneShot && (s.completed() || (s.target > 0 && s.target <= now));
         int container = shortSlot ? R.id.widget_short : R.id.widget_week;
-        v.setViewVisibility(container, target > 0 ? View.VISIBLE : View.GONE);
-        if (target <= 0) return false;
+        v.setViewVisibility(container, target > 0 || completed ? View.VISIBLE : View.GONE);
+        if (target <= 0 && !completed) return false;
         int label = shortSlot ? R.id.widget_short_label : R.id.widget_week_label;
         int chronometer = shortSlot ? R.id.widget_short_clock : R.id.widget_week_clock;
         int staticText = shortSlot ? R.id.widget_short_static : R.id.widget_week_static;
         int date = shortSlot ? R.id.widget_short_date : R.id.widget_week_date;
         int progress = shortSlot ? R.id.widget_short_progress : R.id.widget_week_progress;
         v.setTextViewText(label, I18n.slot(c, s));
+        if (completed) {
+            v.setViewVisibility(chronometer, View.GONE);
+            v.setViewVisibility(staticText, View.VISIBLE);
+            v.setTextViewText(staticText, c.getString(R.string.once_completed));
+            v.setTextViewText(date, c.getString(R.string.once_completed_at,
+                    ResetMath.displayDateTime(s.completed() ? s.completedAt : s.target, now)));
+            v.setViewVisibility(progress, View.GONE);
+            return true;
+        }
+        v.setViewVisibility(progress, View.VISIBLE);
         v.setTextViewText(date, ResetMath.displayDateTime(target, now));
         v.setProgressBar(progress, 10000, ResetMath.countdownLevel(target, s.periodMinutes, now), false);
         if (Build.VERSION.SDK_INT >= 24) {

@@ -37,7 +37,12 @@ public final class WidgetRefreshReceiver extends BroadcastReceiver {
             }
             long now = System.currentTimeMillis(), next = Long.MAX_VALUE;
             for (int profile : profiles) {
-                if (ReminderStore.profile(c, profile) == null) continue;
+                ReminderStore.Profile p = ReminderStore.profile(c, profile);
+                if (p == null) continue;
+                if (p.shortEnabled) {
+                    ReminderStore.Slot shortSlot = ReminderStore.load(c, profile, ReminderStore.SHORT);
+                    if (shortSlot.oneShot && shortSlot.target > now) next = Math.min(next, shortSlot.target);
+                }
                 ReminderStore.Slot week = ReminderStore.load(c, profile, ReminderStore.WEEK);
                 long target = WidgetMath.displayTarget(true, week.target, week.periodMinutes, now);
                 if (target > 0) next = Math.min(next, WidgetMath.weekParts(target, now).refreshAt);

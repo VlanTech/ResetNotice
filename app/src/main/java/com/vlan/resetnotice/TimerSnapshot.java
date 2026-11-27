@@ -11,6 +11,7 @@ final class TimerSnapshot {
     // Mirror only its timestamp and relevant quiet windows for Direct Boot.
     long nextVisibleAlert = Long.MAX_VALUE;
     QuietHours nextAlertGlobalQuiet = QuietHours.OFF, nextAlertAccountQuiet = QuietHours.OFF;
+    String nextAlertOnceToken = "";
     String nextLabel = "";
     String nextProfileLabel = "";
     int nextSlotId;
@@ -33,11 +34,11 @@ final class TimerSnapshot {
                     snapshot.nextPeriodMinutes = s.periodMinutes;
                 }
                 snapshot.nextEvent = Math.min(snapshot.nextEvent, s.target);
-                if (s.at && !s.atDelivered) snapshot.considerVisible(s.target, global, p.quiet);
-                if (s.early && !s.earlyDelivered) {
+                if (AlarmPolicy.visible(s, false, now)) snapshot.considerVisible(s.target, global, p.quiet, s.onceToken(false));
+                if (AlarmPolicy.visible(s, true, now)) {
                     long early = s.target - s.earlyMinutes * ResetMath.MINUTE;
                     if (s.target > now)
-                        snapshot.considerVisible(early, global, p.quiet);
+                        snapshot.considerVisible(early, global, p.quiet, s.onceToken(true));
                     // Already-due reminders are reconciled once per normal check,
                     // rather than repeatedly spinning if permission was denied.
                     if (early > now) snapshot.nextEvent = Math.min(snapshot.nextEvent, early);
@@ -47,11 +48,12 @@ final class TimerSnapshot {
         return snapshot;
     }
 
-    private void considerVisible(long when, QuietHours global, QuietHours account) {
+    private void considerVisible(long when, QuietHours global, QuietHours account, String onceToken) {
         if (when <= 0 || when >= nextVisibleAlert || QuietHours.suppressed(global, account, when, when)) return;
         nextVisibleAlert = when;
         nextAlertGlobalQuiet = global;
         nextAlertAccountQuiet = account;
+        nextAlertOnceToken = onceToken;
     }
 
     boolean shouldRunService(boolean ongoingNotification) { return ongoingNotification && count > 0; }

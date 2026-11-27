@@ -11,7 +11,7 @@ import java.util.List;
 final class HistoryStore {
     static final int LIMIT = 1000;
     static final int SENT = 1, QUIET = 2, DISABLED = 3, PERMISSION = 4, MISSED = 5,
-            FAILED = 6, MANUAL = 7;
+            FAILED = 6, MANUAL = 7, EARLY_SENT = 8;
 
     static final class Entry {
         final long when, recorded, previous, next;
@@ -21,7 +21,7 @@ final class HistoryStore {
             this.slot = slot; this.period = period; this.status = status;
         }
         boolean manual() { return status == MANUAL; }
-        boolean notified() { return status == SENT; }
+        boolean notified() { return status == SENT || status == EARLY_SENT; }
         String encode() { return when + "," + recorded + "," + previous + "," + next + "," + slot + "," + period + "," + status; }
     }
     private static String key(int profile) { return "profile_" + profile + "_history_v1"; }
@@ -37,7 +37,7 @@ final class HistoryStore {
                 Entry e = new Entry(Long.parseLong(cols[0]), Long.parseLong(cols[1]), Long.parseLong(cols[2]),
                         Long.parseLong(cols[3]), Integer.parseInt(cols[4]), Integer.parseInt(cols[5]), Integer.parseInt(cols[6]));
                 if (e.when > 0 && (e.slot == ReminderStore.SHORT || e.slot == ReminderStore.WEEK) &&
-                        e.status >= SENT && e.status <= MANUAL) result.add(e);
+                        e.status >= SENT && e.status <= EARLY_SENT) result.add(e);
             } catch (NumberFormatException ignored) {}
         }
         return result;
@@ -62,14 +62,14 @@ final class HistoryStore {
     }
     static void rollovers(SharedPreferences p, SharedPreferences.Editor editor, ReminderStore.Slot slot,
                           long now, int latestStatus) {
-        long due = ResetMath.latestDue(slot.target, slot.periodMinutes, now);
+        long due = slot.latestDue(now);
         if (due == ResetMath.NO_ALARM) return;
         long period = ResetMath.validPeriod(slot.periodMinutes) * ResetMath.MINUTE;
         long count = Math.min(LIMIT, 1 + (due - slot.target) / period);
         ArrayList<Entry> entries = read(p, slot.profileId);
         for (long i = count - 1; i >= 0; i--) {
             long boundary = due - i * period;
-            entries.add(0, new Entry(boundary, now, boundary, boundary + period, slot.id,
+            entries.add(0, new Entry(boundary, now, boundary, slot.oneShot ? 0L : boundary + period, slot.id,
                     slot.periodMinutes, i == 0 ? latestStatus : MISSED));
         }
         write(editor, slot.profileId, entries);

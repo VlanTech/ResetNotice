@@ -71,7 +71,7 @@
     <string name="early_window">Ventana de aviso previo.</string>
     <string name="enabled">Avisos activados</string>
     <string name="cycle">Repetir cada %1$s</string>
-    <string name="cycle_edit">Cada %1$s · Editar</string>
+    <string name="cycle_edit">Cada %1$s · Modo de temporizador</string>
     <string name="time_future">Elige una hora futura</string>
     <string name="saved_timer">Guardado: %1$s</string>
     <string name="choose_time">Elegir hora de reinicio</string>
@@ -82,7 +82,7 @@
     <string name="duration_hint">Usa el minuto actual; los segundos son 00.</string>
     <string name="set">Fijar</string>
     <string name="duration_min">Mínimo un minuto</string>
-    <string name="cycle_hint">Repite a un intervalo fijo sin cambiar este reinicio.</string>
+    <string name="cycle_hint">Configura la duración sin modificar la hora de reinicio actual.</string>
     <string name="cycle_title">Intervalo horario</string>
     <string name="cycle_limit">Intervalo: de 1 min a 7 días</string>
     <string name="advance_select">Minutos de antelación (1–10080)</string>
@@ -228,4 +228,16 @@
     <string name="widget_native_steps">En un lanzador compatible, añade una tarjeta por cuenta, del mismo tamaño. Mantén pulsada una tarjeta y arrástrala sobre otra. Desliza verticalmente para cambiar de cuenta. El lanzador gestiona las animaciones y el desenfoque.</string>
     <string name="widget_native_add">Añadir tarjeta de cuenta</string>
     <string name="widget_native_manual">Añade tarjetas individuales desde los widgets de inicio y apila las del mismo tamaño si tu lanzador lo admite.</string>
+    <string name="timer_mode_title">Cuota horaria · modo de temporizador</string>
+    <string name="once_mode">Ejecutar una sola vez</string>
+    <string name="once_mode_hint">Cuenta solo hasta este reinicio. Elige un aviso previo o al llegar la hora (solo uno). Configura el siguiente ciclo manualmente.</string>
+    <string name="once_cycle_edit">%1$s · Una vez</string>
+    <string name="once_completed">Completado</string>
+    <string name="once_completed_at">Completado: %1$s</string>
+    <string name="once_completed_hint">Esta ronda ha terminado. Configura una nueva hora de reinicio al comenzar la siguiente.</string>
+    <string name="once_reminder_consumed">Ya se envió el único aviso. El temporizador terminará a la hora de reinicio.</string>
+    <string name="notify_once_done_body">%1$s\nReinicio: %2$s\nLa ronda ha terminado. Configura la siguiente manualmente.</string>
+    <string name="history_notice_early_sent">Aviso previo: enviado</string>
+    <string name="boot_once_alert_title">Aviso de cuota único</string>
+    <string name="boot_once_alert_body">Desbloquea para consultar esta ronda.</string>
 </resources>

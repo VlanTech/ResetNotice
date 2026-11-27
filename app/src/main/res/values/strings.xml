@@ -71,7 +71,7 @@
     <string name="early_window">Early reminder window.</string>
     <string name="enabled">Reminders on</string>
     <string name="cycle">Repeat every %1$s</string>
-    <string name="cycle_edit">Every %1$s · Edit</string>
+    <string name="cycle_edit">Every %1$s · Timer mode</string>
     <string name="time_future">Choose a future time</string>
     <string name="saved_timer">Saved %1$s</string>
     <string name="choose_time">Select reset time</string>
@@ -82,7 +82,7 @@
     <string name="duration_hint">Uses the current system minute; reset seconds are 00.</string>
     <string name="set">Set</string>
     <string name="duration_min">At least one minute</string>
-    <string name="cycle_hint">Repeat at a fixed interval without changing this reset.</string>
+    <string name="cycle_hint">Set the quota interval; the current reset time stays unchanged.</string>
     <string name="cycle_title">Hourly quota interval</string>
     <string name="cycle_limit">Interval: 1 min to 7 days</string>
     <string name="advance_select">Minutes before reset (1–10080)</string>
@@ -228,4 +228,16 @@
     <string name="widget_native_steps">On a launcher that supports widget stacking, add a quota countdown card for each account. Make them the same size, then long-press and drag one onto another. Swipe vertically to switch cards. The launcher controls animations and any wallpaper blur.</string>
     <string name="widget_native_add">Add account card</string>
     <string name="widget_native_manual">Add individual quota countdown cards from the home screen widget picker, then drag same-size cards together if your launcher supports stacking.</string>
+    <string name="timer_mode_title">Hourly quota · timer mode</string>
+    <string name="once_mode">Run only once</string>
+    <string name="once_mode_hint">Run until this reset only. Choose an advance or at-time alert (one reminder total). Set a new time manually for the next round.</string>
+    <string name="once_cycle_edit">%1$s · Once</string>
+    <string name="once_completed">Completed</string>
+    <string name="once_completed_at">Completed: %1$s</string>
+    <string name="once_completed_hint">This round has ended. Set a new reset time manually when the next round starts.</string>
+    <string name="once_reminder_consumed">The single reminder has been sent. This round will stop at the reset time.</string>
+    <string name="notify_once_done_body">%1$s\nReset: %2$s\nThis round has ended. Set a new timer when the next round starts.</string>
+    <string name="history_notice_early_sent">Advance reminder: sent</string>
+    <string name="boot_once_alert_title">One-time quota reminder</string>
+    <string name="boot_once_alert_body">Unlock to check this quota round.</string>
 </resources>
